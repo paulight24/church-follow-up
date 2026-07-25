@@ -1,28 +1,19 @@
 import type { AxiosResponse } from 'axios';
-import type { Team, TeamMember, MemberAssignment } from '@/types/team';
+import type {
+  Team,
+  TeamListFilters,
+  CreateTeamRequest,
+  UpdateTeamRequest,
+  TeamUser,
+  AddTeamUserRequest,
+  UpdateTeamUserRequest,
+} from '@/types/team';
+import type { PaginatedResponse } from '@/types';
 import api from '@/config/api';
 
-interface CreateTeamRequest {
-  name: string;
-  description?: string;
-  leaderId: string;
-}
-
-interface UpdateTeamRequest {
-  name?: string;
-  description?: string;
-  leaderId?: string;
-  isActive?: boolean;
-}
-
-interface AssignMemberRequest {
-  userId: string;
-  role?: 'LEADER' | 'MEMBER';
-}
-
 export const teamsApi = {
-  getTeams(): Promise<AxiosResponse<Team[]>> {
-    return api.get('/teams');
+  getTeams(filters?: TeamListFilters): Promise<AxiosResponse<PaginatedResponse<Team>>> {
+    return api.get('/teams', { params: filters });
   },
 
   getTeam(id: string): Promise<AxiosResponse<Team>> {
@@ -37,15 +28,19 @@ export const teamsApi = {
     return api.patch(`/teams/${id}`, data);
   },
 
-  deleteTeam(id: string): Promise<AxiosResponse<void>> {
+  deleteTeam(id: string): Promise<AxiosResponse<null>> {
     return api.delete(`/teams/${id}`);
   },
 
-  getTeamMembers(teamId: string): Promise<AxiosResponse<TeamMember[]>> {
-    return api.get(`/teams/${teamId}/members`);
+  addTeamUser(teamId: string, data: AddTeamUserRequest): Promise<AxiosResponse<TeamUser>> {
+    return api.post(`/teams/${teamId}/users`, data);
   },
 
-  assignMember(teamId: string, data: AssignMemberRequest): Promise<AxiosResponse<MemberAssignment>> {
-    return api.post(`/teams/${teamId}/assignments`, data);
+  updateTeamUser(teamId: string, userId: string, data: UpdateTeamUserRequest): Promise<AxiosResponse<TeamUser>> {
+    return api.patch(`/teams/${teamId}/users/${userId}`, data);
+  },
+
+  removeTeamUser(teamId: string, userId: string): Promise<AxiosResponse<null>> {
+    return api.delete(`/teams/${teamId}/users/${userId}`);
   },
 };

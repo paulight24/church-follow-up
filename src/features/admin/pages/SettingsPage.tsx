@@ -1,3 +1,8 @@
+// NOTE: The backend has no settings / system-config module yet (no GET/PATCH
+// /settings or similar endpoint exists in church-follow-up-api). This page is
+// intentionally left on local component state with no backing API call — the
+// form does not persist anything server-side. Do not wire this up to a fake
+// endpoint; revisit once the backend exposes a settings module.
 import { useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';

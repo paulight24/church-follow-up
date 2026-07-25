@@ -8,7 +8,7 @@ const sizeClasses = {
   lg: 'h-12 text-base px-4',
 } as const;
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   error?: string;
   helpText?: string;

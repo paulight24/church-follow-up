@@ -39,15 +39,17 @@ const colorConfig = {
 interface KPICardProps {
   title: string;
   value: string | number;
-  change: number;
-  changeLabel: string;
+  /** Optional trend delta. The live API doesn't provide week-over-week deltas, so most cards omit this. */
+  change?: number;
+  changeLabel?: string;
   icon: LucideIcon;
   color: keyof typeof colorConfig;
+  isLoading?: boolean;
 }
 
-export function KPICard({ title, value, change, changeLabel, icon: Icon, color }: KPICardProps) {
+export function KPICard({ title, value, change, changeLabel, icon: Icon, color, isLoading }: KPICardProps) {
   const config = colorConfig[color];
-  const isPositive = change >= 0;
+  const isPositive = (change ?? 0) >= 0;
 
   return (
     <Card className="transition-shadow hover:shadow-md">
@@ -64,24 +66,28 @@ export function KPICard({ title, value, change, changeLabel, icon: Icon, color }
 
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
-          <div className="mt-1.5 flex items-center gap-1.5">
-            {isPositive ? (
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-            ) : (
-              <TrendingDown className="h-3.5 w-3.5 text-rose-500" />
-            )}
-            <span
-              className={cn(
-                'text-xs font-medium',
-                isPositive ? 'text-emerald-600' : 'text-rose-600',
+          <p className="mt-1 text-2xl font-bold text-slate-900">
+            {isLoading ? <span className="inline-block h-6 w-12 animate-pulse rounded bg-slate-200" /> : value}
+          </p>
+          {change !== undefined && !isLoading && (
+            <div className="mt-1.5 flex items-center gap-1.5">
+              {isPositive ? (
+                <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+              ) : (
+                <TrendingDown className="h-3.5 w-3.5 text-rose-500" />
               )}
-            >
-              {isPositive ? '+' : ''}
-              {change}
-            </span>
-            <span className="text-xs text-slate-400">{changeLabel}</span>
-          </div>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  isPositive ? 'text-emerald-600' : 'text-rose-600',
+                )}
+              >
+                {isPositive ? '+' : ''}
+                {change}
+              </span>
+              {changeLabel && <span className="text-xs text-slate-400">{changeLabel}</span>}
+            </div>
+          )}
         </div>
       </div>
     </Card>

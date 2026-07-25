@@ -1,10 +1,20 @@
 import type { AxiosResponse } from 'axios';
-import type { MemberFilters, Member, CreateMemberRequest, UpdateMemberRequest } from '@/types/member';
+import type {
+  MemberListFilters,
+  Member,
+  CreateMemberRequest,
+  UpdateMemberRequest,
+  VerifyContactRequest,
+  MemberContactVerification,
+  ImportMembersRequest,
+  ImportRecord,
+  DuplicateGroup,
+} from '@/types/member';
 import type { PaginatedResponse } from '@/types';
 import api from '@/config/api';
 
 export const membersApi = {
-  getMembers(filters: MemberFilters): Promise<AxiosResponse<PaginatedResponse<Member>>> {
+  getMembers(filters: MemberListFilters): Promise<AxiosResponse<PaginatedResponse<Member>>> {
     return api.get('/members', { params: filters });
   },
 
@@ -20,23 +30,43 @@ export const membersApi = {
     return api.patch(`/members/${id}`, data);
   },
 
-  deleteMember(id: string): Promise<AxiosResponse<void>> {
+  archiveMember(id: string): Promise<AxiosResponse<null>> {
     return api.delete(`/members/${id}`);
   },
 
-  importMembers(file: File): Promise<AxiosResponse<{ imported: number; errors: number }>> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return api.post('/members/import', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  restoreMember(id: string): Promise<AxiosResponse<Member>> {
+    return api.post(`/members/${id}/restore`);
   },
 
-  getDuplicates(): Promise<AxiosResponse<{ pairs: Array<{ member1: Member; member2: Member; confidence: number }> }>> {
-    return api.get('/members/duplicates');
+  getMissingContact(params?: { page?: number; pageSize?: number }): Promise<AxiosResponse<PaginatedResponse<Member>>> {
+    return api.get('/members/missing-contact', { params });
   },
 
-  mergeDuplicates(keepId: string, mergeId: string): Promise<AxiosResponse<Member>> {
-    return api.post('/members/merge', { keepId, mergeId });
+  verifyContact(id: string, data: VerifyContactRequest): Promise<AxiosResponse<MemberContactVerification>> {
+    return api.post(`/members/${id}/verify-contact`, data);
+  },
+
+  getContactVerifications(id: string): Promise<AxiosResponse<MemberContactVerification[]>> {
+    return api.get(`/members/${id}/contact-verifications`);
+  },
+
+  getPossibleDuplicates(): Promise<AxiosResponse<DuplicateGroup[]>> {
+    return api.get('/members/possible-duplicates');
+  },
+
+  mergeMembers(primaryMemberId: string, duplicateMemberId: string): Promise<AxiosResponse<Member>> {
+    return api.post('/members/merge', { primaryMemberId, duplicateMemberId });
+  },
+
+  importMembers(data: ImportMembersRequest): Promise<AxiosResponse<ImportRecord>> {
+    return api.post('/members/import', data);
+  },
+
+  getImports(params?: { page?: number; pageSize?: number }): Promise<AxiosResponse<PaginatedResponse<ImportRecord>>> {
+    return api.get('/members/imports', { params });
+  },
+
+  getImport(id: string): Promise<AxiosResponse<ImportRecord>> {
+    return api.get(`/members/imports/${id}`);
   },
 };

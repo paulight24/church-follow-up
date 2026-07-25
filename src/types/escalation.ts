@@ -1,62 +1,107 @@
-export type EscalationType =
-  | 'PASTORAL_NEED'
-  | 'PRAYER_REQUEST'
-  | 'CRISIS'
-  | 'MEDICAL'
-  | 'FINANCIAL'
-  | 'FAMILY'
-  | 'SPIRITUAL_DISTRESS';
+export type EscalationCategory =
+  | 'BEREAVEMENT'
+  | 'HOSPITALIZATION'
+  | 'FAMILY_CRISIS'
+  | 'SAFETY'
+  | 'HOUSING'
+  | 'EMPLOYMENT'
+  | 'SPIRITUAL_COUNSELING'
+  | 'REPEATED_NO_CONTACT'
+  | 'OTHER';
 
-export type EscalationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type EscalationPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
 
-export type EscalationStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+export type EscalationStatus = 'OPEN' | 'ACKNOWLEDGED' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+
+export type NoteVisibilityLevel = 'PASTOR_ONLY' | 'PASTORAL_TEAM' | 'LEADERSHIP';
+
+export interface EscalationUserRef {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface EscalationMemberRef {
+  id: string;
+  firstName: string;
+  lastName: string;
+  preferredName?: string | null;
+}
+
+export interface EscalationTaskRef {
+  id: string;
+  status: string;
+  dueAt: string;
+}
 
 export interface Escalation {
   id: string;
   memberId: string;
-  member: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    phone?: string | null;
-    email?: string | null;
-  };
-  reportedById: string;
-  reportedBy: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  };
-  type: EscalationType;
+  member: EscalationMemberRef;
+  taskId?: string | null;
+  task?: EscalationTaskRef | null;
+  createdByUserId: string;
+  createdBy: EscalationUserRef;
+  assignedToUserId?: string | null;
+  assignedTo?: EscalationUserRef | null;
+  category: EscalationCategory;
   priority: EscalationPriority;
   status: EscalationStatus;
-  title: string;
-  description: string;
-  confidentialNotes?: string | null;
-  assignedToId?: string | null;
-  assignedTo?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  } | null;
+  summary: string;
+  isConfidential: boolean;
+  acknowledgedAt?: string | null;
   resolvedAt?: string | null;
-  resolvedById?: string | null;
-  resolvedBy?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  } | null;
-  resolutionNotes?: string | null;
   createdAt: string;
   updatedAt: string;
+  _count?: { notes: number };
 }
 
 export interface CreateEscalationRequest {
   memberId: string;
-  type: EscalationType;
-  priority: EscalationPriority;
-  title: string;
-  description: string;
-  confidentialNotes?: string;
-  assignedToId?: string;
+  taskId?: string;
+  assignedToUserId?: string;
+  category: EscalationCategory;
+  priority?: EscalationPriority;
+  summary: string;
+  isConfidential?: boolean;
+}
+
+export interface UpdateEscalationRequest {
+  assignedToUserId?: string;
+  category?: EscalationCategory;
+  priority?: EscalationPriority;
+  status?: EscalationStatus;
+  summary?: string;
+  isConfidential?: boolean;
+}
+
+export interface EscalationListFilters {
+  page?: number;
+  pageSize?: number;
+  status?: EscalationStatus;
+  category?: EscalationCategory;
+  priority?: EscalationPriority;
+  assignedToUserId?: string;
+  memberId?: string;
+}
+
+/**
+ * Confidential pastoral note. Content is encrypted at rest; the API only
+ * ever returns decrypted `content` from the dedicated notes endpoints, and
+ * only to callers holding escalations.view_confidential_notes.
+ */
+export interface PastoralNote {
+  id: string;
+  escalationId: string;
+  authorUserId: string;
+  author?: EscalationUserRef;
+  content: string;
+  visibilityLevel: NoteVisibilityLevel;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateNoteRequest {
+  content: string;
+  visibilityLevel?: NoteVisibilityLevel;
 }

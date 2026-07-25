@@ -1,14 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Eye,
-  Pencil,
-  Trash2,
-  MoreHorizontal,
-  Users,
-} from 'lucide-react';
+import { Eye, Pencil, Archive, MoreHorizontal, Users } from 'lucide-react';
 import type { Member } from '@/types/member';
 import {
   Table,
@@ -19,35 +10,17 @@ import {
   TableCell,
 } from '@/components/ui/Table';
 import { Avatar } from '@/components/ui/Avatar';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Dropdown } from '@/components/ui/Dropdown';
 import type { DropdownItem } from '@/components/ui/Dropdown';
 import { formatDate, formatPhone, formatMemberName } from '@/lib/formatters';
-import { MEMBER_STATUS } from '@/lib/constants';
 import { cn } from '@/lib/cn';
 
 interface MemberTableProps {
   members: Member[];
   isLoading: boolean;
-  onSort?: (field: string) => void;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-function getStatusConfig(status: string) {
-  return MEMBER_STATUS.find((s) => s.value === status);
-}
-
-function SortIcon({ field, sortBy, sortOrder }: { field: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }) {
-  if (sortBy !== field) {
-    return <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />;
-  }
-  return sortOrder === 'asc' ? (
-    <ArrowUp className="h-3.5 w-3.5 text-indigo-600" />
-  ) : (
-    <ArrowDown className="h-3.5 w-3.5 text-indigo-600" />
-  );
+  onArchive?: (member: Member) => void;
 }
 
 function SkeletonRow() {
@@ -72,31 +45,18 @@ function SkeletonRow() {
   );
 }
 
-export function MemberTable({
-  members,
-  isLoading,
-  onSort,
-  sortBy,
-  sortOrder,
-}: MemberTableProps) {
+export function MemberTable({ members, isLoading, onArchive }: MemberTableProps) {
   const navigate = useNavigate();
 
-  const sortableColumns = [
-    { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'memberStatus', label: 'Status' },
-    { key: 'joinDate', label: 'Join Date' },
-    { key: 'department', label: 'Team' },
-  ];
+  const columns = ['Name', 'Email', 'Phone', 'Status', 'Department', 'Created'];
 
   if (isLoading) {
     return (
       <Table>
         <TableHeader>
           <TableRow>
-            {sortableColumns.map((col) => (
-              <TableHead key={col.key}>{col.label}</TableHead>
+            {columns.map((col) => (
+              <TableHead key={col}>{col}</TableHead>
             ))}
             <TableHead className="w-12" />
           </TableRow>
@@ -113,7 +73,7 @@ export function MemberTable({
   if (members.length === 0) {
     return (
       <EmptyState
-        icon={<Users className="h-12 w-12" />}
+        icon={Users}
         title="No members found"
         description="Try adjusting your search or filters to find what you are looking for."
       />
@@ -124,30 +84,17 @@ export function MemberTable({
     <Table>
       <TableHeader>
         <TableRow>
-          {sortableColumns.map((col) => (
-            <TableHead
-              key={col.key}
-              className={cn(onSort && 'cursor-pointer select-none')}
-              onClick={() => onSort?.(col.key)}
-            >
-              <span className="inline-flex items-center gap-1.5">
-                {col.label}
-                {onSort && (
-                  <SortIcon field={col.key} sortBy={sortBy} sortOrder={sortOrder} />
-                )}
-              </span>
-            </TableHead>
+          {columns.map((col) => (
+            <TableHead key={col}>{col}</TableHead>
           ))}
           <TableHead className="w-12" />
         </TableRow>
       </TableHeader>
       <TableBody>
         {members.map((member) => {
-          const statusConfig = getStatusConfig(member.memberStatus);
           const fullName = formatMemberName(member);
           const showPreferred =
-            member.preferredName &&
-            member.preferredName !== member.firstName;
+            member.preferredName && member.preferredName !== member.firstName;
 
           const actions: DropdownItem[] = [
             {
@@ -160,14 +107,12 @@ export function MemberTable({
               icon: <Pencil />,
               onClick: () => navigate(`/members/${member.id}/edit`),
             },
-            { divider: true, label: '' },
+            { label: '', onClick: () => {}, divider: true },
             {
-              label: 'Delete',
-              icon: <Trash2 />,
-              danger: true,
-              onClick: () => {
-                console.log('Delete member:', member.id);
-              },
+              label: 'Archive',
+              icon: <Archive />,
+              variant: 'danger',
+              onClick: () => onArchive?.(member),
             },
           ];
 
@@ -180,7 +125,7 @@ export function MemberTable({
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar
-                    src={member.photoUrl ?? undefined}
+                    src={member.profileImageUrl ?? undefined}
                     name={`${member.firstName} ${member.lastName}`}
                     size="md"
                   />
@@ -196,22 +141,39 @@ export function MemberTable({
               </TableCell>
               <TableCell>{member.email ?? '--'}</TableCell>
               <TableCell>
-                {member.phone ? formatPhone(member.phone) : '--'}
+                {member.phonePrimary ? formatPhone(member.phonePrimary) : '--'}
               </TableCell>
               <TableCell>
-                <StatusBadge
-                  label={statusConfig?.label ?? member.memberStatus}
-                  color={statusConfig?.color}
-                />
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {member.membershipStatus ? (
+                    <Badge variant="default" size="sm">
+                      {member.membershipStatus.name}
+                    </Badge>
+                  ) : (
+                    <span className="text-slate-400">--</span>
+                  )}
+                  {member.isFirstTimer && (
+                    <Badge variant="purple" size="sm">
+                      First Timer
+                    </Badge>
+                  )}
+                  {member.doNotContact && (
+                    <Badge variant="danger" size="sm">
+                      Do Not Contact
+                    </Badge>
+                  )}
+                </div>
               </TableCell>
-              <TableCell>
-                {member.joinDate ? formatDate(member.joinDate) : '--'}
-              </TableCell>
-              <TableCell>{member.department ?? '--'}</TableCell>
+              <TableCell>{member.department?.name ?? '--'}</TableCell>
+              <TableCell>{formatDate(member.createdAt)}</TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Dropdown
                   trigger={
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                    <span
+                      className={cn(
+                        'inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600',
+                      )}
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </span>
                   }

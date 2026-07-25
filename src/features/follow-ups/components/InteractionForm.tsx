@@ -1,28 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 import type { Channel, Outcome } from '@/types/followUp';
+import type { ApiError } from '@/types';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Input } from '@/components/ui/Input';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
-import { CHANNELS, OUTCOMES } from '@/lib/constants';
-import { followUpsApi } from '../api/follow-ups.api';
+import { followUpTasksApi } from '../api/follow-up-tasks.api';
+import { CHANNEL_OPTIONS, OUTCOME_OPTIONS } from '../lib/taskDisplay';
 
 const interactionSchema = z.object({
   channel: z.string().min(1, 'Channel is required'),
   outcome: z.string().min(1, 'Outcome is required'),
   notes: z.string().optional(),
-  duration: z
-    .number({ invalid_type_error: 'Must be a number' })
-    .int('Must be a whole number')
-    .min(1, 'Must be at least 1 minute')
-    .optional()
-    .or(z.literal('')),
-  scheduledCallbackDate: z.string().optional(),
+  nextAction: z.string().optional(),
+  nextFollowUpAt: z.string().optional(),
+  requiresEscalation: z.boolean().optional(),
 });
 
 type InteractionFormValues = z.infer<typeof interactionSchema>;
@@ -31,67 +30,73 @@ interface InteractionFormProps {
   taskId: string;
   onSuccess: () => void;
   onCancel: () => void;
+  presetOutcome?: Outcome | '';
 }
 
-const channelOptions = CHANNELS.map((c) => ({ label: c.label, value: c.value }));
-const outcomeOptions = OUTCOMES.map((o) => ({ label: o.label, value: o.value }));
+const callbackOutcomes = new Set<Outcome>(['SCHEDULED_CALLBACK']);
 
-export function InteractionForm({ taskId, onSuccess, onCancel }: InteractionFormProps) {
+export function InteractionForm({ taskId, onSuccess, onCancel, presetOutcome }: InteractionFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<InteractionFormValues>({
     resolver: zodResolver(interactionSchema),
     defaultValues: {
       channel: '',
-      outcome: '',
+      outcome: presetOutcome || '',
       notes: '',
-      duration: undefined,
-      scheduledCallbackDate: '',
+      nextAction: '',
+      nextFollowUpAt: '',
+      requiresEscalation: false,
     },
   });
 
-  const selectedOutcome = watch('outcome');
+  useEffect(() => {
+    if (presetOutcome) setValue('outcome', presetOutcome);
+  }, [presetOutcome, setValue]);
 
-  const onSubmit = async (values: InteractionFormValues) => {
-    setSubmitError(null);
+  const selectedOutcome = watch('outcome') as Outcome | '';
 
-    try {
-      await followUpsApi.createInteraction(taskId, {
+  const mutation = useMutation({
+    mutationFn: (values: InteractionFormValues) =>
+      followUpTasksApi.createInteraction(taskId, {
         channel: values.channel as Channel,
         outcome: values.outcome as Outcome,
         notes: values.notes || undefined,
-        duration: typeof values.duration === 'number' ? values.duration : undefined,
-        scheduledCallbackDate: values.scheduledCallbackDate || undefined,
-      });
-
+        nextAction: values.nextAction || undefined,
+        nextFollowUpAt: values.nextFollowUpAt || undefined,
+        requiresEscalation: values.requiresEscalation || undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['follow-up-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['follow-up-task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['follow-up-task-interactions', taskId] });
       onSuccess();
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Failed to log interaction. Please try again.';
-      setSubmitError(message);
-    }
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      setSubmitError(error.response?.data?.message ?? 'Failed to log interaction. Please try again.');
+    },
+  });
+
+  const onSubmit = (values: InteractionFormValues) => {
+    setSubmitError(null);
+    mutation.mutate(values);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {submitError && (
-        <Alert variant="error">
-          {submitError}
-        </Alert>
-      )}
+      {submitError && <Alert variant="error">{submitError}</Alert>}
 
       <Select
         label="Channel"
         placeholder="Select channel..."
-        options={channelOptions}
+        options={CHANNEL_OPTIONS}
         error={errors.channel?.message}
         {...register('channel')}
       />
@@ -99,7 +104,7 @@ export function InteractionForm({ taskId, onSuccess, onCancel }: InteractionForm
       <Select
         label="Outcome"
         placeholder="Select outcome..."
-        options={outcomeOptions}
+        options={OUTCOME_OPTIONS}
         error={errors.outcome?.message}
         {...register('outcome')}
       />
@@ -113,34 +118,35 @@ export function InteractionForm({ taskId, onSuccess, onCancel }: InteractionForm
       />
 
       <Input
-        label="Duration (minutes)"
-        type="number"
-        placeholder="e.g. 5"
-        min={1}
-        error={errors.duration?.message}
-        {...register('duration', { valueAsNumber: true })}
+        label="Next Action"
+        placeholder="e.g. Call back next week"
+        error={errors.nextAction?.message}
+        {...register('nextAction')}
       />
 
-      {selectedOutcome === 'REQUESTED_CALLBACK' && (
+      {selectedOutcome && callbackOutcomes.has(selectedOutcome) && (
         <DatePicker
-          label="Scheduled Callback Date"
-          value={watch('scheduledCallbackDate') ?? ''}
-          onChange={(val) => setValue('scheduledCallbackDate', val)}
+          label="Next Follow-Up Date"
+          value={watch('nextFollowUpAt')?.slice(0, 10) ?? ''}
+          onChange={(val) => setValue('nextFollowUpAt', val ? new Date(val).toISOString() : '')}
           min={new Date().toISOString().split('T')[0]}
-          error={errors.scheduledCallbackDate?.message}
         />
       )}
 
+      <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+          {...register('requiresEscalation')}
+        />
+        This requires pastoral escalation
+      </label>
+
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
+        <Button type="button" variant="outline" onClick={onCancel} disabled={mutation.isPending}>
           Cancel
         </Button>
-        <Button type="submit" isLoading={isSubmitting}>
+        <Button type="submit" isLoading={mutation.isPending}>
           Log Interaction
         </Button>
       </div>

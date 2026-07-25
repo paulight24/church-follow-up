@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, LogOut, Menu, Settings, User } from 'lucide-react';
+import { LogOut, Menu, Settings, User } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui/Avatar';
 import { Dropdown } from '@/components/ui/Dropdown';
 import type { DropdownItem } from '@/components/ui/Dropdown';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
@@ -18,11 +19,11 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
 
-  const notificationCount = 3;
-
   const userDisplayName = user
     ? `${user.firstName} ${user.lastName}`
     : 'User';
+
+  const primaryRoleLabel = user?.roles[0]?.name ?? 'Member';
 
   const userMenuItems: DropdownItem[] = [
     {
@@ -75,25 +76,14 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
         />
 
         {/* Notification bell */}
-        <button
-          type="button"
-          className="relative rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5" />
-          {notificationCount > 0 && (
-            <span className="absolute right-1 top-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-semibold text-white">
-              {notificationCount}
-            </span>
-          )}
-        </button>
+        <NotificationBell className="text-slate-500 hover:text-slate-700" />
 
         {/* User dropdown */}
         <Dropdown
           trigger={
             <div className="flex items-center gap-2.5 rounded-lg p-1.5 transition-colors hover:bg-slate-50">
               <Avatar
-                src={user?.avatarUrl}
+                src={user?.avatarUrl ?? undefined}
                 name={userDisplayName}
                 size="sm"
               />
@@ -102,7 +92,7 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
                   {userDisplayName}
                 </p>
                 <p className="text-xs text-slate-400">
-                  {user?.role?.replace(/_/g, ' ') ?? 'Member'}
+                  {primaryRoleLabel}
                 </p>
               </div>
             </div>

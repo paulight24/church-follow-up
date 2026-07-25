@@ -1,8 +1,48 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import axios from 'axios';
+import type { AxiosError } from 'axios';
 import api from '@/config/api';
 import type { User, UserRole } from '@/types';
 import type { LoginResponse } from '@/types/auth';
+
+// `api`'s response interceptor (src/config/api.ts) hard-redirects the whole
+// page to /login whenever ANY request 401s and there's no refresh token
+// stored yet. That's the right behavior for a session that expires mid-use,
+// but a wrong-password attempt on the login form itself is also a plain 401
+// with no refresh token (the user isn't signed in yet) -- routing it through
+// that interceptor means the login page silently reloads instead of showing
+// "Invalid email or password", wiping the form and the error message before
+// the user ever sees it. Use a bare axios client for just this call,
+// replicating the envelope-unwrap / error-normalization `api` does, so a
+// failed login surfaces inline instead of triggering that redirect.
+const rawAuthClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+async function loginRequest(email: string, password: string): Promise<LoginResponse> {
+  try {
+    const { data: envelope } = await rawAuthClient.post<{ success: boolean; data: LoginResponse }>(
+      '/auth/login',
+      { email, password },
+    );
+    return envelope.data;
+  } catch (err) {
+    const error = err as AxiosError;
+    const body = error.response?.data as
+      | { error?: { message?: string; details?: Record<string, string[]> } }
+      | undefined;
+    if (body?.error && error.response) {
+      (error.response as { data: unknown }).data = {
+        message: body.error.message,
+        statusCode: error.response.status,
+        errors: body.error.details,
+      };
+    }
+    throw error;
+  }
+}
 
 export interface AuthContextValue {
   user: User | null;
@@ -28,10 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = user !== null;
 
   const login = useCallback(async (email: string, password: string) => {
-    const { data } = await api.post<LoginResponse>('/auth/login', {
-      email,
-      password,
-    });
+    const data = await loginRequest(email, password);
 
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
@@ -70,7 +107,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const hasPermission = useCallback(
     (code: string): boolean => {
       if (!user) return false;
-      if (user.role === 'SUPER_ADMIN') return true;
+      if (user.roles.some((r) => r.code === 'SUPER_ADMIN')) return true;
       return user.permissions.includes(code);
     },
     [user],
@@ -79,7 +116,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const hasRole = useCallback(
     (role: UserRole): boolean => {
       if (!user) return false;
-      return user.role === role;
+      return user.roles.some((r) => r.code === role);
     },
     [user],
   );

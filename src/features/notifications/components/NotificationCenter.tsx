@@ -1,135 +1,130 @@
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   CheckCircle,
   Send,
-  UserPlus,
   Heart,
+  GraduationCap,
+  Settings,
+  Bell,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Spinner } from '@/components/ui/Spinner';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { formatRelativeDate } from '@/lib/formatters';
 import { cn } from '@/lib/cn';
+import { notificationsApi } from '../api/notifications.api';
+import type { Notification, NotificationType } from '../types';
 
-interface Notification {
-  id: string;
-  type: 'escalation' | 'followup' | 'campaign' | 'member' | 'prayer';
-  title: string;
-  description: string;
-  timestamp: Date;
-  read: boolean;
-}
-
-const typeIcons: Record<Notification['type'], ReactNode> = {
-  escalation: <AlertTriangle className="h-5 w-5 text-amber-500" />,
-  followup: <CheckCircle className="h-5 w-5 text-emerald-500" />,
-  campaign: <Send className="h-5 w-5 text-blue-500" />,
-  member: <UserPlus className="h-5 w-5 text-indigo-500" />,
-  prayer: <Heart className="h-5 w-5 text-rose-500" />,
+const typeIcons: Record<string, ReactNode> = {
+  ESCALATION: <AlertTriangle className="h-5 w-5 text-amber-500" />,
+  FOLLOW_UP_ASSIGNED: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+  FOLLOW_UP_DUE: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+  CAMPAIGN: <Send className="h-5 w-5 text-blue-500" />,
+  PRAYER_REQUEST: <Heart className="h-5 w-5 text-rose-500" />,
+  FOUNDATION_SCHOOL: <GraduationCap className="h-5 w-5 text-indigo-500" />,
+  SYSTEM: <Settings className="h-5 w-5 text-slate-500" />,
 };
 
-const initialNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'escalation',
-    title: 'New escalation reported',
-    description: 'Chioma Eze reported a pastoral need',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'followup',
-    title: 'Follow-up completed',
-    description: 'Adebayo completed follow-up with Mrs. Okonkwo',
-    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'campaign',
-    title: 'Campaign sent',
-    description: 'Easter Sunday Reminder sent to 234 members',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    read: true,
-  },
-  {
-    id: '4',
-    type: 'member',
-    title: 'New member registered',
-    description: 'John Obi registered as a first timer',
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    read: true,
-  },
-  {
-    id: '5',
-    type: 'prayer',
-    title: 'Prayer request',
-    description: 'Anonymous prayer request submitted',
-    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    read: true,
-  },
-];
+function iconForType(type: NotificationType): ReactNode {
+  return typeIcons[type as string] ?? <Bell className="h-5 w-5 text-slate-400" />;
+}
 
-export function NotificationCenter() {
-  const [notifications, setNotifications] =
-    useState<Notification[]>(initialNotifications);
+interface NotificationCenterProps {
+  className?: string;
+  onNavigate?: (notification: Notification) => void;
+}
 
-  function handleMarkAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+export function NotificationCenter({ className, onNavigate }: NotificationCenterProps) {
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['notifications', 'list'],
+    queryFn: () => notificationsApi.getNotifications({ pageSize: 20 }).then((res) => res.data),
+    refetchInterval: 30000,
+  });
+
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: string) => notificationsApi.markAsRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  const markAllReadMutation = useMutation({
+    mutationFn: () => notificationsApi.markAllRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  function handleSelect(notification: Notification) {
+    if (!notification.readAt) {
+      markAsReadMutation.mutate(notification.id);
+    }
+    onNavigate?.(notification);
   }
 
-  function handleMarkAsRead(id: string) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
-  }
+  const notifications = data?.data ?? [];
+  const hasUnread = notifications.some((n) => !n.readAt);
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className={cn('w-full max-w-md', className)}>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Notifications</CardTitle>
         <button
           type="button"
-          onClick={handleMarkAllRead}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition"
+          onClick={() => markAllReadMutation.mutate()}
+          disabled={!hasUnread || markAllReadMutation.isPending}
+          className="text-sm font-medium text-indigo-600 transition hover:text-indigo-700 disabled:pointer-events-none disabled:opacity-40"
         >
           Mark all as read
         </button>
       </CardHeader>
       <CardContent className="p-0">
-        <ul className="divide-y divide-slate-100">
-          {notifications.map((notification) => (
-            <li key={notification.id}>
-              <button
-                type="button"
-                onClick={() => handleMarkAsRead(notification.id)}
-                className={cn(
-                  'flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-slate-50',
-                  !notification.read && 'bg-indigo-50',
-                )}
-              >
-                <span className="mt-0.5 shrink-0">
-                  {typeIcons[notification.type]}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-900">
-                    {notification.title}
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    {notification.description}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {formatRelativeDate(notification.timestamp)}
-                  </p>
-                </div>
-                {!notification.read && (
-                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-indigo-500" />
-                )}
-              </button>
-            </li>
-          ))}
-        </ul>
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <Spinner size="md" className="text-indigo-600" />
+          </div>
+        ) : isError ? (
+          <p className="px-4 py-6 text-center text-sm text-rose-600">
+            Could not load notifications.
+          </p>
+        ) : notifications.length === 0 ? (
+          <EmptyState
+            icon={Bell}
+            title="No notifications"
+            description="You're all caught up."
+          />
+        ) : (
+          <ul className="max-h-96 divide-y divide-slate-100 overflow-y-auto">
+            {notifications.map((notification) => (
+              <li key={notification.id}>
+                <button
+                  type="button"
+                  onClick={() => handleSelect(notification)}
+                  className={cn(
+                    'flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-slate-50',
+                    !notification.readAt && 'bg-indigo-50',
+                  )}
+                >
+                  <span className="mt-0.5 shrink-0">{iconForType(notification.type)}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-slate-900">{notification.title}</p>
+                    <p className="text-sm text-slate-500">{notification.body}</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      {formatRelativeDate(notification.createdAt)}
+                    </p>
+                  </div>
+                  {!notification.readAt && (
+                    <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-indigo-500" />
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );

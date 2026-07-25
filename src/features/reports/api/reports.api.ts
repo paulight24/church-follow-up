@@ -1,34 +1,38 @@
+import type { AxiosResponse } from 'axios';
+import type {
+  ReportFilters,
+  FollowUpReport,
+  MemberReport,
+  TeamPerformanceReport,
+  ContactCompletenessReport,
+  OverdueTasksReport,
+} from '@/types/report';
 import api from '@/config/api';
 
 export const reportsApi = {
-  getFollowUpReport(filters?: Record<string, unknown>) {
+  getFollowUpReport(filters?: ReportFilters): Promise<AxiosResponse<FollowUpReport>> {
     return api.get('/reports/follow-ups', { params: filters });
   },
 
-  getTeamPerformance(filters?: Record<string, unknown>) {
+  getMemberReport(filters?: ReportFilters): Promise<AxiosResponse<MemberReport>> {
+    return api.get('/reports/members', { params: filters });
+  },
+
+  getTeamPerformanceReport(
+    filters?: ReportFilters,
+  ): Promise<AxiosResponse<TeamPerformanceReport>> {
     return api.get('/reports/team-performance', { params: filters });
   },
 
-  getMemberGrowth(filters?: Record<string, unknown>) {
-    return api.get('/reports/member-growth', { params: filters });
+  getContactCompletenessReport(
+    filters?: ReportFilters,
+  ): Promise<AxiosResponse<ContactCompletenessReport>> {
+    return api.get('/reports/contact-completeness', { params: filters });
   },
 
-  getAttendanceTrends(filters?: Record<string, unknown>) {
-    return api.get('/reports/attendance', { params: filters });
-  },
-
-  getEscalationReport(filters?: Record<string, unknown>) {
-    return api.get('/reports/escalations', { params: filters });
-  },
-
-  getCommunicationReport(filters?: Record<string, unknown>) {
-    return api.get('/reports/communications', { params: filters });
-  },
-
-  exportReport(type: string, format: string, filters?: Record<string, unknown>) {
-    return api.get(`/reports/${type}/export`, {
-      params: { format, ...filters },
-      responseType: 'blob',
-    });
+  getOverdueTasksReport(
+    filters?: ReportFilters,
+  ): Promise<AxiosResponse<OverdueTasksReport>> {
+    return api.get('/reports/overdue-tasks', { params: filters });
   },
 };

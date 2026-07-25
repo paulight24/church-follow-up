@@ -1,9 +1,8 @@
 import { Select } from '@/components/ui/Select';
 import { Tabs, TabList, Tab } from '@/components/ui/Tabs';
-import { TASK_PRIORITY } from '@/lib/constants';
 
-interface TaskFiltersState {
-  status: string;
+export interface TaskFiltersState {
+  statusTab: string;
   priority: string;
   sortBy: string;
 }
@@ -18,12 +17,16 @@ const statusTabs = [
   { label: 'Due Today', value: 'due_today' },
   { label: 'Overdue', value: 'overdue' },
   { label: 'Upcoming', value: 'upcoming' },
-  { label: 'Completed', value: 'completed' },
+  { label: 'Escalated', value: 'ESCALATED' },
+  { label: 'Completed', value: 'COMPLETED' },
 ] as const;
 
 const priorityOptions = [
   { label: 'All Priorities', value: '' },
-  ...TASK_PRIORITY.map((p) => ({ label: p.label, value: p.value })),
+  { label: 'Low', value: 'LOW' },
+  { label: 'Normal', value: 'NORMAL' },
+  { label: 'High', value: 'HIGH' },
+  { label: 'Urgent', value: 'URGENT' },
 ];
 
 const sortOptions = [
@@ -36,8 +39,8 @@ export function TaskFilters({ filters, onFilterChange }: TaskFiltersProps) {
   return (
     <div className="space-y-4">
       <Tabs
-        value={filters.status}
-        onValueChange={(status) => onFilterChange({ ...filters, status })}
+        value={filters.statusTab}
+        onValueChange={(statusTab) => onFilterChange({ ...filters, statusTab })}
       >
         <TabList className="overflow-x-auto">
           {statusTabs.map((tab) => (
@@ -54,9 +57,7 @@ export function TaskFilters({ filters, onFilterChange }: TaskFiltersProps) {
             label="Priority"
             options={priorityOptions}
             value={filters.priority}
-            onChange={(e) =>
-              onFilterChange({ ...filters, priority: e.target.value })
-            }
+            onChange={(e) => onFilterChange({ ...filters, priority: e.target.value })}
           />
         </div>
 
@@ -65,9 +66,7 @@ export function TaskFilters({ filters, onFilterChange }: TaskFiltersProps) {
             label="Sort by"
             options={sortOptions}
             value={filters.sortBy}
-            onChange={(e) =>
-              onFilterChange({ ...filters, sortBy: e.target.value })
-            }
+            onChange={(e) => onFilterChange({ ...filters, sortBy: e.target.value })}
           />
         </div>
       </div>

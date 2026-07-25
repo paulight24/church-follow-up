@@ -1,71 +1,53 @@
 import { Link, useParams } from 'react-router-dom';
-import {
-  Pencil,
-  Phone,
-  AlertTriangle,
-  ChevronRight,
-} from 'lucide-react';
-import type { Member } from '@/types/member';
+import { useQuery } from '@tanstack/react-query';
+import { Pencil, Phone, AlertTriangle, ChevronRight } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Avatar } from '@/components/ui/Avatar';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Spinner } from '@/components/ui/Spinner';
+import { Alert } from '@/components/ui/Alert';
 import { MemberProfileTabs } from '@/features/members/components/MemberProfileTabs';
+import { membersApi } from '@/features/members/api/members.api';
 import { formatDate, formatMemberName } from '@/lib/formatters';
-import { MEMBER_STATUS } from '@/lib/constants';
-
-const MOCK_MEMBER: Member = {
-  id: '1',
-  firstName: 'Adebayo',
-  lastName: 'Ogunlade',
-  preferredName: 'Bayo',
-  email: 'adebayo.ogunlade@email.com',
-  phone: '08012345678',
-  secondaryPhone: '08098765432',
-  gender: 'Male',
-  dateOfBirth: '1985-03-15',
-  address: '12 Victoria Island Drive',
-  city: 'Lagos',
-  state: 'Lagos',
-  zipCode: '101001',
-  country: 'Nigeria',
-  memberStatus: 'ACTIVE',
-  joinDate: '2022-01-10',
-  baptismDate: '2022-06-15',
-  salvationDate: '2021-12-25',
-  department: 'Choir',
-  occupation: 'Software Engineer',
-  employer: 'TechCo Nigeria',
-  notes: 'Very committed member. Interested in leadership development programs.',
-  photoUrl: null,
-  isActive: true,
-  householdId: null,
-  createdAt: '2022-01-10T08:00:00Z',
-  updatedAt: '2026-07-01T12:00:00Z',
-};
+import type { ApiError } from '@/types';
 
 export function MemberProfilePage() {
   const { id } = useParams<{ id: string }>();
 
-  // In production, this would fetch from API using the id
-  const member = MOCK_MEMBER;
-  const statusConfig = MEMBER_STATUS.find(
-    (s) => s.value === member.memberStatus,
-  );
-  const fullName = formatMemberName(member);
-  const showPreferred =
-    member.preferredName && member.preferredName !== member.firstName;
+  const { data: member, isLoading, isError, error } = useQuery({
+    queryKey: ['member', id],
+    queryFn: () => membersApi.getMember(id as string).then((res) => res.data),
+    enabled: !!id,
+  });
 
   if (!id) {
     return (
-      <EmptyState
-        title="Member not found"
-        description="The member you are looking for does not exist."
-      />
+      <EmptyState title="Member not found" description="The member you are looking for does not exist." />
     );
   }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" className="text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (isError || !member) {
+    return (
+      <Alert variant="error" title="Failed to load member">
+        {(error as { response?: { data?: ApiError } } | undefined)?.response?.data?.message ??
+          'This member could not be found.'}
+      </Alert>
+    );
+  }
+
+  const fullName = formatMemberName(member);
+  const showPreferred = member.preferredName && member.preferredName !== member.firstName;
 
   return (
     <div className="space-y-6">
@@ -83,38 +65,32 @@ export function MemberProfilePage() {
         actions={
           <div className="flex items-center gap-2">
             <Link to={`/members/${id}/edit`}>
-              <Button
-                variant="outline"
-                size="sm"
-                leftIcon={<Pencil className="h-4 w-4" />}
-              >
+              <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />}>
                 Edit
               </Button>
             </Link>
-            <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={<Phone className="h-4 w-4" />}
-            >
+            <Button variant="secondary" size="sm" leftIcon={<Phone className="h-4 w-4" />}>
               Follow Up
             </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              leftIcon={<AlertTriangle className="h-4 w-4" />}
-            >
+            <Button variant="danger" size="sm" leftIcon={<AlertTriangle className="h-4 w-4" />}>
               Escalate
             </Button>
           </div>
         }
       />
 
+      {member.archivedAt && (
+        <Alert variant="warning" title="This member is archived">
+          Archived on {formatDate(member.archivedAt)}. They are hidden from the default member list.
+        </Alert>
+      )}
+
       {/* Profile Header Card */}
       <Card>
         <CardContent>
           <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
             <Avatar
-              src={member.photoUrl ?? undefined}
+              src={member.profileImageUrl ?? undefined}
               name={`${member.firstName} ${member.lastName}`}
               size="xl"
             />
@@ -124,32 +100,22 @@ export function MemberProfilePage() {
                   {member.firstName} {member.lastName}
                 </h2>
                 {showPreferred && (
-                  <p className="text-sm text-slate-500">
-                    Preferred name: {member.preferredName}
-                  </p>
+                  <p className="text-sm text-slate-500">Preferred name: {member.preferredName}</p>
                 )}
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <StatusBadge
-                  label={statusConfig?.label ?? member.memberStatus}
-                  color={statusConfig?.color}
-                />
-                {member.joinDate && (
-                  <span className="text-sm text-slate-500">
-                    Member since {formatDate(member.joinDate)}
-                  </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {member.membershipStatus && <Badge variant="default">{member.membershipStatus.name}</Badge>}
+                {member.isFirstTimer && <Badge variant="purple">First Timer</Badge>}
+                {member.doNotContact && <Badge variant="danger">Do Not Contact</Badge>}
+                {member.createdAt && (
+                  <span className="text-sm text-slate-500">Added {formatDate(member.createdAt)}</span>
                 )}
                 {member.department && (
-                  <span className="text-sm text-slate-500">
-                    {member.department}
-                  </span>
+                  <span className="text-sm text-slate-500">{member.department.name}</span>
                 )}
               </div>
-              {member.occupation && (
-                <p className="text-sm text-slate-500">
-                  {member.occupation}
-                  {member.employer ? ` at ${member.employer}` : ''}
-                </p>
+              {member.fellowshipGroup && (
+                <p className="text-sm text-slate-500">Fellowship group: {member.fellowshipGroup.name}</p>
               )}
             </div>
           </div>

@@ -1,49 +1,37 @@
-import type { Escalation, CreateEscalationRequest } from '@/types/escalation';
+import type { AxiosResponse } from 'axios';
+import type {
+  Escalation,
+  EscalationListFilters,
+  CreateEscalationRequest,
+  UpdateEscalationRequest,
+  PastoralNote,
+  CreateNoteRequest,
+} from '@/types/escalation';
+import type { PaginatedResponse } from '@/types';
 import api from '@/config/api';
 
-interface EscalationFilters {
-  status?: string;
-  priority?: string;
-  type?: string;
-  assignedToId?: string;
-  search?: string;
-  page?: number;
-  limit?: number;
-}
-
-interface ResolveEscalationData {
-  resolutionNotes: string;
-}
-
-interface UpdateEscalationData {
-  status?: string;
-  priority?: string;
-  assignedToId?: string;
-  title?: string;
-  description?: string;
-  confidentialNotes?: string;
-}
-
 export const escalationsApi = {
-  getEscalations(filters?: EscalationFilters) {
-    return api.get<{ data: Escalation[]; total: number }>('/escalations', {
-      params: filters,
-    });
+  getEscalations(filters?: EscalationListFilters): Promise<AxiosResponse<PaginatedResponse<Escalation>>> {
+    return api.get('/pastoral-escalations', { params: filters });
   },
 
-  getEscalation(id: string) {
-    return api.get<Escalation>(`/escalations/${id}`);
+  getEscalation(id: string): Promise<AxiosResponse<Escalation>> {
+    return api.get(`/pastoral-escalations/${id}`);
   },
 
-  createEscalation(data: CreateEscalationRequest) {
-    return api.post<Escalation>('/escalations', data);
+  createEscalation(data: CreateEscalationRequest): Promise<AxiosResponse<Escalation>> {
+    return api.post('/pastoral-escalations', data);
   },
 
-  updateEscalation(id: string, data: UpdateEscalationData) {
-    return api.patch<Escalation>(`/escalations/${id}`, data);
+  updateEscalation(id: string, data: UpdateEscalationRequest): Promise<AxiosResponse<Escalation>> {
+    return api.patch(`/pastoral-escalations/${id}`, data);
   },
 
-  resolveEscalation(id: string, data: ResolveEscalationData) {
-    return api.post<Escalation>(`/escalations/${id}/resolve`, data);
+  getNotes(id: string): Promise<AxiosResponse<PastoralNote[]>> {
+    return api.get(`/pastoral-escalations/${id}/notes`);
+  },
+
+  createNote(id: string, data: CreateNoteRequest): Promise<AxiosResponse<PastoralNote>> {
+    return api.post(`/pastoral-escalations/${id}/notes`, data);
   },
 };

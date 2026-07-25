@@ -1,18 +1,13 @@
-import { useState } from 'react';
 import { Clock, Lightbulb, MessageSquare, BookOpen, CalendarClock } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { cn } from '@/lib/cn';
 import { PastorQuickSend } from '../components/PastorQuickSend';
-
-type SendTiming = 'now' | 'scheduled';
 
 const TIPS = [
   {
     icon: <MessageSquare className="h-4 w-4" />,
     title: 'Keep messages concise',
-    description: 'Under 160 characters for SMS to avoid splitting into multiple messages.',
+    description: 'Short, warm messages are read in full and land better than long ones.',
   },
   {
     icon: <BookOpen className="h-4 w-4" />,
@@ -37,98 +32,18 @@ const TIPS = [
 ];
 
 export function EncouragementCreatePage() {
-  const [sendTiming, setSendTiming] = useState<SendTiming>('now');
-  const [scheduledDate, setScheduledDate] = useState('');
-
   return (
     <div className="space-y-6">
       <PageHeader
         title="Send Encouragement"
         subtitle="Encouragements > New"
-        breadcrumbs={[
-          { label: 'Encouragements', href: '/encouragements' },
-          { label: 'New' },
-        ]}
+        breadcrumbs={[{ label: 'Encouragements', href: '/encouragements' }, { label: 'New' }]}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Left column: Quick Send form */}
+        {/* Left column: Quick Send form (handles both immediate send and scheduling) */}
         <div className="space-y-6">
           <PastorQuickSend />
-
-          {/* Schedule option */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Delivery Schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <label
-                    className={cn(
-                      'flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-3 transition-all',
-                      sendTiming === 'now'
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-slate-200 bg-white hover:border-slate-300',
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="sendTiming"
-                      value="now"
-                      checked={sendTiming === 'now'}
-                      onChange={() => setSendTiming('now')}
-                      className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span
-                      className={cn(
-                        'text-sm font-medium',
-                        sendTiming === 'now' ? 'text-indigo-900' : 'text-slate-700',
-                      )}
-                    >
-                      Send Now
-                    </span>
-                  </label>
-
-                  <label
-                    className={cn(
-                      'flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-3 transition-all',
-                      sendTiming === 'scheduled'
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-slate-200 bg-white hover:border-slate-300',
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="sendTiming"
-                      value="scheduled"
-                      checked={sendTiming === 'scheduled'}
-                      onChange={() => setSendTiming('scheduled')}
-                      className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span
-                      className={cn(
-                        'text-sm font-medium',
-                        sendTiming === 'scheduled' ? 'text-indigo-900' : 'text-slate-700',
-                      )}
-                    >
-                      Schedule for Later
-                    </span>
-                  </label>
-                </div>
-
-                {sendTiming === 'scheduled' && (
-                  <DatePicker
-                    label="Scheduled Date"
-                    value={scheduledDate}
-                    onChange={setScheduledDate}
-                    min={new Date().toISOString().split('T')[0]}
-                    helpText="The encouragement will be sent at 8:00 AM on the selected date"
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Right column: Tips and guidelines */}
@@ -145,12 +60,8 @@ export function EncouragementCreatePage() {
                       {tip.icon}
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-slate-900">
-                        {tip.title}
-                      </h4>
-                      <p className="mt-0.5 text-sm text-slate-500">
-                        {tip.description}
-                      </p>
+                      <h4 className="text-sm font-medium text-slate-900">{tip.title}</h4>
+                      <p className="mt-0.5 text-sm text-slate-500">{tip.description}</p>
                     </div>
                   </div>
                 ))}

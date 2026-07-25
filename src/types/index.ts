@@ -1,20 +1,32 @@
 export type UserRole =
   | 'SUPER_ADMIN'
   | 'PASTOR'
-  | 'ADMIN'
+  | 'ADMINISTRATOR'
   | 'TEAM_LEAD'
   | 'FOLLOW_UP_WORKER'
+  | 'COMMUNICATIONS_MANAGER'
+  | 'AUDITOR'
   | 'VIEWER';
+
+export interface UserProfileRole {
+  id: string;
+  name: string;
+  code: UserRole;
+  scopeType: 'GLOBAL' | 'TEAM' | 'DEPARTMENT';
+  scopeId: string | null;
+}
 
 export interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  phone?: string | null;
+  status?: string;
+  lastLoginAt?: string | null;
+  roles: UserProfileRole[];
   permissions: string[];
-  churchId: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
 
 export interface PaginatedResponse<T> {

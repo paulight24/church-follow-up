@@ -1,116 +1,112 @@
 import { useState } from 'react';
-import { Plus, GraduationCap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { Plus, GraduationCap, Users, Calendar } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Spinner } from '@/components/ui/Spinner';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { formatDate } from '@/lib/formatters';
+import { foundationSchoolApi } from '../api/foundation-school.api';
+import { CohortFormModal } from '../components/CohortFormModal';
+import type { CohortStatus } from '@/types/foundationSchool';
 
-interface Cohort {
-  id: string;
-  name: string;
-  startDate: string;
-  studentCount: number;
-  status: 'Active' | 'Completed' | 'Upcoming';
-  progress: number;
-}
-
-const statusVariant: Record<Cohort['status'], 'success' | 'info' | 'warning'> = {
-  Active: 'success',
-  Completed: 'info',
-  Upcoming: 'warning',
+const STATUS_VARIANT: Record<CohortStatus, 'success' | 'info' | 'warning' | 'gray'> = {
+  ACTIVE: 'success',
+  COMPLETED: 'info',
+  PLANNED: 'warning',
+  CANCELLED: 'gray',
 };
 
-const MOCK_COHORTS: Cohort[] = [
-  {
-    id: '1',
-    name: 'April 2026 Cohort',
-    startDate: 'Apr 1, 2026',
-    studentCount: 32,
-    status: 'Active',
-    progress: 65,
-  },
-  {
-    id: '2',
-    name: 'January 2026 Cohort',
-    startDate: 'Jan 15, 2026',
-    studentCount: 28,
-    status: 'Completed',
-    progress: 100,
-  },
-  {
-    id: '3',
-    name: 'July 2026 Cohort',
-    startDate: 'Jul 1, 2026',
-    studentCount: 15,
-    status: 'Upcoming',
-    progress: 0,
-  },
-];
-
 export function FoundationSchoolPage() {
-  const [cohorts] = useState(MOCK_COHORTS);
+  const navigate = useNavigate();
+  const [formOpen, setFormOpen] = useState(false);
+
+  const cohortsQuery = useQuery({
+    queryKey: ['foundation-school', 'cohorts'],
+    queryFn: () => foundationSchoolApi.getCohorts().then((res) => res.data),
+  });
+
+  const cohorts = cohortsQuery.data ?? [];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Foundation School"
+        description="Manage cohorts, enrollments, and 7-class progress tracking"
         actions={
-          <Button
-            leftIcon={<Plus className="h-4 w-4" />}
-            onClick={() => alert('New cohort form coming soon')}
-          >
+          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
             New Cohort
           </Button>
         }
       />
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {cohorts.map((cohort) => (
-          <Card
-            key={cohort.id}
-            className="cursor-pointer transition-shadow hover:shadow-md"
-            onClick={() => alert('Cohort details coming soon')}
-          >
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <GraduationCap className="h-5 w-5 text-indigo-500" />
-                  <CardTitle>{cohort.name}</CardTitle>
-                </div>
-                <Badge variant={statusVariant[cohort.status]} dot>
-                  {cohort.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Start Date</span>
-                  <span className="font-medium text-slate-700">{cohort.startDate}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Students</span>
-                  <span className="font-medium text-slate-700">
-                    {cohort.studentCount} {cohort.status === 'Upcoming' ? 'registered' : 'students'}
-                  </span>
-                </div>
-                <div>
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Progress</span>
-                    <span className="font-medium text-slate-700">{cohort.progress}%</span>
+      {cohortsQuery.isLoading ? (
+        <div className="flex justify-center py-16">
+          <Spinner size="lg" className="text-indigo-600" />
+        </div>
+      ) : cohorts.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={GraduationCap}
+            title="No cohorts yet"
+            description="Create your first Foundation School cohort to start enrolling members."
+            action={
+              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
+                New Cohort
+              </Button>
+            }
+          />
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {cohorts.map((cohort) => (
+            <Card
+              key={cohort.id}
+              className="cursor-pointer transition-shadow hover:shadow-md"
+              onClick={() => navigate(`/foundation-school/${cohort.id}`)}
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <GraduationCap className="h-5 w-5 text-indigo-500" />
+                    <CardTitle>{cohort.name}</CardTitle>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-slate-200">
-                    <div
-                      className="h-2 rounded-full bg-indigo-600 transition-all"
-                      style={{ width: `${cohort.progress}%` }}
-                    />
-                  </div>
+                  <Badge variant={STATUS_VARIANT[cohort.status]} dot>
+                    {cohort.status.charAt(0) + cohort.status.slice(1).toLowerCase()}
+                  </Badge>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-slate-500">
+                      <Calendar className="h-3.5 w-3.5" /> Start Date
+                    </span>
+                    <span className="font-medium text-slate-700">{formatDate(cohort.startDate)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-slate-500">
+                      <Users className="h-3.5 w-3.5" /> Enrolled
+                    </span>
+                    <span className="font-medium text-slate-700">{cohort._count?.enrollments ?? 0} members</span>
+                  </div>
+                  {cohort.instructor && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Instructor</span>
+                      <span className="font-medium text-slate-700">{cohort.instructor}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <CohortFormModal isOpen={formOpen} onClose={() => setFormOpen(false)} />
     </div>
   );
 }

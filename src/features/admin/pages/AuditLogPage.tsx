@@ -1,3 +1,8 @@
+// NOTE: The backend writes AuditLog rows internally on every mutation
+// (via createAuditLog() in church-follow-up-api/src/middleware/audit.ts) but
+// does not yet expose any GET /audit-logs (or similar) read endpoint. This
+// page is intentionally left on mock data until that endpoint is added —
+// this is expected, not a bug to fix in the frontend.
 import { useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { Activity, Filter } from 'lucide-react';

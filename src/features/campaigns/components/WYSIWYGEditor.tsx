@@ -43,9 +43,15 @@ function ToolbarButton({ icon, title, onClick }: ToolbarButtonProps) {
 interface WYSIWYGEditorProps {
   content: string;
   onChange: (html: string) => void;
+  /**
+   * When provided, the "Insert Image" toolbar button hands control to the caller
+   * (e.g. to open the media library) instead of prompting for a raw URL. Call the
+   * given `insert` callback with a chosen image URL to insert it at the cursor.
+   */
+  onInsertImage?: (insert: (url: string) => void) => void;
 }
 
-export function WYSIWYGEditor({ content, onChange }: WYSIWYGEditorProps) {
+export function WYSIWYGEditor({ content, onChange, onInsertImage }: WYSIWYGEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
 
   const execCommand = useCallback((command: string, value?: string) => {
@@ -67,11 +73,15 @@ export function WYSIWYGEditor({ content, onChange }: WYSIWYGEditorProps) {
   }, [execCommand]);
 
   const handleInsertImage = useCallback(() => {
+    if (onInsertImage) {
+      onInsertImage((url) => execCommand('insertImage', url));
+      return;
+    }
     const url = prompt('Enter image URL:');
     if (url) {
       execCommand('insertImage', url);
     }
-  }, [execCommand]);
+  }, [execCommand, onInsertImage]);
 
   return (
     <div className="overflow-hidden rounded-lg border border-slate-300 bg-white">

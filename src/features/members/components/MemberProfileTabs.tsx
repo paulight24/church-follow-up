@@ -2,20 +2,19 @@ import { useState } from 'react';
 import {
   Phone,
   Mail,
-  MapPin,
+  Home,
   CalendarDays,
   Cake,
-  Briefcase,
-  Clock,
+  Building2,
   MessageSquare,
   User,
   AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
 import type { Member } from '@/types/member';
 import { Tabs, TabList, Tab, TabPanel } from '@/components/ui/Tabs';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
   Table,
@@ -25,8 +24,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/Table';
-import { formatDate, formatPhone } from '@/lib/formatters';
-import { CHANNELS, OUTCOMES } from '@/lib/constants';
+import { formatDate, formatDateTime, formatPhone } from '@/lib/formatters';
 
 interface MemberProfileTabsProps {
   member: Member;
@@ -43,107 +41,38 @@ function InfoCard({ icon, label, value }: InfoCardProps) {
     <div className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50 p-4">
       <span className="mt-0.5 shrink-0 text-slate-400">{icon}</span>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-          {label}
-        </p>
-        <p className="mt-0.5 truncate text-sm font-medium text-slate-900">
-          {value || '--'}
-        </p>
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">{label}</p>
+        <p className="mt-0.5 truncate text-sm font-medium text-slate-900">{value || '--'}</p>
       </div>
     </div>
   );
 }
 
-const mockFollowUpHistory = [
-  {
-    id: '1',
-    date: '2026-07-20',
-    worker: 'Ngozi Okafor',
-    channel: 'PHONE_CALL',
-    outcome: 'REACHED_POSITIVE',
-    notes: 'Member is doing well. Attending Sunday services regularly. Expressed interest in joining the choir.',
-  },
-  {
-    id: '2',
-    date: '2026-07-13',
-    worker: 'Emmanuel Adeyemi',
-    channel: 'WHATSAPP',
-    outcome: 'REACHED_POSITIVE',
-    notes: 'Sent weekly encouragement message. Member responded with gratitude.',
-  },
-  {
-    id: '3',
-    date: '2026-07-05',
-    worker: 'Ngozi Okafor',
-    channel: 'HOME_VISIT',
-    outcome: 'REACHED_NEUTRAL',
-    notes: 'Visited at home. Member has been traveling for work. Will be back next Sunday.',
-  },
-  {
-    id: '4',
-    date: '2026-06-28',
-    worker: 'Blessing Eze',
-    channel: 'SMS',
-    outcome: 'NOT_REACHED',
-    notes: 'SMS sent but no response received.',
-  },
-  {
-    id: '5',
-    date: '2026-06-15',
-    worker: 'Emmanuel Adeyemi',
-    channel: 'PHONE_CALL',
-    outcome: 'VOICEMAIL',
-    notes: 'Left voicemail asking member to return call.',
-  },
-];
-
-const mockRecentActivity = [
-  { id: '1', action: 'Follow-up call completed', date: '2026-07-20T14:30:00Z', type: 'follow-up' },
-  { id: '2', action: 'Attended Sunday service', date: '2026-07-20T09:00:00Z', type: 'attendance' },
-  { id: '3', action: 'WhatsApp message sent', date: '2026-07-13T11:00:00Z', type: 'communication' },
-  { id: '4', action: 'Attended midweek service', date: '2026-07-09T18:30:00Z', type: 'attendance' },
-  { id: '5', action: 'Home visit conducted', date: '2026-07-05T16:00:00Z', type: 'follow-up' },
-  { id: '6', action: 'Joined Foundation School', date: '2026-06-22T10:00:00Z', type: 'milestone' },
-];
-
-function getChannelLabel(value: string) {
-  return CHANNELS.find((c) => c.value === value)?.label ?? value;
-}
-
-function getOutcomeConfig(value: string) {
-  return OUTCOMES.find((o) => o.value === value);
-}
-
-function getActivityIcon(type: string) {
-  switch (type) {
-    case 'follow-up':
-      return <Phone className="h-4 w-4" />;
-    case 'communication':
-      return <MessageSquare className="h-4 w-4" />;
-    case 'attendance':
-      return <User className="h-4 w-4" />;
-    case 'milestone':
-      return <CalendarDays className="h-4 w-4" />;
-    default:
-      return <Clock className="h-4 w-4" />;
-  }
-}
+const verificationVariant: Record<string, 'success' | 'warning' | 'danger' | 'gray'> = {
+  VERIFIED: 'success',
+  PENDING: 'gray',
+  NEEDS_UPDATE: 'warning',
+  FAILED: 'danger',
+};
 
 export function MemberProfileTabs({ member }: MemberProfileTabsProps) {
   const [activeTab, setActiveTab] = useState('overview');
 
-  const address = [member.address, member.city, member.state, member.zipCode]
-    .filter(Boolean)
-    .join(', ');
+  const household = member.household;
+  const householdAddress = household
+    ? [household.addressLine1, household.addressLine2, household.city, household.state, household.postalCode]
+        .filter(Boolean)
+        .join(', ')
+    : '';
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabList className="overflow-x-auto">
         <Tab value="overview">Overview</Tab>
+        <Tab value="household">Household</Tab>
+        <Tab value="contact-verification">Contact Verification</Tab>
         <Tab value="follow-up">Follow-Up History</Tab>
         <Tab value="attendance">Attendance</Tab>
-        <Tab value="communications">Communications</Tab>
-        <Tab value="household">Household</Tab>
         <Tab value="escalations">Escalations</Tab>
       </TabList>
 
@@ -153,142 +82,196 @@ export function MemberProfileTabs({ member }: MemberProfileTabsProps) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoCard
               icon={<Phone className="h-5 w-5" />}
-              label="Phone"
-              value={member.phone ? formatPhone(member.phone) : null}
+              label="Primary Phone"
+              value={member.phonePrimary ? formatPhone(member.phonePrimary) : null}
             />
             <InfoCard
-              icon={<Mail className="h-5 w-5" />}
-              label="Email"
-              value={member.email}
+              icon={<Phone className="h-5 w-5" />}
+              label="Secondary Phone"
+              value={member.phoneSecondary ? formatPhone(member.phoneSecondary) : null}
             />
-            <InfoCard
-              icon={<MapPin className="h-5 w-5" />}
-              label="Address"
-              value={address || null}
-            />
-            <InfoCard
-              icon={<CalendarDays className="h-5 w-5" />}
-              label="Member Since"
-              value={member.joinDate ? formatDate(member.joinDate) : null}
-            />
+            <InfoCard icon={<Mail className="h-5 w-5" />} label="Email" value={member.email} />
             <InfoCard
               icon={<Cake className="h-5 w-5" />}
               label="Birthday"
               value={member.dateOfBirth ? formatDate(member.dateOfBirth) : null}
             />
             <InfoCard
-              icon={<Briefcase className="h-5 w-5" />}
+              icon={<User className="h-5 w-5" />}
+              label="Gender"
+              value={member.gender}
+            />
+            <InfoCard
+              icon={<User className="h-5 w-5" />}
+              label="Marital Status"
+              value={member.maritalStatus}
+            />
+            <InfoCard
+              icon={<Building2 className="h-5 w-5" />}
               label="Department"
-              value={member.department}
+              value={member.department?.name}
+            />
+            <InfoCard
+              icon={<Building2 className="h-5 w-5" />}
+              label="Fellowship Group"
+              value={member.fellowshipGroup?.name}
+            />
+            <InfoCard
+              icon={<CalendarDays className="h-5 w-5" />}
+              label="Last Attendance"
+              value={member.lastAttendanceDate ? formatDate(member.lastAttendanceDate) : null}
+            />
+            <InfoCard
+              icon={<MessageSquare className="h-5 w-5" />}
+              label="Preferred Contact Method"
+              value={member.preferredContactMethod}
+            />
+            <InfoCard
+              icon={<CalendarDays className="h-5 w-5" />}
+              label="First Visit Date"
+              value={member.firstVisitDate ? formatDate(member.firstVisitDate) : null}
+            />
+            <InfoCard
+              icon={<User className="h-5 w-5" />}
+              label="Visitor Journey Stage"
+              value={member.visitorJourneyStage}
             />
           </div>
 
-          {/* Recent Activity */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant={member.communicationConsentEmail ? 'success' : 'gray'} size="sm">
+              {member.communicationConsentEmail ? 'OK to email' : 'Email consent declined'}
+            </Badge>
+            <Badge variant={member.communicationConsentSms ? 'success' : 'gray'} size="sm">
+              {member.communicationConsentSms ? 'OK to text' : 'SMS consent declined'}
+            </Badge>
+            {member.doNotContact && (
+              <Badge variant="danger" size="sm">
+                Do Not Contact
+              </Badge>
+            )}
+          </div>
+
+          {(member.generalNotes || member.pastoralNotes) && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {member.generalNotes && (
+                <Card>
+                  <CardContent className="pt-5">
+                    <h3 className="mb-2 text-sm font-semibold text-slate-900">General Notes</h3>
+                    <p className="whitespace-pre-wrap text-sm text-slate-600">{member.generalNotes}</p>
+                  </CardContent>
+                </Card>
+              )}
+              {member.pastoralNotes !== undefined && member.pastoralNotes !== null && (
+                <Card>
+                  <CardContent className="pt-5">
+                    <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                      <ShieldCheck className="h-4 w-4 text-slate-400" />
+                      Pastoral Notes
+                    </h3>
+                    <p className="whitespace-pre-wrap text-sm text-slate-600">{member.pastoralNotes}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
+      </TabPanel>
+
+      {/* Household Tab */}
+      <TabPanel value="household">
+        {household ? (
           <Card>
-            <CardContent className="pt-5">
-              <h3 className="mb-4 text-sm font-semibold text-slate-900">
-                Recent Activity
-              </h3>
-              <div className="space-y-0">
-                {mockRecentActivity.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-center gap-3 border-b border-slate-100 py-3 last:border-0"
-                  >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                      {getActivityIcon(activity.type)}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-slate-700">{activity.action}</p>
-                    </div>
-                    <time className="shrink-0 text-xs text-slate-400">
-                      {formatDate(activity.date)}
-                    </time>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="space-y-3 pt-5">
+              <h3 className="text-sm font-semibold text-slate-900">{household.householdName}</h3>
+              {householdAddress && <p className="text-sm text-slate-600">{householdAddress}</p>}
+              {member.householdMemberships && member.householdMemberships.length > 0 && (
+                <div className="pt-2">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Household Members
+                  </p>
+                  <ul className="space-y-1 text-sm text-slate-700">
+                    {member.householdMemberships.map((hm) => (
+                      <li key={hm.id}>{hm.household.householdName}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </CardContent>
           </Card>
-        </div>
+        ) : (
+          <EmptyState
+            icon={Home}
+            title="No household on file"
+            description="This member is not linked to a household record yet."
+          />
+        )}
+      </TabPanel>
+
+      {/* Contact Verification Tab */}
+      <TabPanel value="contact-verification">
+        {member.contactVerifications && member.contactVerifications.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Phone Verified</TableHead>
+                <TableHead>Email Verified</TableHead>
+                <TableHead>Source</TableHead>
+                <TableHead>Notes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {member.contactVerifications.map((v) => (
+                <TableRow key={v.id}>
+                  <TableCell className="whitespace-nowrap">{formatDateTime(v.createdAt)}</TableCell>
+                  <TableCell>
+                    <Badge variant={verificationVariant[v.verificationStatus] ?? 'gray'} size="sm">
+                      {v.verificationStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{v.phoneVerified ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{v.emailVerified ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{v.verificationSource ?? '--'}</TableCell>
+                  <TableCell className="max-w-xs truncate">{v.notes ?? '--'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <EmptyState
+            icon={ShieldCheck}
+            title="No contact verifications yet"
+            description="Verified contact attempts for this member will appear here."
+          />
+        )}
       </TabPanel>
 
       {/* Follow-Up History Tab */}
       <TabPanel value="follow-up">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Worker</TableHead>
-              <TableHead>Channel</TableHead>
-              <TableHead>Outcome</TableHead>
-              <TableHead>Notes</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mockFollowUpHistory.map((record) => {
-              const outcomeConfig = getOutcomeConfig(record.outcome);
-              return (
-                <TableRow key={record.id}>
-                  <TableCell className="whitespace-nowrap">
-                    {formatDate(record.date)}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {record.worker}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="gray" size="sm">
-                      {getChannelLabel(record.channel)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge
-                      label={outcomeConfig?.label ?? record.outcome}
-                      color={outcomeConfig?.color}
-                    />
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {record.notes}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <EmptyState
+          icon={CalendarDays}
+          title="Coming Soon"
+          description={`Follow-up history will be available from the Follow-Ups feature. This member has ${member._count?.followUpTasks ?? 0} follow-up task(s) on file.`}
+        />
       </TabPanel>
 
       {/* Attendance Tab */}
       <TabPanel value="attendance">
         <EmptyState
-          icon={<CalendarDays className="h-12 w-12" />}
+          icon={CalendarDays}
           title="Coming Soon"
           description="Attendance tracking will be available in a future update."
-        />
-      </TabPanel>
-
-      {/* Communications Tab */}
-      <TabPanel value="communications">
-        <EmptyState
-          icon={<MessageSquare className="h-12 w-12" />}
-          title="Coming Soon"
-          description="Communication logs will be available in a future update."
-        />
-      </TabPanel>
-
-      {/* Household Tab */}
-      <TabPanel value="household">
-        <EmptyState
-          icon={<User className="h-12 w-12" />}
-          title="Coming Soon"
-          description="Household management will be available in a future update."
         />
       </TabPanel>
 
       {/* Escalations Tab */}
       <TabPanel value="escalations">
         <EmptyState
-          icon={<AlertTriangle className="h-12 w-12" />}
+          icon={AlertTriangle}
           title="Coming Soon"
-          description="Escalation tracking will be available in a future update."
+          description={`Escalation details will be available from the Escalations feature. This member has ${member._count?.escalations ?? 0} escalation(s) on file.`}
         />
       </TabPanel>
     </Tabs>

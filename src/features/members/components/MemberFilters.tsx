@@ -1,66 +1,74 @@
+import { useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react';
-import type { MemberFilters as MemberFiltersType } from '@/types/member';
+import type { MemberListFilters } from '@/types/member';
 import { Select } from '@/components/ui/Select';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { MEMBER_STATUS } from '@/lib/constants';
+import { lookupsApi } from '@/features/members/api/lookups.api';
 
 interface MemberFiltersProps {
-  filters: MemberFiltersType;
-  onFilterChange: (filters: MemberFiltersType) => void;
+  filters: MemberListFilters;
+  onFilterChange: (filters: MemberListFilters) => void;
 }
 
-const statusOptions = MEMBER_STATUS.map((s) => ({
-  label: s.label,
-  value: s.value,
-}));
-
 const genderOptions = [
-  { label: 'Male', value: 'Male' },
-  { label: 'Female', value: 'Female' },
-  { label: 'Other', value: 'Other' },
+  { label: 'Male', value: 'MALE' },
+  { label: 'Female', value: 'FEMALE' },
 ];
 
-const activeOptions = [
-  { label: 'Active', value: 'true' },
-  { label: 'Inactive', value: 'false' },
+const firstTimerOptions = [
+  { label: 'First timers only', value: 'true' },
+  { label: 'Not first timers', value: 'false' },
+];
+
+const visitorJourneyStageOptions = [
+  { label: 'New First Timer', value: 'NEW_FIRST_TIMER' },
+  { label: 'Contact Attempted', value: 'CONTACT_ATTEMPTED' },
+  { label: 'Contacted', value: 'CONTACTED' },
+  { label: 'Returning Visitor', value: 'RETURNING_VISITOR' },
+  { label: 'Foundation School Invited', value: 'FOUNDATION_SCHOOL_INVITED' },
+  { label: 'Foundation School Enrolled', value: 'FOUNDATION_SCHOOL_ENROLLED' },
+  { label: 'Foundation School In Progress', value: 'FOUNDATION_SCHOOL_IN_PROGRESS' },
+  { label: 'Graduated', value: 'GRADUATED' },
+  { label: 'Assigned To Cell', value: 'ASSIGNED_TO_CELL' },
+  { label: 'Established Member', value: 'ESTABLISHED_MEMBER' },
 ];
 
 export function MemberFilters({ filters, onFilterChange }: MemberFiltersProps) {
+  const { data: departments } = useQuery({
+    queryKey: ['departments', 'lookup'],
+    queryFn: () => lookupsApi.getDepartments().then((res) => res.data.data),
+  });
+
+  const { data: fellowshipGroups } = useQuery({
+    queryKey: ['fellowship-groups', 'lookup'],
+    queryFn: () => lookupsApi.getFellowshipGroups().then((res) => res.data.data),
+  });
+
+  const departmentOptions = (departments ?? []).map((d) => ({ label: d.name, value: d.id }));
+  const fellowshipGroupOptions = (fellowshipGroups ?? []).map((g) => ({ label: g.name, value: g.id }));
+
   const hasActiveFilters =
-    filters.status != null ||
     filters.gender != null ||
-    (filters.department != null && filters.department !== '') ||
-    filters.isActive != null;
+    filters.departmentId != null ||
+    filters.fellowshipGroupId != null ||
+    filters.isFirstTimer != null ||
+    filters.visitorJourneyStage != null ||
+    filters.includeArchived === true;
 
   const handleClearFilters = () => {
     onFilterChange({
       ...filters,
-      status: undefined,
       gender: undefined,
-      department: undefined,
-      isActive: undefined,
+      departmentId: undefined,
+      fellowshipGroupId: undefined,
+      isFirstTimer: undefined,
+      visitorJourneyStage: undefined,
+      includeArchived: undefined,
     });
   };
 
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <div className="w-full sm:w-40">
-        <Select
-          label="Status"
-          placeholder="All statuses"
-          options={statusOptions}
-          value={filters.status ?? ''}
-          onChange={(e) =>
-            onFilterChange({
-              ...filters,
-              status: e.target.value ? (e.target.value as MemberFiltersType['status']) : undefined,
-              page: 1,
-            })
-          }
-        />
-      </div>
-
       <div className="w-full sm:w-36">
         <Select
           label="Gender"
@@ -70,7 +78,49 @@ export function MemberFilters({ filters, onFilterChange }: MemberFiltersProps) {
           onChange={(e) =>
             onFilterChange({
               ...filters,
-              gender: e.target.value ? (e.target.value as MemberFiltersType['gender']) : undefined,
+              gender: e.target.value ? (e.target.value as MemberListFilters['gender']) : undefined,
+              page: 1,
+            })
+          }
+        />
+      </div>
+
+      <div className="w-full sm:w-48">
+        <Select
+          label="Department"
+          placeholder="All departments"
+          options={departmentOptions}
+          value={filters.departmentId ?? ''}
+          onChange={(e) =>
+            onFilterChange({ ...filters, departmentId: e.target.value || undefined, page: 1 })
+          }
+        />
+      </div>
+
+      <div className="w-full sm:w-48">
+        <Select
+          label="Fellowship Group"
+          placeholder="All groups"
+          options={fellowshipGroupOptions}
+          value={filters.fellowshipGroupId ?? ''}
+          onChange={(e) =>
+            onFilterChange({ ...filters, fellowshipGroupId: e.target.value || undefined, page: 1 })
+          }
+        />
+      </div>
+
+      <div className="w-full sm:w-52">
+        <Select
+          label="Visitor Journey Stage"
+          placeholder="Any stage"
+          options={visitorJourneyStageOptions}
+          value={filters.visitorJourneyStage ?? ''}
+          onChange={(e) =>
+            onFilterChange({
+              ...filters,
+              visitorJourneyStage: e.target.value
+                ? (e.target.value as MemberListFilters['visitorJourneyStage'])
+                : undefined,
               page: 1,
             })
           }
@@ -78,35 +128,32 @@ export function MemberFilters({ filters, onFilterChange }: MemberFiltersProps) {
       </div>
 
       <div className="w-full sm:w-44">
-        <Input
-          label="Department"
-          placeholder="Filter by department"
-          value={filters.department ?? ''}
+        <Select
+          label="First Timer"
+          placeholder="All members"
+          options={firstTimerOptions}
+          value={filters.isFirstTimer != null ? String(filters.isFirstTimer) : ''}
           onChange={(e) =>
             onFilterChange({
               ...filters,
-              department: e.target.value || undefined,
+              isFirstTimer: e.target.value ? e.target.value === 'true' : undefined,
               page: 1,
             })
           }
         />
       </div>
 
-      <div className="w-full sm:w-36">
-        <Select
-          label="Active Status"
-          placeholder="All"
-          options={activeOptions}
-          value={filters.isActive != null ? String(filters.isActive) : ''}
+      <label className="flex h-10 w-full items-center gap-2 text-sm text-slate-600 sm:w-auto">
+        <input
+          type="checkbox"
+          className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+          checked={filters.includeArchived === true}
           onChange={(e) =>
-            onFilterChange({
-              ...filters,
-              isActive: e.target.value ? e.target.value === 'true' : undefined,
-              page: 1,
-            })
+            onFilterChange({ ...filters, includeArchived: e.target.checked || undefined, page: 1 })
           }
         />
-      </div>
+        Include archived
+      </label>
 
       {hasActiveFilters && (
         <Button
