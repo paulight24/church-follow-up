@@ -15,6 +15,7 @@ const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPag
 // Members
 const MemberListPage = lazy(() => import('@/features/members/pages/MemberListPage').then(m => ({ default: m.MemberListPage })));
 const MemberCreatePage = lazy(() => import('@/features/members/pages/MemberCreatePage').then(m => ({ default: m.MemberCreatePage })));
+const MemberEditPage = lazy(() => import('@/features/members/pages/MemberEditPage').then(m => ({ default: m.MemberEditPage })));
 const MemberProfilePage = lazy(() => import('@/features/members/pages/MemberProfilePage').then(m => ({ default: m.MemberProfilePage })));
 const MemberImportPage = lazy(() => import('@/features/members/pages/MemberImportPage').then(m => ({ default: m.MemberImportPage })));
 const DuplicateReviewPage = lazy(() => import('@/features/members/pages/DuplicateReviewPage').then(m => ({ default: m.DuplicateReviewPage })));
@@ -88,6 +89,7 @@ export function AppRoutes() {
             <Route path="/members/new" element={<MemberCreatePage />} />
             <Route path="/members/import" element={<MemberImportPage />} />
             <Route path="/members/duplicates" element={<DuplicateReviewPage />} />
+            <Route path="/members/:id/edit" element={<MemberEditPage />} />
             <Route path="/members/:id" element={<MemberProfilePage />} />
 
             {/* Teams */}

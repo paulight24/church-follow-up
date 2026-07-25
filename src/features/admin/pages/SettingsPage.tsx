@@ -1,18 +1,31 @@
-// NOTE: The backend has no settings / system-config module yet (no GET/PATCH
-// /settings or similar endpoint exists in church-follow-up-api). This page is
-// intentionally left on local component state with no backing API call — the
-// form does not persist anything server-side. Do not wire this up to a fake
-// endpoint; revisit once the backend exposes a settings module.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
+import { Alert } from '@/components/ui/Alert';
+import { settingsApi, type AllSettings } from '../api/settings.api';
+
+function asString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function asBoolean(value: unknown, fallback = false): boolean {
+  return typeof value === 'boolean' ? value : fallback;
+}
 
 export function SettingsPage() {
-  const [churchName, setChurchName] = useState('Grace Community Church');
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => settingsApi.getAll().then((res) => res.data),
+  });
+
+  const [churchName, setChurchName] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -26,12 +39,68 @@ export function SettingsPage() {
   const [smsNotifs, setSmsNotifs] = useState(true);
   const [inAppNotifs, setInAppNotifs] = useState(true);
 
+  useEffect(() => {
+    if (!data) return;
+    const profile = data.CHURCH_PROFILE ?? {};
+    setChurchName(asString(profile.churchName));
+    setAddress(asString(profile.address));
+    setPhone(asString(profile.phone));
+    setEmail(asString(profile.email));
+    setWebsite(asString(profile.website));
+
+    const followUp = data.FOLLOW_UP ?? {};
+    setCycleDuration(asString(followUp.cycleDuration, '14'));
+    setAutoEscalation(asString(followUp.autoEscalationDays, '5'));
+    setMaxAttempts(asString(followUp.maxAttempts, '5'));
+
+    const notifications = data.NOTIFICATIONS ?? {};
+    setEmailNotifs(asBoolean(notifications.email, true));
+    setSmsNotifs(asBoolean(notifications.sms, true));
+    setInAppNotifs(asBoolean(notifications.inApp, true));
+  }, [data]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      await Promise.all([
+        settingsApi.updateCategory('CHURCH_PROFILE', { churchName, address, phone, email, website }),
+        settingsApi.updateCategory('FOLLOW_UP', {
+          cycleDuration,
+          autoEscalationDays: autoEscalation,
+          maxAttempts,
+        }),
+        settingsApi.updateCategory('NOTIFICATIONS', {
+          email: emailNotifs,
+          sms: smsNotifs,
+          inApp: inAppNotifs,
+        }),
+      ]);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner size="lg" className="text-indigo-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Settings"
         description="Configure your church and system preferences"
       />
+
+      {saveMutation.isSuccess && (
+        <Alert variant="success">Settings saved successfully.</Alert>
+      )}
+      {saveMutation.isError && (
+        <Alert variant="error">Failed to save settings. Please try again.</Alert>
+      )}
 
       {/* Church Profile */}
       <Card>
@@ -164,45 +233,30 @@ export function SettingsPage() {
           <CardTitle>Integration Settings</CardTitle>
         </CardHeader>
         <CardContent>
+          <p className="mb-4 text-sm text-slate-500">
+            SMS and email delivery currently run through stub providers (they log outbound
+            messages instead of sending them). Configure real credentials via environment
+            variables on the server (SMS_PROVIDER, TWILIO_*, EMAIL_PROVIDER, RESEND_API_KEY,
+            etc.) — there is no in-app credentials UI yet.
+          </p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-lg border border-slate-200 p-4">
               <h4 className="mb-1 font-medium text-slate-900">SMS Provider</h4>
               <p className="mb-3 text-sm text-slate-500">
-                Connect your SMS gateway for text messaging
+                Console stub active. Set SMS_PROVIDER=twilio + credentials on the server to go live.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => alert('SMS provider configuration coming soon')}
-              >
-                Configure
-              </Button>
             </div>
             <div className="rounded-lg border border-slate-200 p-4">
               <h4 className="mb-1 font-medium text-slate-900">WhatsApp Business</h4>
               <p className="mb-3 text-sm text-slate-500">
-                Integrate WhatsApp for member communication
+                Not yet implemented.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => alert('WhatsApp configuration coming soon')}
-              >
-                Configure
-              </Button>
             </div>
             <div className="rounded-lg border border-slate-200 p-4">
               <h4 className="mb-1 font-medium text-slate-900">Email Service</h4>
               <p className="mb-3 text-sm text-slate-500">
-                Set up email delivery for campaigns and notifications
+                Configure EMAIL_PROVIDER + RESEND_API_KEY/SENDGRID_API_KEY on the server.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => alert('Email service configuration coming soon')}
-              >
-                Configure
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -210,8 +264,8 @@ export function SettingsPage() {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={() => alert('Settings saved (mock)')}>
-          Save Changes
+        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+          {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
     </div>
