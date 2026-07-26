@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, Settings, User } from 'lucide-react';
+import { LogOut, Menu, Settings } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui/Avatar';
@@ -27,14 +27,9 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
 
   const userMenuItems: DropdownItem[] = [
     {
-      label: 'Profile',
-      icon: <User />,
-      onClick: () => navigate('/profile'),
-    },
-    {
       label: 'Settings',
       icon: <Settings />,
-      onClick: () => navigate('/settings'),
+      onClick: () => navigate('/admin/settings'),
     },
     { label: '', divider: true, onClick: () => {} },
     {
