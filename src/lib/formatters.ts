@@ -32,7 +32,7 @@ export function formatMemberName(member: {
   preferredName?: string | null;
 }): string {
   const displayFirst = member.preferredName ?? member.firstName;
-  return `${displayFirst} ${member.lastName}`;
+  return `${displayFirst} ${member.lastName}`.trim();
 }
 
 export function formatCurrency(amount: number): string {
