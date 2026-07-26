@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Settings,
   Bell,
+  BellRing,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -14,8 +15,33 @@ import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatRelativeDate } from '@/lib/formatters';
 import { cn } from '@/lib/cn';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { notificationsApi } from '../api/notifications.api';
 import type { Notification, NotificationType } from '../types';
+
+function PushOptInBanner() {
+  const { permission, isRegistering, error, enable, isSupported } = usePushNotifications();
+
+  if (!isSupported || permission === 'granted' || permission === 'denied') return null;
+
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-indigo-50 px-4 py-2.5">
+      <div className="flex items-center gap-2 text-sm text-indigo-900">
+        <BellRing className="h-4 w-4 shrink-0" />
+        <span>Get browser alerts for new tasks and escalations.</span>
+      </div>
+      <button
+        type="button"
+        onClick={enable}
+        disabled={isRegistering}
+        className="shrink-0 text-sm font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+      >
+        {isRegistering ? 'Enabling…' : 'Enable'}
+      </button>
+      {error && <p className="text-xs text-rose-600">{error}</p>}
+    </div>
+  );
+}
 
 const typeIcons: Record<string, ReactNode> = {
   ESCALATION: <AlertTriangle className="h-5 w-5 text-amber-500" />,
@@ -82,6 +108,7 @@ export function NotificationCenter({ className, onNavigate }: NotificationCenter
           Mark all as read
         </button>
       </CardHeader>
+      <PushOptInBanner />
       <CardContent className="p-0">
         {isLoading ? (
           <div className="flex justify-center py-10">
