@@ -1,0 +1,34 @@
+# Deploys to the live Firebase Hosting channel on every push to the branch
+# below. The Firebase web config values are not secrets (they're shipped to
+# every browser in the built JS bundle anyway), so they're plain env vars
+# here rather than GitHub secrets - update them here if the Firebase project
+# or backend URL ever changes.
+name: Deploy to Firebase Hosting on push
+on:
+  push:
+    branches:
+      - claude/church-followup-architecture-o08r8s
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_API_URL: https://church-followup.e4wtech.com/api/v1
+          VITE_FIREBASE_API_KEY: AIzaSyDEn8eiourpxrV7Wy7FPBDbT_AeQHQNWxU
+          VITE_FIREBASE_AUTH_DOMAIN: church-follow-up-dev.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: church-follow-up-dev
+          VITE_FIREBASE_STORAGE_BUCKET: church-follow-up-dev.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "1011335835960"
+          VITE_FIREBASE_APP_ID: "1:1011335835960:web:62fb0849ef28b06c5411cd"
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_CHURCH_FOLLOW_UP_DEV }}"
+          channelId: live
+          projectId: church-follow-up-dev
