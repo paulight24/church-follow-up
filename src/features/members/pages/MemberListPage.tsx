@@ -15,13 +15,16 @@ import { membersApi } from '@/features/members/api/members.api';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { ApiError } from '@/types';
 
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 25;
 
 export function MemberListPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<MemberListFiltersType>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [archiveTarget, setArchiveTarget] = useState<Member | null>(null);
 
   const debouncedSearch = useDebounce(search, 300);
@@ -30,7 +33,9 @@ export function MemberListPage() {
     ...filters,
     search: debouncedSearch || undefined,
     page: currentPage,
-    pageSize: PAGE_SIZE,
+    pageSize,
+    sortBy,
+    sortOrder,
   };
 
   const { data, isLoading, isError, error } = useQuery({
@@ -109,6 +114,17 @@ export function MemberListPage() {
           members={members}
           isLoading={isLoading}
           onArchive={(member) => setArchiveTarget(member)}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={(field) => {
+            if (field === sortBy) {
+              setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+            } else {
+              setSortBy(field);
+              setSortOrder('asc');
+            }
+            setCurrentPage(1);
+          }}
         />
 
         {totalItems > 0 && (
@@ -118,7 +134,11 @@ export function MemberListPage() {
               totalPages={totalPages}
               onPageChange={setCurrentPage}
               totalItems={totalItems}
-              pageSize={PAGE_SIZE}
+              pageSize={pageSize}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
             />
           </div>
         )}

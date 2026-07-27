@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Archive, MoreHorizontal, Users } from 'lucide-react';
+import { Eye, Pencil, Archive, MoreHorizontal, Users, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import type { Member } from '@/types/member';
 import {
   Table,
@@ -21,6 +21,9 @@ interface MemberTableProps {
   members: Member[];
   isLoading: boolean;
   onArchive?: (member: Member) => void;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  onSort?: (field: string) => void;
 }
 
 function SkeletonRow() {
@@ -45,22 +48,46 @@ function SkeletonRow() {
   );
 }
 
-export function MemberTable({ members, isLoading, onArchive }: MemberTableProps) {
+const sortableColumns = [
+  { label: 'Name', field: 'lastName' },
+  { label: 'Email', field: 'email' },
+  { label: 'Phone', field: 'phonePrimary' },
+  { label: 'Status', field: undefined },
+  { label: 'Department', field: undefined },
+  { label: 'Created', field: 'createdAt' },
+] as const;
+
+function SortIcon({ field, sortBy, sortOrder }: { field?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }) {
+  if (!field) return null;
+  if (field !== sortBy) return <ArrowUpDown className="ml-1 inline h-3.5 w-3.5 text-slate-300" />;
+  return sortOrder === 'asc'
+    ? <ArrowUp className="ml-1 inline h-3.5 w-3.5 text-indigo-600" />
+    : <ArrowDown className="ml-1 inline h-3.5 w-3.5 text-indigo-600" />;
+}
+
+export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, onSort }: MemberTableProps) {
   const navigate = useNavigate();
 
-  const columns = ['Name', 'Email', 'Phone', 'Status', 'Department', 'Created'];
+  const headerRow = (
+    <TableRow>
+      {sortableColumns.map((col) => (
+        <TableHead
+          key={col.label}
+          className={col.field ? 'cursor-pointer select-none hover:text-slate-900' : ''}
+          onClick={col.field && onSort ? () => onSort(col.field!) : undefined}
+        >
+          {col.label}
+          <SortIcon field={col.field} sortBy={sortBy} sortOrder={sortOrder} />
+        </TableHead>
+      ))}
+      <TableHead className="w-12" />
+    </TableRow>
+  );
 
   if (isLoading) {
     return (
       <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((col) => (
-              <TableHead key={col}>{col}</TableHead>
-            ))}
-            <TableHead className="w-12" />
-          </TableRow>
-        </TableHeader>
+        <TableHeader>{headerRow}</TableHeader>
         <TableBody>
           {Array.from({ length: 5 }, (_, i) => (
             <SkeletonRow key={i} />
@@ -82,14 +109,7 @@ export function MemberTable({ members, isLoading, onArchive }: MemberTableProps)
 
   return (
     <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((col) => (
-            <TableHead key={col}>{col}</TableHead>
-          ))}
-          <TableHead className="w-12" />
-        </TableRow>
-      </TableHeader>
+      <TableHeader>{headerRow}</TableHeader>
       <TableBody>
         {members.map((member) => {
           const fullName = formatMemberName(member);

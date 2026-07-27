@@ -40,10 +40,12 @@ const CampaignAnalyticsPage = lazy(() => import('@/features/campaigns/pages/Camp
 // Encouragements
 const EncouragementListPage = lazy(() => import('@/features/encouragements/pages/EncouragementListPage').then(m => ({ default: m.EncouragementListPage })));
 const EncouragementCreatePage = lazy(() => import('@/features/encouragements/pages/EncouragementCreatePage').then(m => ({ default: m.EncouragementCreatePage })));
+const EncouragementCardPrintPage = lazy(() => import('@/features/encouragements/pages/EncouragementCardPrintPage').then(m => ({ default: m.EncouragementCardPrintPage })));
 
 // Prayer Requests
 const PrayerRequestListPage = lazy(() => import('@/features/prayer-requests/pages/PrayerRequestListPage').then(m => ({ default: m.PrayerRequestListPage })));
 const PrayerDashboardPage = lazy(() => import('@/features/prayer-requests/pages/PrayerDashboardPage').then(m => ({ default: m.PrayerDashboardPage })));
+const PublicPrayerRequestPage = lazy(() => import('@/features/prayer-requests/pages/PublicPrayerRequestPage').then(m => ({ default: m.PublicPrayerRequestPage })));
 
 // Foundation School
 const FoundationSchoolPage = lazy(() => import('@/features/foundation-school/pages/FoundationSchoolPage').then(m => ({ default: m.FoundationSchoolPage })));
@@ -78,6 +80,7 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/prayer" element={<PublicPrayerRequestPage />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
@@ -112,6 +115,7 @@ export function AppRoutes() {
             {/* Encouragements */}
             <Route path="/encouragements" element={<EncouragementListPage />} />
             <Route path="/encouragements/new" element={<EncouragementCreatePage />} />
+            <Route path="/encouragements/cards" element={<EncouragementCardPrintPage />} />
 
             {/* Prayer Requests */}
             <Route path="/prayer-requests" element={<PrayerRequestListPage />} />

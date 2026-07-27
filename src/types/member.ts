@@ -162,6 +162,8 @@ export interface MemberListFilters {
   includeArchived?: boolean;
   page?: number;
   pageSize?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface CreateMemberRequest {

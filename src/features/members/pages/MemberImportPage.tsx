@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Check,
   XCircle,
+  Download,
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -84,6 +85,20 @@ function applyMapping(row: ParsedRow, mapping: Record<string, string>): ParsedRo
     mapped[targetField] = row[sourceColumn] ?? '';
   }
   return mapped;
+}
+
+const SAMPLE_ROWS = [
+  ['John', 'Doe', '', '', '+2348012345678', '', 'john@example.com', 'Visitor', '', '', '', 'PHONE', 'en', 'true', 'true', 'false', ''],
+  ['Jane', 'Smith', 'Ann', 'Jenny', '+2349087654321', '+2349011111111', 'jane@example.com', 'Visitor', 'Ushering', 'Zone A', '2026-07-20', 'EMAIL', 'en', 'true', 'true', 'false', 'First-time visitor from Zone A'],
+  ['David', 'Ola', '', '', '+2347033333333', '', '', '', '', '', '', 'PHONE', 'en', 'true', 'false', 'false', ''],
+];
+
+function downloadSampleTemplate() {
+  const headers = TARGET_FIELDS.filter((f) => f.value).map((f) => f.value);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...SAMPLE_ROWS]);
+  XLSX.utils.book_append_sheet(wb, ws, 'Members');
+  XLSX.writeFile(wb, 'member-import-template.xlsx');
 }
 
 export function MemberImportPage() {
@@ -247,6 +262,19 @@ export function MemberImportPage() {
                 Upload a CSV or XLSX file containing member data. The first row must contain column
                 headers. You will map columns to member fields in the next step.
               </Alert>
+
+              <div className="mb-6 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+                <Download className="h-4 w-4 shrink-0 text-indigo-500" />
+                <span>Need a starting point?</span>
+                <button
+                  type="button"
+                  onClick={downloadSampleTemplate}
+                  className="font-medium text-indigo-600 underline underline-offset-2 hover:text-indigo-700"
+                >
+                  Download sample template
+                </button>
+                <span>with example data and all supported columns.</span>
+              </div>
 
               {parseError && (
                 <Alert variant="error" className="mb-6">
