@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Pencil, Phone, AlertTriangle, ChevronRight } from 'lucide-react';
@@ -9,13 +10,18 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Spinner } from '@/components/ui/Spinner';
 import { Alert } from '@/components/ui/Alert';
+import { Modal } from '@/components/ui/Modal';
 import { MemberProfileTabs } from '@/features/members/components/MemberProfileTabs';
+import { CreateFollowUpModal } from '@/features/follow-ups/components/CreateFollowUpModal';
+import { EscalationForm } from '@/features/escalations/components/EscalationForm';
 import { membersApi } from '@/features/members/api/members.api';
 import { formatDate, formatMemberName } from '@/lib/formatters';
 import type { ApiError } from '@/types';
 
 export function MemberProfilePage() {
   const { id } = useParams<{ id: string }>();
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [showEscalate, setShowEscalate] = useState(false);
 
   const { data: member, isLoading, isError, error } = useQuery({
     queryKey: ['member', id],
@@ -69,10 +75,10 @@ export function MemberProfilePage() {
                 Edit
               </Button>
             </Link>
-            <Button variant="secondary" size="sm" leftIcon={<Phone className="h-4 w-4" />}>
+            <Button variant="secondary" size="sm" leftIcon={<Phone className="h-4 w-4" />} onClick={() => setShowFollowUp(true)}>
               Follow Up
             </Button>
-            <Button variant="danger" size="sm" leftIcon={<AlertTriangle className="h-4 w-4" />}>
+            <Button variant="danger" size="sm" leftIcon={<AlertTriangle className="h-4 w-4" />} onClick={() => setShowEscalate(true)}>
               Escalate
             </Button>
           </div>
@@ -124,6 +130,23 @@ export function MemberProfilePage() {
 
       {/* Tabs */}
       <MemberProfileTabs member={member} />
+
+      {/* Follow Up Modal */}
+      <CreateFollowUpModal
+        isOpen={showFollowUp}
+        onClose={() => setShowFollowUp(false)}
+        memberId={id}
+        memberName={fullName}
+      />
+
+      {/* Escalation Modal */}
+      <Modal isOpen={showEscalate} onClose={() => setShowEscalate(false)} title="Report Escalation">
+        <EscalationForm
+          memberId={id}
+          onSuccess={() => setShowEscalate(false)}
+          onCancel={() => setShowEscalate(false)}
+        />
+      </Modal>
     </div>
   );
 }
