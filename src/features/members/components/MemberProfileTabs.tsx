@@ -5,6 +5,7 @@ import {
   Home,
   CalendarDays,
   Cake,
+  Heart,
   Building2,
   MessageSquare,
   User,
@@ -95,6 +96,11 @@ export function MemberProfileTabs({ member }: MemberProfileTabsProps) {
               icon={<Cake className="h-5 w-5" />}
               label="Birthday"
               value={member.dateOfBirth ? formatDate(member.dateOfBirth) : null}
+            />
+            <InfoCard
+              icon={<Heart className="h-5 w-5" />}
+              label="Wedding Anniversary"
+              value={member.weddingAnniversary ? formatDate(member.weddingAnniversary) : null}
             />
             <InfoCard
               icon={<User className="h-5 w-5" />}

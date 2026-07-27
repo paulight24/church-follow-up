@@ -22,6 +22,7 @@ function toUpdateRequest(values: MemberFormValues): UpdateMemberRequest {
   if (values.gender) payload.gender = values.gender as UpdateMemberRequest['gender'];
   if (values.maritalStatus) payload.maritalStatus = values.maritalStatus as UpdateMemberRequest['maritalStatus'];
   if (values.dateOfBirth) payload.dateOfBirth = values.dateOfBirth;
+  if (values.weddingAnniversary) payload.weddingAnniversary = values.weddingAnniversary;
   if (values.email) payload.email = values.email;
   if (values.phonePrimary) payload.phonePrimary = values.phonePrimary;
   if (values.phoneSecondary) payload.phoneSecondary = values.phoneSecondary;

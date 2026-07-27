@@ -18,6 +18,7 @@ const memberFormSchema = z.object({
   gender: z.enum(['MALE', 'FEMALE', '']).optional(),
   maritalStatus: z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED', '']).optional(),
   dateOfBirth: z.string().optional().or(z.literal('')),
+  weddingAnniversary: z.string().optional().or(z.literal('')),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   phonePrimary: z.string().max(30).optional().or(z.literal('')),
   phoneSecondary: z.string().max(30).optional().or(z.literal('')),
@@ -142,6 +143,7 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
       gender: (initialData?.gender as MemberFormValues['gender']) ?? '',
       maritalStatus: (initialData?.maritalStatus as MemberFormValues['maritalStatus']) ?? '',
       dateOfBirth: toDateInputValue(initialData?.dateOfBirth),
+      weddingAnniversary: toDateInputValue(initialData?.weddingAnniversary),
       email: initialData?.email ?? '',
       phonePrimary: initialData?.phonePrimary ?? '',
       phoneSecondary: initialData?.phoneSecondary ?? '',
@@ -216,6 +218,12 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
             type="date"
             error={errors.dateOfBirth?.message}
             {...register('dateOfBirth')}
+          />
+          <Input
+            label="Wedding Anniversary"
+            type="date"
+            error={errors.weddingAnniversary?.message}
+            {...register('weddingAnniversary')}
           />
         </div>
       </section>

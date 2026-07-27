@@ -102,6 +102,7 @@ export interface Member {
   phoneSecondary?: string | null;
   email?: string | null;
   dateOfBirth?: string | null;
+  weddingAnniversary?: string | null;
   gender?: Gender | null;
   maritalStatus?: MaritalStatus | null;
   householdId?: string | null;
@@ -175,6 +176,7 @@ export interface CreateMemberRequest {
   phoneSecondary?: string;
   email?: string;
   dateOfBirth?: string;
+  weddingAnniversary?: string;
   gender?: Gender;
   maritalStatus?: MaritalStatus;
   householdId?: string;
