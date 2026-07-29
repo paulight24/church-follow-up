@@ -56,6 +56,9 @@ export function SettingsPage() {
   const [testingBirthday, setTestingBirthday] = useState(false);
   const [birthdayTestResult, setBirthdayTestResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   useEffect(() => {
     if (!data) return;
     const profile = data.CHURCH_PROFILE ?? {};
@@ -411,8 +414,39 @@ export function SettingsPage() {
               <p className="mb-3 text-sm text-slate-500">
                 Configure EMAIL_PROVIDER + RESEND_API_KEY/SENDGRID_API_KEY on the server.
               </p>
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Send className="h-4 w-4" />}
+                onClick={async () => {
+                  setTestingEmail(true);
+                  setEmailTestResult(null);
+                  try {
+                    const res = await api.post('/settings/email/test');
+                    const { provider, to, result } = res.data;
+                    if (result.status === 'SENT') {
+                      setEmailTestResult({ type: 'success', message: `Sent via ${provider} to ${to}.` });
+                    } else {
+                      setEmailTestResult({ type: 'error', message: `${provider} failed: ${result.failureReason}` });
+                    }
+                  } catch {
+                    setEmailTestResult({ type: 'error', message: 'Failed to send test email. Check server logs.' });
+                  } finally {
+                    setTestingEmail(false);
+                  }
+                }}
+                disabled={testingEmail}
+              >
+                {testingEmail ? 'Sending...' : 'Send Test Email'}
+              </Button>
+              <p className="mt-2 text-xs text-slate-500">Sends only to your own account email.</p>
             </div>
           </div>
+          {emailTestResult && (
+            <Alert variant={emailTestResult.type === 'success' ? 'success' : 'error'} className="mt-4">
+              {emailTestResult.message}
+            </Alert>
+          )}
         </CardContent>
       </Card>
 
