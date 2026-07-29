@@ -207,7 +207,7 @@ export function FellowshipGroupsPage() {
         />
       ) : groups.length === 0 ? (
         <EmptyState
-          icon={<Users className="h-10 w-10 text-slate-400" />}
+          icon={Users}
           title="No fellowship groups found"
           description="Try adjusting your search or filters."
         />

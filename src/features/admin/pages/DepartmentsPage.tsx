@@ -190,7 +190,7 @@ export function DepartmentsPage() {
         <EmptyState title="Failed to load departments" description="Please try again shortly." />
       ) : departments.length === 0 ? (
         <EmptyState
-          icon={<Building2 className="h-10 w-10 text-slate-400" />}
+          icon={Building2}
           title="No departments found"
           description="Try adjusting your search or filters."
         />
