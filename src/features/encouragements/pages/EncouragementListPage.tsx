@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, Trash2, BarChart3, ShieldCheck, Send, Ban, CalendarClock, FileCheck } from 'lucide-react';
+import { Heart, Trash2, BarChart3, ShieldCheck, Send, Ban, CalendarClock, FileCheck, Printer } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -143,9 +143,16 @@ export function EncouragementListPage() {
         title="Encouragements"
         subtitle="Send uplifting messages and scripture to your congregation"
         actions={
-          <Button onClick={() => navigate('/encouragements/new')} leftIcon={<Heart className="h-4 w-4" />}>
-            Send New
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/encouragements/cards">
+              <Button variant="outline" leftIcon={<Printer className="h-4 w-4" />}>
+                Print Cards
+              </Button>
+            </Link>
+            <Button onClick={() => navigate('/encouragements/new')} leftIcon={<Heart className="h-4 w-4" />}>
+              Send New
+            </Button>
+          </div>
         }
       />
 

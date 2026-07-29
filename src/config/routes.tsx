@@ -55,6 +55,9 @@ const CohortDetailPage = lazy(() => import('@/features/foundation-school/pages/C
 const CallGuideListPage = lazy(() => import('@/features/call-guides/pages/CallGuideListPage').then(m => ({ default: m.CallGuideListPage })));
 const CallGuideEditorPage = lazy(() => import('@/features/call-guides/pages/CallGuideEditorPage').then(m => ({ default: m.CallGuideEditorPage })));
 
+// Notifications
+const NotificationsPage = lazy(() => import('@/features/notifications/pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
+
 // Reports
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 
@@ -128,6 +131,9 @@ export function AppRoutes() {
             {/* Call Guides */}
             <Route path="/call-guides" element={<CallGuideListPage />} />
             <Route path="/call-guides/:id" element={<CallGuideEditorPage />} />
+
+            {/* Notifications */}
+            <Route path="/notifications" element={<NotificationsPage />} />
 
             {/* Reports */}
             <Route path="/reports" element={<ReportsPage />} />

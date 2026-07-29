@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Upload, Users2 } from 'lucide-react';
 import type { Member, MemberListFilters as MemberListFiltersType } from '@/types/member';
@@ -19,7 +19,8 @@ const DEFAULT_PAGE_SIZE = 25;
 
 export function MemberListPage() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [filters, setFilters] = useState<MemberListFiltersType>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);

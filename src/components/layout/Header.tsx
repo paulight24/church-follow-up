@@ -19,6 +19,13 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
 
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    if (value.trim()) {
+      navigate(`/members?search=${encodeURIComponent(value.trim())}`);
+    }
+  };
+
   const userDisplayName = user
     ? `${user.firstName} ${user.lastName}`
     : 'User';
@@ -65,7 +72,7 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
         {/* Global search */}
         <SearchInput
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={handleSearch}
           placeholder="Search members, teams..."
           className="hidden w-64 lg:block xl:w-80"
         />

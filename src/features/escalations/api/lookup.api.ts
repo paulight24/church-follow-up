@@ -28,5 +28,5 @@ export function searchMembers(search: string): Promise<AxiosResponse<PaginatedRe
 
 /** Requires `users.view` on the backend - gate pickers built on this with usePermission first. */
 export function searchUsers(search?: string): Promise<AxiosResponse<PaginatedResponse<UserLookup>>> {
-  return api.get('/admin/users', { params: { search, pageSize: 25 } });
+  return api.get('/users', { params: { search, pageSize: 25 } });
 }
