@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Printer, ChevronLeft, Check } from 'lucide-react';
+import { Printer, ChevronLeft, Check, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -30,11 +30,12 @@ function useCardTemplates() {
   });
 }
 
+const CARDS_PER_PAGE = 12; // 3 columns x 4 rows
+
 function PrintableCards({ templates }: { templates: CardTemplate[] }) {
-  // 8 cards per A4 page, 2 columns x 4 rows
   const pages: CardTemplate[][] = [];
-  for (let i = 0; i < templates.length; i += 8) {
-    pages.push(templates.slice(i, i + 8));
+  for (let i = 0; i < templates.length; i += CARDS_PER_PAGE) {
+    pages.push(templates.slice(i, i + CARDS_PER_PAGE));
   }
 
   return (
@@ -47,50 +48,45 @@ function PrintableCards({ templates }: { templates: CardTemplate[] }) {
           .no-print { display: none !important; }
           .print-page { page-break-after: always; break-after: page; }
           .print-page:last-child { page-break-after: auto; break-after: auto; }
-          @page { size: A4; margin: 10mm; }
+          @page { size: A4; margin: 8mm; }
         }
       `}</style>
       {pages.map((pageCards, pi) => (
         <div
           key={pi}
-          className="print-page mx-auto mb-8 grid grid-cols-2 gap-0"
-          style={{ width: '190mm', minHeight: '267mm' }}
+          className="print-page mx-auto mb-8 grid grid-cols-3 gap-0"
+          style={{ width: '194mm', minHeight: '271mm' }}
         >
           {pageCards.map((card, ci) => (
             <div
               key={`${pi}-${ci}`}
-              className="flex flex-col justify-between border border-dashed border-slate-300 p-4"
-              style={{ height: '66.75mm', width: '95mm' }}
+              className="flex flex-col justify-between border border-dashed border-slate-300 px-2.5 py-2"
+              style={{ height: '67.75mm', width: '64.67mm' }}
             >
               <div>
-                <p className="mb-1 text-center text-[10px] font-semibold uppercase tracking-widest text-indigo-600">
+                <p className="mb-0.5 text-center text-[8px] font-bold uppercase tracking-widest text-indigo-600">
                   Christ Embassy LA
                 </p>
-                <div className="mx-auto mb-2 h-px w-12 bg-indigo-200" />
-                <p className="text-center text-[11px] leading-snug text-slate-800">
+                <div className="mx-auto mb-1 h-px w-8 bg-indigo-200" />
+                <h4 className="mb-1 text-center text-[9px] font-semibold text-slate-900">
+                  {card.title}
+                </h4>
+                <p className="text-center text-[8.5px] leading-snug text-slate-700">
                   {card.encouragementText}
                 </p>
               </div>
-              <div className="mt-2">
-                {card.scripture && (
-                  <p className="text-center text-[9px] font-medium italic text-indigo-500">
-                    — {card.scripture}
-                  </p>
-                )}
-                {card.pastorSignature && (
-                  <p className="mt-1 text-center text-[9px] text-slate-500">
-                    {card.pastorSignature}
-                  </p>
-                )}
-              </div>
+              {card.scripture && (
+                <p className="mt-1 text-center text-[8px] font-medium italic text-indigo-500">
+                  — {card.scripture}
+                </p>
+              )}
             </div>
           ))}
-          {/* Fill empty slots to keep the grid even */}
-          {Array.from({ length: 8 - pageCards.length }, (_, i) => (
+          {Array.from({ length: CARDS_PER_PAGE - pageCards.length }, (_, i) => (
             <div
               key={`empty-${i}`}
               className="border border-dashed border-slate-200"
-              style={{ height: '66.75mm', width: '95mm' }}
+              style={{ height: '67.75mm', width: '64.67mm' }}
             />
           ))}
         </div>
@@ -109,10 +105,9 @@ export function EncouragementCardPrintPage() {
     ? activeTemplates.filter((t) => selected.has(t.id))
     : activeTemplates;
 
-  // Repeat cards to fill pages (8 per page)
   const cardsForPrint: CardTemplate[] = [];
   if (selectedTemplates.length > 0) {
-    const copies = Math.max(1, Math.ceil(8 / selectedTemplates.length));
+    const copies = Math.max(1, Math.ceil(CARDS_PER_PAGE / selectedTemplates.length));
     for (let c = 0; c < copies; c++) {
       cardsForPrint.push(...selectedTemplates);
     }
@@ -144,7 +139,7 @@ export function EncouragementCardPrintPage() {
           </Button>
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-500">
-              {cardsForPrint.length} cards across {Math.ceil(cardsForPrint.length / 8)} page(s)
+              {cardsForPrint.length} cards across {Math.ceil(cardsForPrint.length / CARDS_PER_PAGE)} page(s)
             </span>
             <Button size="sm" onClick={() => window.print()}>
               <Printer className="mr-1.5 h-4 w-4" /> Print
@@ -166,6 +161,11 @@ export function EncouragementCardPrintPage() {
             <Link to="/encouragements">
               <Button variant="outline" size="sm">
                 <ChevronLeft className="mr-1 h-4 w-4" /> Encouragements
+              </Button>
+            </Link>
+            <Link to="/encouragements/cards/manage">
+              <Button variant="outline" size="sm">
+                <Settings className="mr-1 h-4 w-4" /> Manage Templates
               </Button>
             </Link>
             <Button

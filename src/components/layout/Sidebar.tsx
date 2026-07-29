@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   AlertTriangle,
   BarChart3,
+  Building2,
   ChevronDown,
   ChevronRight,
   ChevronsLeft,
@@ -100,6 +101,18 @@ const navSections: NavSection[] = [
         path: '/admin/settings',
         icon: Settings,
         permission: 'admin.settings',
+      },
+      {
+        label: 'Departments',
+        path: '/admin/departments',
+        icon: Building2,
+        permission: 'admin.departments',
+      },
+      {
+        label: 'Fellowship Groups',
+        path: '/admin/fellowship-groups',
+        icon: Users,
+        permission: 'admin.fellowship-groups',
       },
       {
         label: 'Audit Logs',

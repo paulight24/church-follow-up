@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, Settings } from 'lucide-react';
+import { LogOut, Menu, Search, Settings, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui/Avatar';
@@ -18,11 +18,29 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (mobileSearchOpen && mobileInputRef.current) {
+      mobileInputRef.current.focus();
+    }
+  }, [mobileSearchOpen]);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
     if (value.trim()) {
       navigate(`/members?search=${encodeURIComponent(value.trim())}`);
+      setMobileSearchOpen(false);
+    }
+  };
+
+  const handleMobileSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      navigate(`/members?search=${encodeURIComponent(searchValue.trim())}`);
+      setMobileSearchOpen(false);
+      setSearchValue('');
     }
   };
 
@@ -69,13 +87,23 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
 
       {/* Center/Right */}
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
-        {/* Global search */}
+        {/* Desktop search */}
         <SearchInput
           value={searchValue}
           onChange={handleSearch}
           placeholder="Search members, teams..."
           className="hidden w-64 lg:block xl:w-80"
         />
+
+        {/* Mobile search icon */}
+        <button
+          type="button"
+          onClick={() => setMobileSearchOpen(true)}
+          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+          aria-label="Search"
+        >
+          <Search className="h-5 w-5" />
+        </button>
 
         {/* Notification bell */}
         <NotificationBell className="text-slate-500 hover:text-slate-700" />
@@ -103,6 +131,31 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
           align="right"
         />
       </div>
+
+      {/* Mobile search overlay */}
+      {mobileSearchOpen && (
+        <div className="absolute inset-0 z-50 flex items-center gap-2 bg-white px-3 lg:hidden">
+          <form onSubmit={handleMobileSearchSubmit} className="flex flex-1 items-center gap-2">
+            <Search className="h-5 w-5 shrink-0 text-slate-400" />
+            <input
+              ref={mobileInputRef}
+              type="text"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Search members, teams..."
+              className="h-10 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+            />
+          </form>
+          <button
+            type="button"
+            onClick={() => { setMobileSearchOpen(false); setSearchValue(''); }}
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+            aria-label="Close search"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
     </header>
   );
 }

@@ -41,6 +41,7 @@ const CampaignAnalyticsPage = lazy(() => import('@/features/campaigns/pages/Camp
 const EncouragementListPage = lazy(() => import('@/features/encouragements/pages/EncouragementListPage').then(m => ({ default: m.EncouragementListPage })));
 const EncouragementCreatePage = lazy(() => import('@/features/encouragements/pages/EncouragementCreatePage').then(m => ({ default: m.EncouragementCreatePage })));
 const EncouragementCardPrintPage = lazy(() => import('@/features/encouragements/pages/EncouragementCardPrintPage').then(m => ({ default: m.EncouragementCardPrintPage })));
+const CardTemplateManagePage = lazy(() => import('@/features/encouragements/pages/CardTemplateManagePage').then(m => ({ default: m.CardTemplateManagePage })));
 
 // Prayer Requests
 const PrayerRequestListPage = lazy(() => import('@/features/prayer-requests/pages/PrayerRequestListPage').then(m => ({ default: m.PrayerRequestListPage })));
@@ -66,6 +67,8 @@ const UsersPage = lazy(() => import('@/features/admin/pages/UsersPage').then(m =
 const RolesPage = lazy(() => import('@/features/admin/pages/RolesPage').then(m => ({ default: m.RolesPage })));
 const SettingsPage = lazy(() => import('@/features/admin/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const AuditLogPage = lazy(() => import('@/features/admin/pages/AuditLogPage').then(m => ({ default: m.AuditLogPage })));
+const DepartmentsPage = lazy(() => import('@/features/admin/pages/DepartmentsPage').then(m => ({ default: m.DepartmentsPage })));
+const FellowshipGroupsPage = lazy(() => import('@/features/admin/pages/FellowshipGroupsPage').then(m => ({ default: m.FellowshipGroupsPage })));
 
 function PageLoader() {
   return (
@@ -119,6 +122,7 @@ export function AppRoutes() {
             <Route path="/encouragements" element={<EncouragementListPage />} />
             <Route path="/encouragements/new" element={<EncouragementCreatePage />} />
             <Route path="/encouragements/cards" element={<EncouragementCardPrintPage />} />
+            <Route path="/encouragements/cards/manage" element={<CardTemplateManagePage />} />
 
             {/* Prayer Requests */}
             <Route path="/prayer-requests" element={<PrayerRequestListPage />} />
@@ -141,6 +145,8 @@ export function AppRoutes() {
             {/* Admin */}
             <Route path="/admin/users" element={<UsersPage />} />
             <Route path="/admin/roles" element={<RolesPage />} />
+            <Route path="/admin/departments" element={<DepartmentsPage />} />
+            <Route path="/admin/fellowship-groups" element={<FellowshipGroupsPage />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
             <Route path="/admin/audit-logs" element={<AuditLogPage />} />
           </Route>
