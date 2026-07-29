@@ -119,7 +119,7 @@ export function MemberProfileTabs({ member }: MemberProfileTabsProps) {
             />
             <InfoCard
               icon={<Building2 className="h-5 w-5" />}
-              label="Fellowship Group"
+              label="Cell Group"
               value={member.fellowshipGroup?.name}
             />
             <InfoCard

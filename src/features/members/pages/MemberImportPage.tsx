@@ -54,7 +54,7 @@ const TARGET_FIELDS = [
   { label: 'Email', value: 'email' },
   { label: 'Membership Status (name)', value: 'membershipStatus' },
   { label: 'Department (name)', value: 'department' },
-  { label: 'Fellowship Group (name)', value: 'fellowshipGroup' },
+  { label: 'Cell Group (name)', value: 'fellowshipGroup' },
   { label: 'Last Attendance Date', value: 'lastAttendanceDate' },
   { label: 'Preferred Contact Method', value: 'preferredContactMethod' },
   { label: 'Preferred Language', value: 'preferredLanguage' },

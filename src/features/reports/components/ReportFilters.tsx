@@ -155,7 +155,7 @@ export function ReportFilters({
       {fields.includes('fellowshipGroup') && (
         <div className="w-full sm:w-48">
           <Select
-            label="Fellowship Group"
+            label="Cell Group"
             value={filters.fellowshipGroupId ?? ''}
             onChange={(e) => update({ fellowshipGroupId: e.target.value || undefined })}
             options={[

@@ -118,7 +118,7 @@ export function FellowshipGroupsPage() {
   const archiveMutation = useMutation({
     mutationFn: (id: string) => archiveFellowshipGroup(id),
     onSuccess: () => {
-      toast({ title: 'Fellowship group archived', variant: 'success' });
+      toast({ title: 'Cell group archived', variant: 'success' });
       queryClient.invalidateQueries({ queryKey: ['admin', 'fellowship-groups'] });
       setArchiveTarget(null);
     },
@@ -126,7 +126,7 @@ export function FellowshipGroupsPage() {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data
         ?.message;
       toast({
-        title: 'Could not archive fellowship group',
+        title: 'Could not archive cell group',
         description: message,
         variant: 'error',
       });
@@ -136,14 +136,14 @@ export function FellowshipGroupsPage() {
   const restoreMutation = useMutation({
     mutationFn: (id: string) => restoreFellowshipGroup(id),
     onSuccess: () => {
-      toast({ title: 'Fellowship group restored', variant: 'success' });
+      toast({ title: 'Cell group restored', variant: 'success' });
       queryClient.invalidateQueries({ queryKey: ['admin', 'fellowship-groups'] });
     },
     onError: (err: unknown) => {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data
         ?.message;
       toast({
-        title: 'Could not restore fellowship group',
+        title: 'Could not restore cell group',
         description: message,
         variant: 'error',
       });
@@ -166,11 +166,11 @@ export function FellowshipGroupsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Fellowship Groups"
-        description="Manage fellowship groups and their meeting locations"
+        title="Cell Groups"
+        description="Manage cell groups and their meeting locations"
         actions={
           <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>
-            Add Fellowship Group
+            Add Cell Group
           </Button>
         }
       />
@@ -182,7 +182,7 @@ export function FellowshipGroupsPage() {
             setSearch(v);
             setPage(1);
           }}
-          placeholder="Search fellowship groups..."
+          placeholder="Search cell groups..."
           className="sm:max-w-xs"
         />
         <Select
@@ -202,13 +202,13 @@ export function FellowshipGroupsPage() {
         </div>
       ) : groupsQuery.isError ? (
         <EmptyState
-          title="Failed to load fellowship groups"
+          title="Failed to load cell groups"
           description="Please try again shortly."
         />
       ) : groups.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No fellowship groups found"
+          title="No cell groups found"
           description="Try adjusting your search or filters."
         />
       ) : (
@@ -251,7 +251,7 @@ export function FellowshipGroupsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => setArchiveTarget(group)}
-                          title="Archive fellowship group"
+                          title="Archive cell group"
                         >
                           <Trash2 className="h-4 w-4 text-rose-500" />
                         </Button>
@@ -261,7 +261,7 @@ export function FellowshipGroupsPage() {
                           size="sm"
                           isLoading={restoreMutation.isPending}
                           onClick={() => restoreMutation.mutate(group.id)}
-                          title="Restore fellowship group"
+                          title="Restore cell group"
                         >
                           <RotateCcw className="h-4 w-4 text-emerald-600" />
                         </Button>
@@ -298,7 +298,7 @@ export function FellowshipGroupsPage() {
         isOpen={archiveTarget !== null}
         onClose={() => setArchiveTarget(null)}
         onConfirm={() => archiveTarget && archiveMutation.mutate(archiveTarget.id)}
-        title="Archive fellowship group"
+        title="Archive cell group"
         message={`Are you sure you want to archive "${archiveTarget?.name}"? It can be restored later.`}
         confirmText="Archive"
         variant="danger"
@@ -355,7 +355,7 @@ function FellowshipGroupFormModal({
     onError: (err: unknown) => {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data
         ?.message;
-      setFormError(message ?? 'Failed to create fellowship group.');
+      setFormError(message ?? 'Failed to create cell group.');
     },
   });
 
@@ -370,7 +370,7 @@ function FellowshipGroupFormModal({
     onError: (err: unknown) => {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data
         ?.message;
-      setFormError(message ?? 'Failed to update fellowship group.');
+      setFormError(message ?? 'Failed to update cell group.');
     },
   });
 
@@ -398,14 +398,14 @@ function FellowshipGroupFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? 'Edit Fellowship Group' : 'Add Fellowship Group'}
+      title={isEditing ? 'Edit Cell Group' : 'Add Cell Group'}
       footer={
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button isLoading={isPending} onClick={handleSubmit}>
-            {isEditing ? 'Save Changes' : 'Create Fellowship Group'}
+            {isEditing ? 'Save Changes' : 'Create Cell Group'}
           </Button>
         </div>
       }
@@ -418,7 +418,7 @@ function FellowshipGroupFormModal({
           label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Zone A Fellowship"
+          placeholder="e.g. Noble Cell"
         />
         <Input
           label="Meeting Location"

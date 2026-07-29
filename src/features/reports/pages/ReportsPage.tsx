@@ -293,7 +293,7 @@ function ReportTable({ reportType, rows }: { reportType: ReportType; rows: Array
             <TableHead>Name</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Department</TableHead>
-            <TableHead>Fellowship Group</TableHead>
+            <TableHead>Cell Group</TableHead>
             <TableHead>First Timer</TableHead>
             <TableHead>Has Phone</TableHead>
             <TableHead>Has Email</TableHead>
@@ -364,7 +364,7 @@ function ReportTable({ reportType, rows }: { reportType: ReportType; rows: Array
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Department</TableHead>
-            <TableHead>Fellowship Group</TableHead>
+            <TableHead>Cell Group</TableHead>
             <TableHead>Missing Phone</TableHead>
             <TableHead>Missing Email</TableHead>
           </TableRow>

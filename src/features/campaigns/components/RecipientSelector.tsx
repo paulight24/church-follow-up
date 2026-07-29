@@ -95,7 +95,7 @@ export function RecipientSelector({ value, onChange, campaignId }: RecipientSele
 
   const modeOptions: Array<{ value: Mode; label: string; description: string; icon: typeof Users }> = [
     { value: 'all', label: 'All Members', description: 'Every member with email consent on file', icon: Users },
-    { value: 'criteria', label: 'By Criteria', description: 'Department, fellowship group, team, first-timers', icon: Filter },
+    { value: 'criteria', label: 'By Criteria', description: 'Department, cell group, team, first-timers', icon: Filter },
     { value: 'custom', label: 'Specific Members', description: 'Search and hand-pick recipients', icon: UserCheck },
   ];
 
@@ -150,8 +150,8 @@ export function RecipientSelector({ value, onChange, campaignId }: RecipientSele
               onChange={(e) => onChange({ ...value, departmentIds: e.target.value ? [e.target.value] : [] })}
             />
             <Select
-              label="Fellowship Group"
-              placeholder="Any fellowship group"
+              label="Cell Group"
+              placeholder="Any cell group"
               options={fellowshipGroupOptions}
               value={value.fellowshipGroupIds?.[0] ?? ''}
               onChange={(e) => onChange({ ...value, fellowshipGroupIds: e.target.value ? [e.target.value] : [] })}

@@ -60,23 +60,21 @@ function PrintableCards({ templates }: { templates: CardTemplate[] }) {
           {pageCards.map((card, ci) => (
             <div
               key={`${pi}-${ci}`}
-              className="flex flex-col justify-between border border-dashed border-slate-300 px-2.5 py-2"
-              style={{ height: '67.75mm', width: '64.67mm' }}
+              className="flex flex-col border border-dashed border-slate-300 px-2.5 py-1.5"
+              style={{ width: '64.67mm' }}
             >
-              <div>
-                <p className="mb-0.5 text-center text-[8px] font-bold uppercase tracking-widest text-indigo-600">
-                  Christ Embassy LA
-                </p>
-                <div className="mx-auto mb-1 h-px w-8 bg-indigo-200" />
-                <h4 className="mb-1 text-center text-[9px] font-semibold text-slate-900">
-                  {card.title}
-                </h4>
-                <p className="text-center text-[8.5px] leading-snug text-slate-700">
-                  {card.encouragementText}
-                </p>
-              </div>
+              <p className="mb-0.5 text-center text-[8px] font-bold uppercase tracking-widest text-indigo-600">
+                Christ Embassy LA
+              </p>
+              <div className="mx-auto mb-0.5 h-px w-8 bg-indigo-200" />
+              <h4 className="mb-0.5 text-center text-[9px] font-semibold text-slate-900">
+                {card.title}
+              </h4>
+              <p className="text-center text-[8.5px] leading-snug text-slate-700">
+                {card.encouragementText}
+              </p>
               {card.scripture && (
-                <p className="mt-1 text-center text-[8px] font-medium italic text-indigo-500">
+                <p className="mt-0.5 text-center text-[8px] font-medium italic text-indigo-500">
                   — {card.scripture}
                 </p>
               )}
@@ -86,7 +84,7 @@ function PrintableCards({ templates }: { templates: CardTemplate[] }) {
             <div
               key={`empty-${i}`}
               className="border border-dashed border-slate-200"
-              style={{ height: '67.75mm', width: '64.67mm' }}
+              style={{ width: '64.67mm' }}
             />
           ))}
         </div>

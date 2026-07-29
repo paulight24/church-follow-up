@@ -307,8 +307,8 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
             {...register('departmentId')}
           />
           <Select
-            label="Fellowship Group"
-            placeholder="Select fellowship group"
+            label="Cell Group"
+            placeholder="Select cell group"
             options={fellowshipGroupOptions}
             error={errors.fellowshipGroupId?.message}
             {...register('fellowshipGroupId')}

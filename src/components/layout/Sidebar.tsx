@@ -109,7 +109,7 @@ const navSections: NavSection[] = [
         permission: 'admin.departments',
       },
       {
-        label: 'Fellowship Groups',
+        label: 'Cell Groups',
         path: '/admin/fellowship-groups',
         icon: Users,
         permission: 'admin.fellowship-groups',

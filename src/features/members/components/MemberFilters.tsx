@@ -99,7 +99,7 @@ export function MemberFilters({ filters, onFilterChange }: MemberFiltersProps) {
 
       <div className="w-full sm:w-48">
         <Select
-          label="Fellowship Group"
+          label="Cell Group"
           placeholder="All groups"
           options={fellowshipGroupOptions}
           value={filters.fellowshipGroupId ?? ''}
