@@ -30,7 +30,7 @@ function useCardTemplates() {
   });
 }
 
-const CARDS_PER_PAGE = 12; // 3 columns x 4 rows
+const CARDS_PER_PAGE = 24; // 4 columns x 6 rows
 
 function PrintableCards({ templates }: { templates: CardTemplate[] }) {
   const pages: CardTemplate[][] = [];
@@ -54,27 +54,27 @@ function PrintableCards({ templates }: { templates: CardTemplate[] }) {
       {pages.map((pageCards, pi) => (
         <div
           key={pi}
-          className="print-page mx-auto mb-8 grid grid-cols-3 gap-0"
-          style={{ width: '194mm', minHeight: '271mm' }}
+          className="print-page mx-auto mb-8 grid grid-cols-4 gap-0"
+          style={{ width: '194mm', minHeight: '271mm', alignContent: 'start' }}
         >
           {pageCards.map((card, ci) => (
             <div
               key={`${pi}-${ci}`}
-              className="flex flex-col border border-dashed border-slate-300 px-2.5 py-1.5"
-              style={{ width: '64.67mm' }}
+              className="flex flex-col border border-dashed border-slate-300 px-1.5 py-1"
+              style={{ width: '48.5mm' }}
             >
-              <p className="mb-0.5 text-center text-[8px] font-bold uppercase tracking-widest text-indigo-600">
+              <p className="mb-px text-center text-[6.5px] font-bold uppercase tracking-widest text-indigo-600">
                 Christ Embassy LA
               </p>
-              <div className="mx-auto mb-0.5 h-px w-8 bg-indigo-200" />
-              <h4 className="mb-0.5 text-center text-[9px] font-semibold text-slate-900">
+              <div className="mx-auto mb-px h-px w-6 bg-indigo-200" />
+              <h4 className="mb-px text-center text-[7.5px] font-semibold leading-tight text-slate-900">
                 {card.title}
               </h4>
-              <p className="text-center text-[8.5px] leading-snug text-slate-700">
+              <p className="text-center text-[7px] leading-snug text-slate-700">
                 {card.encouragementText}
               </p>
               {card.scripture && (
-                <p className="mt-0.5 text-center text-[8px] font-medium italic text-indigo-500">
+                <p className="mt-px text-center text-[6.5px] font-medium italic text-indigo-500">
                   — {card.scripture}
                 </p>
               )}
@@ -84,7 +84,7 @@ function PrintableCards({ templates }: { templates: CardTemplate[] }) {
             <div
               key={`empty-${i}`}
               className="border border-dashed border-slate-200"
-              style={{ width: '64.67mm' }}
+              style={{ width: '48.5mm' }}
             />
           ))}
         </div>

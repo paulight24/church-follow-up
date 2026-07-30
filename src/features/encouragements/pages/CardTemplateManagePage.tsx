@@ -9,11 +9,13 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Select } from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
+import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { useToast } from '@/components/ui/Toast';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   Table,
   TableHeader,
@@ -50,6 +52,7 @@ interface TemplateFormData {
 const PAGE_SIZE = 10;
 
 const statusFilterOptions = [
+  { label: 'All Statuses', value: '' },
   { label: 'Active', value: 'ACTIVE' },
   { label: 'Draft', value: 'DRAFT' },
   { label: 'Archived', value: 'ARCHIVED' },
@@ -77,7 +80,7 @@ const emptyForm: TemplateFormData = {
 
 // ---------- API helpers ----------
 
-function fetchTemplates(params: { status?: string; page: number; pageSize: number }) {
+function fetchTemplates(params: { status?: string; search?: string; page: number; pageSize: number }) {
   return api
     .get('/encouragement-cards/templates', { params })
     .then((res) => res.data);
@@ -103,6 +106,8 @@ export function CardTemplateManagePage() {
 
   // List state
   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [page, setPage] = useState(1);
 
   // Modal state
@@ -117,10 +122,11 @@ export function CardTemplateManagePage() {
   // ---------- Queries ----------
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['card-templates', { status: statusFilter, page }],
+    queryKey: ['card-templates', { status: statusFilter, search: debouncedSearch, page }],
     queryFn: () =>
       fetchTemplates({
         status: statusFilter || undefined,
+        search: debouncedSearch || undefined,
         page,
         pageSize: PAGE_SIZE,
       }),
@@ -248,10 +254,18 @@ export function CardTemplateManagePage() {
       />
 
       <Card>
-        <div className="flex items-center gap-3 border-b border-slate-100 p-4 sm:p-6">
+        <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:p-6">
+          <SearchInput
+            value={search}
+            onChange={(v) => {
+              setSearch(v);
+              setPage(1);
+            }}
+            placeholder="Search templates..."
+            className="sm:max-w-xs"
+          />
           <div className="w-56">
             <Select
-              placeholder="All statuses"
               options={statusFilterOptions}
               value={statusFilter}
               onChange={(e) => {
