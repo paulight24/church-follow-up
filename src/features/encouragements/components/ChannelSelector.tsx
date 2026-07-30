@@ -76,8 +76,7 @@ export function ChannelSelector({ value, onChange }: ChannelSelectorProps) {
         })}
       </div>
       <p className="mt-1.5 text-xs text-slate-400">
-        Only In-App and Email are delivered in this phase. SMS and Push selections are recorded but skipped by
-        the server until those integrations are live.
+        In-App, Email, and SMS are delivered. Push selections are recorded but skipped until that integration is live.
       </p>
     </div>
   );
