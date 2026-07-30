@@ -17,7 +17,7 @@ export type EncouragementMessageType =
 export type DeliveryChannel = 'IN_APP' | 'EMAIL' | 'SMS' | 'PUSH';
 
 /** Channels that are actually deliverable this phase (see encouragements.service.ts#DELIVERABLE_CHANNELS). */
-export const DELIVERABLE_CHANNELS: DeliveryChannel[] = ['IN_APP', 'EMAIL'];
+export const DELIVERABLE_CHANNELS: DeliveryChannel[] = ['IN_APP', 'EMAIL', 'SMS'];
 
 export type EncouragementRecipientStatus = 'PENDING' | 'SENT' | 'DELIVERED' | 'FAILED';
 
