@@ -12,6 +12,9 @@ const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPassword
 // Dashboard
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 
+// Guide
+const GuidePage = lazy(() => import('@/features/guide/pages/GuidePage').then(m => ({ default: m.GuidePage })));
+
 // Members
 const MemberListPage = lazy(() => import('@/features/members/pages/MemberListPage').then(m => ({ default: m.MemberListPage })));
 const MemberCreatePage = lazy(() => import('@/features/members/pages/MemberCreatePage').then(m => ({ default: m.MemberCreatePage })));
@@ -92,6 +95,7 @@ export function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/guide" element={<GuidePage />} />
 
             {/* Members */}
             <Route path="/members" element={<MemberListPage />} />

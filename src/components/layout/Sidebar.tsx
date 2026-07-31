@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   AlertTriangle,
   BarChart3,
+  BookOpen,
   Building2,
   ChevronDown,
   ChevronRight,
@@ -50,6 +51,7 @@ const navSections: NavSection[] = [
   {
     items: [
       { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+      { label: 'Guide', path: '/guide', icon: BookOpen },
       { label: 'My Follow-Ups', path: '/follow-ups', icon: ClipboardCheck },
       {
         label: 'Members',
