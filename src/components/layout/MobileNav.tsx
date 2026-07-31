@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Bell,
+  BookOpen,
   ClipboardCheck,
   LayoutDashboard,
   MoreHorizontal,
@@ -19,6 +20,7 @@ interface MobileNavItem {
 
 const mobileNavItems: MobileNavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Guide', path: '/guide', icon: BookOpen },
   { label: 'Follow-Ups', path: '/follow-ups', icon: ClipboardCheck },
   { label: 'Members', path: '/members', icon: Users },
   { label: 'Notifications', path: '/notifications', icon: Bell, useBadge: true },
