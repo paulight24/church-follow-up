@@ -1,10 +1,17 @@
-export const ROLE_NAMES: Record<string, string> = {
+import type { UserRole } from '@/types';
+
+export const ROLE_NAMES: Record<UserRole, string> = {
   SUPER_ADMIN: 'Super Admin',
   PASTOR: 'Pastor',
-  ADMIN: 'Admin',
+  ADMINISTRATOR: 'Administrator',
   TEAM_LEAD: 'Team Lead',
   FOLLOW_UP_WORKER: 'Follow-Up Worker',
+  COMMUNICATIONS_MANAGER: 'Communications Manager',
+  AUDITOR: 'Auditor',
   VIEWER: 'Viewer',
+  MEMBER: 'Member',
+  USHER: 'Usher',
+  FOUNDATION_SCHOOL_TEACHER: 'Foundation School Teacher',
 } as const;
 
 export const MEMBER_STATUS = [

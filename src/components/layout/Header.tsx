@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, Search, Settings, X } from 'lucide-react';
+import { LogOut, Menu, Search, Settings, User, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui/Avatar';
@@ -15,8 +15,9 @@ interface HeaderProps {
 }
 
 export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
+  const canSearchMembers = hasPermission('members.view');
   const [searchValue, setSearchValue] = useState('');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileInputRef = useRef<HTMLInputElement>(null);
@@ -51,11 +52,24 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
   const primaryRoleLabel = user?.roles[0]?.name ?? 'Member';
 
   const userMenuItems: DropdownItem[] = [
-    {
-      label: 'Settings',
-      icon: <Settings />,
-      onClick: () => navigate('/admin/settings'),
-    },
+    ...(hasPermission('profile.view_own')
+      ? [
+          {
+            label: 'My Profile',
+            icon: <User />,
+            onClick: () => navigate('/profile'),
+          },
+        ]
+      : []),
+    ...(hasPermission('system.settings')
+      ? [
+          {
+            label: 'Settings',
+            icon: <Settings />,
+            onClick: () => navigate('/admin/settings'),
+          },
+        ]
+      : []),
     { label: '', divider: true, onClick: () => {} },
     {
       label: 'Logout',
@@ -87,15 +101,19 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
 
       {/* Center/Right */}
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
-        {/* Desktop search */}
+        {/* Desktop search - hidden without members.view, since it only ever
+            navigates to /members and would dead-end in a 403 otherwise. */}
+        {canSearchMembers && (
         <SearchInput
           value={searchValue}
           onChange={handleSearch}
           placeholder="Search members, teams..."
           className="hidden w-64 lg:block xl:w-80"
         />
+        )}
 
         {/* Mobile search icon */}
+        {canSearchMembers && (
         <button
           type="button"
           onClick={() => setMobileSearchOpen(true)}
@@ -104,6 +122,7 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
         >
           <Search className="h-5 w-5" />
         </button>
+        )}
 
         {/* Notification bell */}
         <NotificationBell className="text-slate-500 hover:text-slate-700" />

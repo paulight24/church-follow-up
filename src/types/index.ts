@@ -6,7 +6,10 @@ export type UserRole =
   | 'FOLLOW_UP_WORKER'
   | 'COMMUNICATIONS_MANAGER'
   | 'AUDITOR'
-  | 'VIEWER';
+  | 'VIEWER'
+  | 'MEMBER'
+  | 'USHER'
+  | 'FOUNDATION_SCHOOL_TEACHER';
 
 export interface UserProfileRole {
   id: string;
