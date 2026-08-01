@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { ApiError } from '@/types';
 import type { ReasonCode, TaskPriority } from '@/types/followUp';
@@ -12,11 +12,15 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { followUpTasksApi } from '../api/follow-up-tasks.api';
+import { teamsApi } from '@/features/teams/api/teams.api';
+import { searchUsers } from '../api/user-lookup.api';
 
 const schema = z.object({
   reasonCode: z.string().min(1, 'Please select a reason'),
   priority: z.string().min(1, 'Please select a priority'),
   dueAt: z.string().min(1, 'Due date is required'),
+  teamId: z.string().optional(),
+  assignedUserId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -56,6 +60,7 @@ export function CreateFollowUpModal({ isOpen, onClose, memberId, memberName }: C
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -63,8 +68,64 @@ export function CreateFollowUpModal({ isOpen, onClose, memberId, memberName }: C
       reasonCode: 'MANUAL',
       priority: 'NORMAL',
       dueAt: defaultDue,
+      teamId: '',
+      assignedUserId: '',
     },
   });
+
+  const selectedTeamId = useWatch({ control, name: 'teamId' });
+
+  const { data: teams } = useQuery({
+    queryKey: ['teams', 'lookup'],
+    queryFn: () => teamsApi.getTeams({ pageSize: 100 }).then((res) => res.data.data),
+    enabled: isOpen,
+  });
+
+  // When a team is chosen, the assignee list narrows to that team's staff so
+  // leaders surface first; otherwise fall back to a flat user lookup.
+  const { data: teamDetail } = useQuery({
+    queryKey: ['team', selectedTeamId],
+    queryFn: () => teamsApi.getTeam(selectedTeamId!).then((res) => res.data),
+    enabled: isOpen && Boolean(selectedTeamId),
+  });
+
+  const { data: allUsers } = useQuery({
+    queryKey: ['users', 'lookup'],
+    queryFn: () => searchUsers().then((res) => res.data.data),
+    enabled: isOpen && !selectedTeamId,
+  });
+
+  const teamOptions = [
+    { value: '', label: 'No team' },
+    ...(teams ?? []).map((t) => ({ value: t.id, label: t.name })),
+  ];
+
+  const assigneeOptions = (() => {
+    if (selectedTeamId) {
+      const staff = teamDetail?.teamUsers ?? [];
+      // Leaders first - that's who a follow-up normally gets routed to.
+      const sorted = [...staff].sort((a, b) => {
+        const rank = (u: typeof a) => (u.isPrimaryLeader ? 0 : u.teamRole === 'LEADER' ? 1 : 2);
+        return rank(a) - rank(b);
+      });
+      return [
+        { value: '', label: 'Unassigned' },
+        ...sorted.map((tu) => ({
+          value: tu.userId,
+          label:
+            `${tu.user.firstName} ${tu.user.lastName}` +
+            (tu.isPrimaryLeader ? ' — Primary Leader' : tu.teamRole === 'LEADER' ? ' — Leader' : ''),
+        })),
+      ];
+    }
+    return [
+      { value: '', label: 'Unassigned' },
+      ...(allUsers ?? []).map((u) => ({
+        value: u.id,
+        label: `${u.firstName} ${u.lastName}`,
+      })),
+    ];
+  })();
 
   const mutation = useMutation({
     mutationFn: (values: FormData) =>
@@ -73,6 +134,8 @@ export function CreateFollowUpModal({ isOpen, onClose, memberId, memberName }: C
         reasonCode: values.reasonCode as ReasonCode,
         priority: values.priority as TaskPriority,
         dueAt: new Date(values.dueAt).toISOString(),
+        teamId: values.teamId || undefined,
+        assignedUserId: values.assignedUserId || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['follow-up-tasks'] });
@@ -121,6 +184,22 @@ export function CreateFollowUpModal({ isOpen, onClose, memberId, memberName }: C
             options={PRIORITY_OPTIONS}
             error={errors.priority?.message}
             {...register('priority')}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Select
+            label="Team"
+            options={teamOptions}
+            error={errors.teamId?.message}
+            {...register('teamId')}
+          />
+          <Select
+            label="Assign to"
+            options={assigneeOptions}
+            helpText={selectedTeamId ? "Showing this team's workers" : 'Pick a team to narrow this list'}
+            error={errors.assignedUserId?.message}
+            {...register('assignedUserId')}
           />
         </div>
 

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Phone,
   MessageSquare,
+  UserCog,
 } from 'lucide-react';
 import type { FollowUpTask, Outcome, TaskPriority } from '@/types/followUp';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -26,6 +27,7 @@ import { TaskFilters, type TaskFiltersState } from '../components/TaskFilters';
 import { FollowUpTaskCard } from '../components/FollowUpTaskCard';
 import { InteractionForm } from '../components/InteractionForm';
 import { CallGuidePanel } from '../components/CallGuidePanel';
+import { ReassignTaskModal } from '../components/ReassignTaskModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAuth } from '@/hooks/useAuth';
 import { followUpTasksApi } from '../api/follow-up-tasks.api';
@@ -53,6 +55,7 @@ export function MyFollowUpsPage() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showInteractionModal, setShowInteractionModal] = useState(false);
   const [presetOutcome, setPresetOutcome] = useState<Outcome | ''>('');
+  const [reassignTaskId, setReassignTaskId] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['follow-up-tasks', 'mine', user?.id],
@@ -132,6 +135,7 @@ export function MyFollowUpsPage() {
   };
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
+  const reassignTask = tasks.find((t) => t.id === reassignTaskId) ?? null;
 
   return (
     <div className="space-y-6">
@@ -253,14 +257,24 @@ export function MyFollowUpsPage() {
                       <TableCell>{task._count?.interactions ?? 0}</TableCell>
                       <TableCell>
                         {isTaskOpen(task.status) && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
-                            onClick={() => handleLogInteraction(task.id)}
-                          >
-                            Log Interaction
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
+                              onClick={() => handleLogInteraction(task.id)}
+                            >
+                              Log Interaction
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              leftIcon={<UserCog className="h-3.5 w-3.5" />}
+                              onClick={() => setReassignTaskId(task.id)}
+                            >
+                              Reassign
+                            </Button>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
@@ -275,6 +289,7 @@ export function MyFollowUpsPage() {
                   key={task.id}
                   task={task}
                   onLogInteraction={() => handleLogInteraction(task.id)}
+                  onReassign={() => setReassignTaskId(task.id)}
                 />
               ))}
             </div>
@@ -319,6 +334,12 @@ export function MyFollowUpsPage() {
           </div>
         )}
       </Modal>
+
+      <ReassignTaskModal
+        isOpen={reassignTaskId !== null}
+        onClose={() => setReassignTaskId(null)}
+        task={reassignTask}
+      />
     </div>
   );
 }

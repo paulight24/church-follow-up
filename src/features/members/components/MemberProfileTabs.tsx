@@ -26,6 +26,7 @@ import {
   TableCell,
 } from '@/components/ui/Table';
 import { formatDate, formatDateTime, formatPhone } from '@/lib/formatters';
+import { MemberAttendanceTab } from './MemberAttendanceTab';
 
 interface MemberProfileTabsProps {
   member: Member;
@@ -265,11 +266,7 @@ export function MemberProfileTabs({ member }: MemberProfileTabsProps) {
 
       {/* Attendance Tab */}
       <TabPanel value="attendance">
-        <EmptyState
-          icon={CalendarDays}
-          title="Coming Soon"
-          description="Attendance tracking will be available in a future update."
-        />
+        <MemberAttendanceTab memberId={member.id} />
       </TabPanel>
 
       {/* Escalations Tab */}

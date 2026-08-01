@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   BarChart3,
   Building2,
+  CalendarCheck,
   ClipboardCheck,
   FileText,
   GraduationCap,
@@ -69,6 +70,7 @@ const guideGroups: GuideGroup[] = [
           "Click a member's name to open their full profile.",
           'After contact, log the outcome directly from the follow-up record — reached, no answer, voicemail, or needs pastoral care.',
           'Add a note so the next person (or you, next week) has context.',
+          'Need someone else to handle it? Use Reassign — pick a team to narrow the list, and its leaders appear at the top.',
         ],
         tip: "A cleared queue doesn't mean you're done — new follow-ups get assigned automatically as visitors and members move through their journey stage.",
       },
@@ -91,11 +93,27 @@ const guideGroups: GuideGroup[] = [
         title: 'Teams',
         path: '/teams',
         description:
-          'Groups of staff or volunteers who share a follow-up workload — e.g. a "New Converts" team or a "First Timer Callers" team.',
+          'Groups of staff or volunteers who share a follow-up workload — e.g. a "New Converts" team or a "First Timer Callers" team. This is also where you name a team\'s leader.',
         steps: [
-          "Open a team to see its members and assigned follow-up load.",
-          "Assign or reassign a member's follow-up to balance the queue.",
+          "Open a team to see its workers and assigned follow-up load.",
+          'Click Assign Member, pick the person, and set their role to Leader to make them the team leader.',
+          'Leaders show up first in the "Assign to" list whenever a follow-up is created or reassigned for that team.',
         ],
+        tip: 'A team leader also needs a login with the Team Lead role — see Users, Roles & Settings below.',
+      },
+      {
+        icon: CalendarCheck,
+        title: 'Services & Attendance',
+        path: '/services',
+        description:
+          'Create a service (e.g. "Sunday Service, Aug 3"), then check members in. Attendance feeds each member\'s history and their "last attended" date automatically.',
+        steps: [
+          'Click New Service and give it a name, date, and type.',
+          'Open the service, then search for members and tap each one to mark them present.',
+          'Tap again to undo. Everything saves as you tap — there is no separate save button.',
+          "See any one person's full history on their profile under the Attendance tab.",
+        ],
+        tip: 'Marking someone present also updates their Last Attendance date, which is what drives absentee follow-ups.',
       },
       {
         icon: AlertTriangle,
@@ -148,7 +166,9 @@ const guideGroups: GuideGroup[] = [
         steps: [
           'Review new requests as they come in.',
           'Mark as prayed for, or convert to a follow-up if it needs a personal call.',
+          'Submitters can mark a request Confidential or Pastor Only — those are locked to Pastor-role accounts.',
         ],
+        tip: 'On a locked request, everyone else sees only the category and status — the text, the name, and all actions are hidden.',
       },
       {
         icon: GraduationCap,
@@ -204,10 +224,13 @@ const guideGroups: GuideGroup[] = [
         description:
           "Staff accounts, permission roles, church-wide settings (like birthday reminders), and the audit log of who changed what.",
         steps: [
-          'Add a new staff user and assign them a role under Users.',
-          'Adjust what a role can see or do under Roles.',
-          'Check Audit Logs if something needs tracing back to who did it.',
+          'To give someone a login: Users → Add User → enter their name, email, and a temporary password, then tick a role before saving.',
+          'Roles available include Pastor, Administrator, Team Lead, Follow-Up Worker, Communications Manager, Auditor, and Viewer.',
+          'Pick Team Lead for cell/team leaders — it lets them view members, run follow-ups, and assign or reassign work.',
+          'Only Pastor can open prayer requests marked Confidential or Pastor Only.',
+          'Adjust what any role can see or do under Roles, and check Audit Logs to trace who changed what.',
         ],
+        tip: 'Share the temporary password with the person directly and ask them to change it — there is no automatic invite email yet.',
       },
     ],
   },

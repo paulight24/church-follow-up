@@ -8,6 +8,7 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
+  CalendarCheck,
   ChevronsLeft,
   ChevronsRight,
   ClipboardCheck,
@@ -65,6 +66,12 @@ const navSections: NavSection[] = [
         ],
       },
       { label: 'Teams', path: '/teams', icon: UsersRound, permission: 'teams.view' },
+      {
+        label: 'Services & Attendance',
+        path: '/services',
+        icon: CalendarCheck,
+        permission: 'services.view',
+      },
       {
         label: 'Escalations',
         path: '/escalations',

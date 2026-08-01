@@ -1,4 +1,4 @@
-import { Phone, MessageSquare, Clock, User } from 'lucide-react';
+import { Phone, MessageSquare, Clock, User, UserCog } from 'lucide-react';
 import type { FollowUpTask } from '@/types/followUp';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -20,6 +20,7 @@ import {
 interface FollowUpTaskCardProps {
   task: FollowUpTask;
   onLogInteraction?: (task: FollowUpTask) => void;
+  onReassign?: (task: FollowUpTask) => void;
 }
 
 function getDueDateColor(task: FollowUpTask): string {
@@ -27,7 +28,7 @@ function getDueDateColor(task: FollowUpTask): string {
   return 'text-slate-700';
 }
 
-export function FollowUpTaskCard({ task, onLogInteraction }: FollowUpTaskCardProps) {
+export function FollowUpTaskCard({ task, onLogInteraction, onReassign }: FollowUpTaskCardProps) {
   const memberName = formatMemberName(task.member);
   const canLogInteraction = isTaskOpen(task.status);
 
@@ -98,6 +99,16 @@ export function FollowUpTaskCard({ task, onLogInteraction }: FollowUpTaskCardPro
           >
             Log Interaction
           </Button>
+          {onReassign && (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<UserCog className="h-4 w-4" />}
+              onClick={() => onReassign(task)}
+            >
+              Reassign
+            </Button>
+          )}
         </CardFooter>
       )}
     </Card>

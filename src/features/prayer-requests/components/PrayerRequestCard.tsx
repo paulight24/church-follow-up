@@ -35,6 +35,9 @@ function statusLabel(status: PrayerRequestStatus): string {
 }
 
 function requesterName(request: PrayerRequest): string {
+  // The backend strips the requester's identity alongside the text on
+  // confidential requests, so there is nothing to show but the lock.
+  if (request.requestRedacted) return 'Confidential';
   if (request.member) return `${request.member.firstName} ${request.member.lastName}`;
   if (request.guestFirstName || request.guestLastName) {
     return `${request.guestFirstName ?? ''} ${request.guestLastName ?? ''}`.trim();
@@ -96,30 +99,34 @@ export function PrayerRequestCard({ request, onAssign }: PrayerRequestCardProps)
 
   const name = requesterName(request);
   const canFollowUp = !!request.memberId && (request.wantsCall || request.wantsPastoralContact);
+  // Acting on a request you aren't cleared to read is rejected by the backend
+  // too - this just keeps the affordance from showing up at all.
+  const isLocked = Boolean(request.requestRedacted);
 
   const dropdownItems = [
     {
       label: request.assignedTo ? 'Reassign' : 'Assign to worker',
       icon: <UserPlus className="h-4 w-4" />,
       onClick: () => onAssign(request.id),
+      disabled: isLocked,
     },
     {
       label: canFollowUp ? 'Create Follow-Up Task' : 'Create Follow-Up Task (requires linked member + call/pastoral request)',
       icon: <ClipboardPlus className="h-4 w-4" />,
       onClick: () => followUpTaskMutation.mutate(),
-      disabled: !canFollowUp,
+      disabled: isLocked || !canFollowUp,
     },
     {
       label: 'Mark Follow-Up Needed',
       icon: <Heart className="h-4 w-4" />,
       onClick: () => updateStatusMutation.mutate({ status: 'FOLLOW_UP_NEEDED' }),
-      disabled: request.status === 'FOLLOW_UP_NEEDED' || request.status === 'CLOSED',
+      disabled: isLocked || request.status === 'FOLLOW_UP_NEEDED' || request.status === 'CLOSED',
     },
     {
       label: 'Record Testimony',
       icon: <Sparkles className="h-4 w-4" />,
       onClick: () => setTestimonyModalOpen(true),
-      disabled: request.status === 'TESTIMONY_RECEIVED',
+      disabled: isLocked || request.status === 'TESTIMONY_RECEIVED',
     },
     {
       label: 'divider',
@@ -130,7 +137,7 @@ export function PrayerRequestCard({ request, onAssign }: PrayerRequestCardProps)
       label: 'Close Request',
       icon: <CheckCircle2 className="h-4 w-4" />,
       onClick: () => updateStatusMutation.mutate({ status: 'CLOSED' }),
-      disabled: request.status === 'CLOSED',
+      disabled: isLocked || request.status === 'CLOSED',
     },
   ];
 

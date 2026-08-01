@@ -51,6 +51,10 @@ const PrayerRequestListPage = lazy(() => import('@/features/prayer-requests/page
 const PrayerDashboardPage = lazy(() => import('@/features/prayer-requests/pages/PrayerDashboardPage').then(m => ({ default: m.PrayerDashboardPage })));
 const PublicPrayerRequestPage = lazy(() => import('@/features/prayer-requests/pages/PublicPrayerRequestPage').then(m => ({ default: m.PublicPrayerRequestPage })));
 
+// Services & Attendance
+const ServicesPage = lazy(() => import('@/features/attendance/pages/ServicesPage').then(m => ({ default: m.ServicesPage })));
+const ServiceAttendancePage = lazy(() => import('@/features/attendance/pages/ServiceAttendancePage').then(m => ({ default: m.ServiceAttendancePage })));
+
 // Foundation School
 const FoundationSchoolPage = lazy(() => import('@/features/foundation-school/pages/FoundationSchoolPage').then(m => ({ default: m.FoundationSchoolPage })));
 const CohortDetailPage = lazy(() => import('@/features/foundation-school/pages/CohortDetailPage').then(m => ({ default: m.CohortDetailPage })));
@@ -131,6 +135,10 @@ export function AppRoutes() {
             {/* Prayer Requests */}
             <Route path="/prayer-requests" element={<PrayerRequestListPage />} />
             <Route path="/prayer-requests/dashboard" element={<PrayerDashboardPage />} />
+
+            {/* Services & Attendance */}
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/services/:id" element={<ServiceAttendancePage />} />
 
             {/* Foundation School */}
             <Route path="/foundation-school" element={<FoundationSchoolPage />} />
