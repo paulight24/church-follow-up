@@ -14,6 +14,23 @@ import type {
 import type { PaginatedResponse } from '@/types';
 import api from '@/config/api';
 
+// Lightweight lookup backing the instructor picker in CohortFormModal. The
+// real user management surface lives under /users (requires `users.view`,
+// not owned by this feature) - mirrors the same pattern used by the teams
+// feature's usersLookupApi.
+export interface InstructorLookup {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export const instructorLookupApi = {
+  searchInstructors(search?: string): Promise<AxiosResponse<PaginatedResponse<InstructorLookup>>> {
+    return api.get('/users', { params: { search, pageSize: 25 } });
+  },
+};
+
 export const foundationSchoolApi = {
   getCohorts(filters?: { status?: string }): Promise<AxiosResponse<FoundationSchoolCohort[]>> {
     return api.get('/foundation-school/cohorts', { params: filters });

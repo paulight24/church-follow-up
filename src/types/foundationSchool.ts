@@ -20,7 +20,11 @@ export interface FoundationSchoolCohort {
   name: string;
   startDate: string;
   graduationDate: string | null;
+  /** Legacy free-text instructor name, kept so older batches keep rendering. */
   instructor: string | null;
+  instructorUserId: string | null;
+  /** The actual person teaching this batch, when set via the instructor picker. */
+  instructorUser?: { id: string; firstName: string; lastName: string } | null;
   status: CohortStatus;
   createdAt: string;
   updatedAt: string;
@@ -74,7 +78,9 @@ export interface CreateCohortData {
   name: string;
   startDate: string;
   graduationDate?: string;
+  /** Legacy free-text instructor name. Superseded by `instructorUserId`. */
   instructor?: string;
+  instructorUserId?: string;
   status?: CohortStatus;
 }
 

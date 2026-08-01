@@ -12,8 +12,10 @@ import { cn } from '@/lib/cn';
 import { ScriptureSelector } from './ScriptureSelector';
 import { ChannelSelector } from './ChannelSelector';
 import { AudienceSelector } from './AudienceSelector';
-import { encouragementsApi } from '../api/encouragements.api';
-import type { AudienceDefinition, DeliveryChannel } from '@/types/encouragement';
+import { ImageAttachmentPicker } from './ImageAttachmentPicker';
+import { WhatsAppSharePanel } from './WhatsAppSharePanel';
+import { encouragementsApi, mediaAssetUrl } from '../api/encouragements.api';
+import type { AudienceDefinition, DeliveryChannel, MediaAssetSummary } from '@/types/encouragement';
 
 type SendTiming = 'now' | 'scheduled';
 
@@ -30,6 +32,8 @@ export function PastorQuickSend() {
   const [audience, setAudience] = useState<AudienceDefinition>({ all: true });
   const [sendTiming, setSendTiming] = useState<SendTiming>('now');
   const [scheduledDate, setScheduledDate] = useState('');
+  const [imageAsset, setImageAsset] = useState<MediaAssetSummary | null>(null);
+  const [whatsAppShareEnabled, setWhatsAppShareEnabled] = useState(false);
 
   function handleScriptureChange(reference: string, text: string) {
     setScriptureReference(reference);
@@ -37,6 +41,7 @@ export function PastorQuickSend() {
   }
 
   const previewMessage = [message, scriptureText ? `\n\n"${scriptureText}" - ${scriptureReference}` : ''].join('');
+  const imageUrl = imageAsset ? mediaAssetUrl(imageAsset) : null;
 
   function resetForm() {
     setTitle('');
@@ -45,6 +50,8 @@ export function PastorQuickSend() {
     setScriptureText('');
     setSendTiming('now');
     setScheduledDate('');
+    setImageAsset(null);
+    setWhatsAppShareEnabled(false);
   }
 
   const quickSendMutation = useMutation({
@@ -52,6 +59,7 @@ export function PastorQuickSend() {
       encouragementsApi.quickSend({
         title: title || undefined,
         shortMessage: previewMessage,
+        imageAssetId: imageAsset?.id,
         audienceDefinitionJson: audience,
         deliveryChannelsJson: channels,
       }),
@@ -80,6 +88,8 @@ export function PastorQuickSend() {
         shortMessage: previewMessage,
         scriptureReference: scriptureReference || undefined,
         scriptureText: scriptureText || undefined,
+        imageAssetId: imageAsset?.id,
+        messageType: imageAsset ? 'IMAGE' : undefined,
         senderDisplayName: 'Pastor',
         sendAsPastor: true,
         audienceDefinitionJson: audience,
@@ -157,7 +167,17 @@ export function PastorQuickSend() {
 
           <ScriptureSelector value={scriptureReference} onChange={handleScriptureChange} />
 
-          <ChannelSelector value={channels} onChange={setChannels} />
+          <ImageAttachmentPicker value={imageAsset} onChange={setImageAsset} />
+
+          <ChannelSelector
+            value={channels}
+            onChange={setChannels}
+            hasImage={Boolean(imageAsset)}
+            whatsAppShareEnabled={whatsAppShareEnabled}
+            onWhatsAppShareChange={setWhatsAppShareEnabled}
+          />
+
+          {whatsAppShareEnabled && <WhatsAppSharePanel message={previewMessage} imageUrl={imageUrl} />}
 
           <AudienceSelector value={audience} onChange={setAudience} />
 

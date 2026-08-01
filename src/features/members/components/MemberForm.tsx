@@ -32,7 +32,7 @@ const memberFormSchema = z.object({
     .optional(),
   isFirstTimer: z.boolean().optional(),
   firstVisitDate: z.string().optional().or(z.literal('')),
-  bornAgainStatus: z.string().max(50).optional().or(z.literal('')),
+  bornAgainStatus: z.enum(['Yes', 'No', 'Unknown', '']).optional(),
   inviterName: z.string().max(150).optional().or(z.literal('')),
   inviterPhone: z.string().max(30).optional().or(z.literal('')),
   visitorJourneyStage: z
@@ -91,6 +91,16 @@ const sourceOptions = [
   { label: 'Import', value: 'IMPORT' },
   { label: 'Manual', value: 'MANUAL' },
   { label: 'Campaign', value: 'CAMPAIGN' },
+];
+
+// Values are title-case to match what is already stored in the members table
+// ("Yes" / "No" / "Unknown"). Using upper-case codes here would fail to match
+// every existing record, render the field blank, and silently overwrite the
+// stored answer on the next save.
+const bornAgainStatusOptions = [
+  { label: 'Yes', value: 'Yes' },
+  { label: 'No', value: 'No' },
+  { label: 'Unknown', value: 'Unknown' },
 ];
 
 const visitorJourneyStageOptions = [
@@ -156,7 +166,7 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
       source: (initialData?.source as MemberFormValues['source']) ?? '',
       isFirstTimer: initialData?.isFirstTimer ?? false,
       firstVisitDate: toDateInputValue(initialData?.firstVisitDate),
-      bornAgainStatus: initialData?.bornAgainStatus ?? '',
+      bornAgainStatus: (initialData?.bornAgainStatus as MemberFormValues['bornAgainStatus']) ?? '',
       inviterName: initialData?.inviterName ?? '',
       inviterPhone: initialData?.inviterPhone ?? '',
       visitorJourneyStage:
@@ -333,9 +343,10 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
             error={errors.visitorJourneyStage?.message}
             {...register('visitorJourneyStage')}
           />
-          <Input
+          <Select
             label="Born-Again Status"
-            placeholder="e.g., Yes, Rededicated"
+            placeholder="Select status"
+            options={bornAgainStatusOptions}
             error={errors.bornAgainStatus?.message}
             {...register('bornAgainStatus')}
           />
