@@ -73,6 +73,12 @@ export function DashboardPage() {
   const { user } = useAuth();
   const firstName = user?.firstName ?? 'there';
   const canViewAll = usePermission('dashboard.view_all');
+  const canCreateMember = usePermission('members.create');
+  // Both hooks must run unconditionally - `||` would short-circuit the second.
+  const canViewOwnFollowUps = usePermission('follow_ups.view_own');
+  const canViewAllFollowUps = usePermission('follow_ups.view');
+  const canViewFollowUps = canViewOwnFollowUps || canViewAllFollowUps;
+  const canSendEncouragement = usePermission('encouragements.create');
 
   const pastorQuery = useQuery({
     queryKey: ['dashboard', 'pastor'],
@@ -231,22 +237,30 @@ export function DashboardPage() {
         title="Dashboard"
         description={`Hello, ${firstName}! Here's your ministry overview.`}
         actions={
+          // Each shortcut is gated on the permission its destination needs.
+          // Without this a Member sees three buttons that all dead-end in a 403.
           <div className="flex flex-wrap gap-2">
-            <Link to="/members/new">
-              <Button variant="outline" size="sm" leftIcon={<UserPlus className="h-4 w-4" />}>
-                New Member
-              </Button>
-            </Link>
-            <Link to="/follow-ups">
-              <Button variant="outline" size="sm" leftIcon={<ClipboardCheck className="h-4 w-4" />}>
-                My Follow-Ups
-              </Button>
-            </Link>
-            <Link to="/encouragements/new">
-              <Button variant="primary" size="sm" leftIcon={<Heart className="h-4 w-4" />}>
-                Send Encouragement
-              </Button>
-            </Link>
+            {canCreateMember && (
+              <Link to="/members/new">
+                <Button variant="outline" size="sm" leftIcon={<UserPlus className="h-4 w-4" />}>
+                  New Member
+                </Button>
+              </Link>
+            )}
+            {canViewFollowUps && (
+              <Link to="/follow-ups">
+                <Button variant="outline" size="sm" leftIcon={<ClipboardCheck className="h-4 w-4" />}>
+                  My Follow-Ups
+                </Button>
+              </Link>
+            )}
+            {canSendEncouragement && (
+              <Link to="/encouragements/new">
+                <Button variant="primary" size="sm" leftIcon={<Heart className="h-4 w-4" />}>
+                  Send Encouragement
+                </Button>
+              </Link>
+            )}
           </div>
         }
       />
