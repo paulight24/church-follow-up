@@ -1,17 +1,20 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import {
   ClipboardList,
   Users,
   Trophy,
   PhoneOff,
   AlarmClockOff,
+  CalendarCheck,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableEmpty } from '@/components/ui/Table';
 import { Spinner } from '@/components/ui/Spinner';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/cn';
 import { formatDate } from '@/lib/formatters';
 import { reportsApi } from '../api/reports.api';
@@ -103,6 +106,7 @@ function downloadCsv(filename: string, rows: Array<Record<string, unknown>>) {
 }
 
 export function ReportsPage() {
+  const { hasPermission } = useAuth();
   const [selectedId, setSelectedId] = useState<ReportType | null>(null);
   const [filters, setFilters] = useState<ReportFiltersState>({});
 
@@ -143,6 +147,25 @@ export function ReportsPage() {
             </CardContent>
           </Card>
         ))}
+
+        {/* Attendance Reports lives on its own page (sortable, paginated),
+            not in this card-select-and-filter flow - this card is a
+            discoverability link there, matching Paul's ask to surface it
+            "under reports" as well as under Attendance. */}
+        {hasPermission('attendance.view_reports') && (
+          <Link to="/services/reports">
+            <Card className="h-full transition-shadow hover:shadow-md">
+              <CardContent className="flex flex-col">
+                <CalendarCheck className="mb-3 h-10 w-10 text-indigo-500" />
+                <CardTitle className="mb-2">Attendance Reports</CardTitle>
+                <p className="flex-1 text-sm text-slate-500">
+                  Service-by-service and member-by-member attendance, sortable by date, present count, and
+                  who&rsquo;s stopped coming
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
       </div>
 
       {selected && (

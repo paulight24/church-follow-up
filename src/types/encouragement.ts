@@ -132,6 +132,7 @@ export type UpdateEncouragementRequest = Partial<CreateEncouragementRequest>;
 export interface QuickSendRequest {
   title?: string;
   shortMessage: string;
+  imageAssetId?: string;
   senderDisplayName?: string;
   audienceDefinitionJson?: AudienceDefinition;
   deliveryChannelsJson?: DeliveryChannel[];

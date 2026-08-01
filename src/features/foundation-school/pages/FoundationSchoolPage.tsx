@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { formatDate } from '@/lib/formatters';
 import { foundationSchoolApi } from '../api/foundation-school.api';
 import { CohortFormModal } from '../components/CohortFormModal';
+import { getInstructorLabel } from '../lib/instructorLabel';
 import type { CohortStatus } from '@/types/foundationSchool';
 
 const STATUS_VARIANT: Record<CohortStatus, 'success' | 'info' | 'warning' | 'gray'> = {
@@ -35,10 +36,10 @@ export function FoundationSchoolPage() {
     <div className="space-y-6">
       <PageHeader
         title="Foundation School"
-        description="Manage cohorts, enrollments, and 7-class progress tracking"
+        description="Manage batches, enrollments, and 7-class progress tracking"
         actions={
           <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
-            New Cohort
+            New Batch
           </Button>
         }
       />
@@ -51,11 +52,11 @@ export function FoundationSchoolPage() {
         <Card>
           <EmptyState
             icon={GraduationCap}
-            title="No cohorts yet"
-            description="Create your first Foundation School cohort to start enrolling members."
+            title="No batches yet"
+            description="Create your first Foundation School batch to start enrolling members."
             action={
               <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
-                New Cohort
+                New Batch
               </Button>
             }
           />
@@ -93,10 +94,10 @@ export function FoundationSchoolPage() {
                     </span>
                     <span className="font-medium text-slate-700">{cohort._count?.enrollments ?? 0} members</span>
                   </div>
-                  {cohort.instructor && (
+                  {getInstructorLabel(cohort) && (
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500">Instructor</span>
-                      <span className="font-medium text-slate-700">{cohort.instructor}</span>
+                      <span className="font-medium text-slate-700">{getInstructorLabel(cohort)}</span>
                     </div>
                   )}
                 </div>

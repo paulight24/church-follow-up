@@ -54,6 +54,10 @@ const PublicPrayerRequestPage = lazy(() => import('@/features/prayer-requests/pa
 // Services & Attendance
 const ServicesPage = lazy(() => import('@/features/attendance/pages/ServicesPage').then(m => ({ default: m.ServicesPage })));
 const ServiceAttendancePage = lazy(() => import('@/features/attendance/pages/ServiceAttendancePage').then(m => ({ default: m.ServiceAttendancePage })));
+const AttendanceReportsPage = lazy(() => import('@/features/attendance/pages/AttendanceReportsPage').then(m => ({ default: m.AttendanceReportsPage })));
+
+// Profile (self-service)
+const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 
 // Foundation School
 const FoundationSchoolPage = lazy(() => import('@/features/foundation-school/pages/FoundationSchoolPage').then(m => ({ default: m.FoundationSchoolPage })));
@@ -76,6 +80,7 @@ const SettingsPage = lazy(() => import('@/features/admin/pages/SettingsPage').th
 const AuditLogPage = lazy(() => import('@/features/admin/pages/AuditLogPage').then(m => ({ default: m.AuditLogPage })));
 const DepartmentsPage = lazy(() => import('@/features/admin/pages/DepartmentsPage').then(m => ({ default: m.DepartmentsPage })));
 const FellowshipGroupsPage = lazy(() => import('@/features/admin/pages/FellowshipGroupsPage').then(m => ({ default: m.FellowshipGroupsPage })));
+const ServiceSchedulesPage = lazy(() => import('@/features/admin/pages/ServiceSchedulesPage').then(m => ({ default: m.ServiceSchedulesPage })));
 
 function PageLoader() {
   return (
@@ -98,69 +103,136 @@ export function AppRoutes() {
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
+            {/* Dashboard & Guide are open to every authenticated role, so no
+                extra permission gate beyond the auth check above. */}
             <Route path="/" element={<DashboardPage />} />
             <Route path="/guide" element={<GuidePage />} />
 
+            {/* My Profile (self-service) */}
+            <Route element={<ProtectedRoute permission="profile.view_own" />}>
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+
             {/* Members */}
-            <Route path="/members" element={<MemberListPage />} />
-            <Route path="/members/new" element={<MemberCreatePage />} />
-            <Route path="/members/import" element={<MemberImportPage />} />
-            <Route path="/members/duplicates" element={<DuplicateReviewPage />} />
-            <Route path="/members/:id/edit" element={<MemberEditPage />} />
-            <Route path="/members/:id" element={<MemberProfilePage />} />
+            <Route element={<ProtectedRoute permission="members.view" />}>
+              <Route path="/members" element={<MemberListPage />} />
+              <Route path="/members/:id" element={<MemberProfilePage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="members.create" />}>
+              <Route path="/members/new" element={<MemberCreatePage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="members.update" />}>
+              <Route path="/members/:id/edit" element={<MemberEditPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="members.import" />}>
+              <Route path="/members/import" element={<MemberImportPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="members.merge_duplicates" />}>
+              <Route path="/members/duplicates" element={<DuplicateReviewPage />} />
+            </Route>
 
             {/* Teams */}
-            <Route path="/teams" element={<TeamListPage />} />
-            <Route path="/teams/:id" element={<TeamDetailPage />} />
+            <Route element={<ProtectedRoute permission="teams.view" />}>
+              <Route path="/teams" element={<TeamListPage />} />
+              <Route path="/teams/:id" element={<TeamDetailPage />} />
+            </Route>
 
             {/* Follow-ups */}
-            <Route path="/follow-ups" element={<MyFollowUpsPage />} />
-            <Route path="/follow-ups/cycles" element={<FollowUpCyclesPage />} />
+            <Route element={<ProtectedRoute permission={['follow_ups.view', 'follow_ups.view_own']} />}>
+              <Route path="/follow-ups" element={<MyFollowUpsPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="follow_ups.manage_cycles" />}>
+              <Route path="/follow-ups/cycles" element={<FollowUpCyclesPage />} />
+            </Route>
 
             {/* Escalations */}
-            <Route path="/escalations" element={<EscalationsPage />} />
-            <Route path="/escalations/:id" element={<EscalationDetailPage />} />
+            <Route element={<ProtectedRoute permission="escalations.view" />}>
+              <Route path="/escalations" element={<EscalationsPage />} />
+              <Route path="/escalations/:id" element={<EscalationDetailPage />} />
+            </Route>
 
             {/* Campaigns */}
-            <Route path="/campaigns" element={<CampaignListPage />} />
-            <Route path="/campaigns/new" element={<CampaignBuilderPage />} />
-            <Route path="/campaigns/:id/analytics" element={<CampaignAnalyticsPage />} />
+            <Route element={<ProtectedRoute permission="campaigns.view" />}>
+              <Route path="/campaigns" element={<CampaignListPage />} />
+              <Route path="/campaigns/:id/analytics" element={<CampaignAnalyticsPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="campaigns.create" />}>
+              <Route path="/campaigns/new" element={<CampaignBuilderPage />} />
+            </Route>
 
             {/* Encouragements */}
-            <Route path="/encouragements" element={<EncouragementListPage />} />
-            <Route path="/encouragements/new" element={<EncouragementCreatePage />} />
-            <Route path="/encouragements/cards" element={<EncouragementCardPrintPage />} />
-            <Route path="/encouragements/cards/manage" element={<CardTemplateManagePage />} />
+            <Route element={<ProtectedRoute permission="encouragements.view" />}>
+              <Route path="/encouragements" element={<EncouragementListPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="encouragements.create" />}>
+              <Route path="/encouragements/new" element={<EncouragementCreatePage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="encouragement_cards.print" />}>
+              <Route path="/encouragements/cards" element={<EncouragementCardPrintPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="encouragement_cards.edit" />}>
+              <Route path="/encouragements/cards/manage" element={<CardTemplateManagePage />} />
+            </Route>
 
             {/* Prayer Requests */}
-            <Route path="/prayer-requests" element={<PrayerRequestListPage />} />
-            <Route path="/prayer-requests/dashboard" element={<PrayerDashboardPage />} />
+            <Route element={<ProtectedRoute permission="prayer_requests.view" />}>
+              <Route path="/prayer-requests" element={<PrayerRequestListPage />} />
+              <Route path="/prayer-requests/dashboard" element={<PrayerDashboardPage />} />
+            </Route>
 
             {/* Services & Attendance */}
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/services/:id" element={<ServiceAttendancePage />} />
+            <Route element={<ProtectedRoute permission="services.view" />}>
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/services/:id" element={<ServiceAttendancePage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="attendance.view_reports" />}>
+              <Route path="/services/reports" element={<AttendanceReportsPage />} />
+            </Route>
 
             {/* Foundation School */}
-            <Route path="/foundation-school" element={<FoundationSchoolPage />} />
-            <Route path="/foundation-school/:id" element={<CohortDetailPage />} />
+            <Route element={<ProtectedRoute permission="foundation_school.view" />}>
+              <Route path="/foundation-school" element={<FoundationSchoolPage />} />
+              <Route path="/foundation-school/:id" element={<CohortDetailPage />} />
+            </Route>
 
             {/* Call Guides */}
-            <Route path="/call-guides" element={<CallGuideListPage />} />
-            <Route path="/call-guides/:id" element={<CallGuideEditorPage />} />
+            <Route element={<ProtectedRoute permission="call_guides.view" />}>
+              <Route path="/call-guides" element={<CallGuideListPage />} />
+              <Route path="/call-guides/:id" element={<CallGuideEditorPage />} />
+            </Route>
 
             {/* Notifications */}
-            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route element={<ProtectedRoute permission="notifications.view" />}>
+              <Route path="/notifications" element={<NotificationsPage />} />
+            </Route>
 
             {/* Reports */}
-            <Route path="/reports" element={<ReportsPage />} />
+            <Route element={<ProtectedRoute permission="reports.view" />}>
+              <Route path="/reports" element={<ReportsPage />} />
+            </Route>
 
             {/* Admin */}
-            <Route path="/admin/users" element={<UsersPage />} />
-            <Route path="/admin/roles" element={<RolesPage />} />
-            <Route path="/admin/departments" element={<DepartmentsPage />} />
-            <Route path="/admin/fellowship-groups" element={<FellowshipGroupsPage />} />
-            <Route path="/admin/settings" element={<SettingsPage />} />
-            <Route path="/admin/audit-logs" element={<AuditLogPage />} />
+            <Route element={<ProtectedRoute permission="users.view" />}>
+              <Route path="/admin/users" element={<UsersPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="roles.view" />}>
+              <Route path="/admin/roles" element={<RolesPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="departments.view" />}>
+              <Route path="/admin/departments" element={<DepartmentsPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="fellowship_groups.view" />}>
+              <Route path="/admin/fellowship-groups" element={<FellowshipGroupsPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="services.manage_schedules" />}>
+              <Route path="/admin/service-schedules" element={<ServiceSchedulesPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="system.settings" />}>
+              <Route path="/admin/settings" element={<SettingsPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="audit.view" />}>
+              <Route path="/admin/audit-logs" element={<AuditLogPage />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

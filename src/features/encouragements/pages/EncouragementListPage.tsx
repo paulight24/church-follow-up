@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, Trash2, BarChart3, ShieldCheck, Send, Ban, CalendarClock, FileCheck, Printer } from 'lucide-react';
+import { Heart, Trash2, BarChart3, ShieldCheck, Send, Ban, CalendarClock, FileCheck, Printer, Pencil, ImageIcon } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -24,9 +24,15 @@ import {
   TableCell,
 } from '@/components/ui/Table';
 import { formatDate } from '@/lib/formatters';
-import { encouragementsApi } from '../api/encouragements.api';
+import { encouragementsApi, mediaAssetUrl } from '../api/encouragements.api';
+import { EditEncouragementModal } from '../components/EditEncouragementModal';
+import type { Encouragement } from '@/types/encouragement';
 
 const PAGE_SIZE = 10;
+
+// Mirrors the backend's edit guard (encouragements.service.ts#updateEncouragement):
+// SENDING/SENT/CANCELLED messages can no longer be edited.
+const EDITABLE_STATUSES = ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'SCHEDULED'];
 
 const statusOptions = [
   { label: 'Draft', value: 'DRAFT' },
@@ -56,6 +62,7 @@ export function EncouragementListPage() {
   const [scheduleTargetId, setScheduleTargetId] = useState<string | null>(null);
   const [scheduleDate, setScheduleDate] = useState('');
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [editTarget, setEditTarget] = useState<Encouragement | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['encouragements', { status, page }],
@@ -208,7 +215,18 @@ export function EncouragementListPage() {
                 {encouragements.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>
-                      <span className="font-medium text-slate-900">{item.title}</span>
+                      <div className="flex items-center gap-2">
+                        {item.imageAsset ? (
+                          <img
+                            src={mediaAssetUrl(item.imageAsset)}
+                            alt=""
+                            className="h-8 w-8 shrink-0 rounded object-cover"
+                          />
+                        ) : (
+                          item.messageType === 'IMAGE' && <ImageIcon className="h-4 w-4 shrink-0 text-slate-300" />
+                        )}
+                        <span className="font-medium text-slate-900">{item.title}</span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <span className="text-slate-600">{item.scriptureReference ?? '-'}</span>
@@ -231,6 +249,17 @@ export function EncouragementListPage() {
                         >
                           View
                         </Button>
+
+                        {EDITABLE_STATUSES.includes(item.status) && canUpdate && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            leftIcon={<Pencil className="h-3.5 w-3.5" />}
+                            onClick={() => setEditTarget(item)}
+                          >
+                            Edit
+                          </Button>
+                        )}
 
                         {item.status === 'DRAFT' && canCreate && !item.sendAsPastor && (
                           <Button
@@ -431,6 +460,8 @@ export function EncouragementListPage() {
           </div>
         )}
       </Modal>
+
+      {editTarget && <EditEncouragementModal encouragement={editTarget} onClose={() => setEditTarget(null)} />}
     </div>
   );
 }

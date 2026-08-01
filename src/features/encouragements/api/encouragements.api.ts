@@ -15,6 +15,13 @@ import type {
 } from '@/types/encouragement';
 import api from '@/config/api';
 
+// The media asset library (upload + public URL helper) is shared with the
+// campaigns feature - see campaigns.api.ts's own comment ("campaign /
+// encouragement image library"). Re-exported here so encouragements-owned
+// components only need to import from this file.
+export { mediaAssetsApi, mediaAssetUrl } from '@/features/campaigns/api/campaigns.api';
+export type { MediaAsset } from '@/features/campaigns/api/campaigns.api';
+
 export const encouragementsApi = {
   getEncouragements(filters?: EncouragementListFilters): Promise<AxiosResponse<PaginatedResponse<Encouragement>>> {
     return api.get('/encouragements', { params: filters });
