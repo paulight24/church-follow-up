@@ -27,6 +27,7 @@ import { ActivityFeed } from '../components/ActivityFeed';
 import type { ActivityItem } from '../components/ActivityFeed';
 import { EscalationSummary } from '../components/EscalationSummary';
 import type { EscalationListItem } from '../components/EscalationSummary';
+import { WhatsHappeningWidget } from '../components/WhatsHappeningWidget';
 
 function taskMemberName(task: DashboardFollowUpTask): string {
   return `${task.member.firstName} ${task.member.lastName}`;
@@ -79,6 +80,7 @@ export function DashboardPage() {
   const canViewAllFollowUps = usePermission('follow_ups.view');
   const canViewFollowUps = canViewOwnFollowUps || canViewAllFollowUps;
   const canSendEncouragement = usePermission('encouragements.create');
+  const canViewAnnouncements = usePermission('announcements.view');
 
   const pastorQuery = useQuery({
     queryKey: ['dashboard', 'pastor'],
@@ -264,6 +266,11 @@ export function DashboardPage() {
           </div>
         }
       />
+
+      {/* What's Happening - for a MEMBER this may be nearly the only other
+          thing on this page, so it's placed above the KPI cards rather than
+          buried after content a plain member's role can't see anyway. */}
+      {canViewAnnouncements && <WhatsHappeningWidget />}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

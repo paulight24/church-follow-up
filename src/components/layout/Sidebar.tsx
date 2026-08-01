@@ -11,6 +11,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ClipboardCheck,
+  FileEdit,
   FileText,
   GraduationCap,
   HandHeart,
@@ -18,6 +19,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   Megaphone,
+  Newspaper,
   Phone,
   Repeat,
   Settings,
@@ -58,6 +60,10 @@ interface NavSection {
 /** Items that always sit above the collapsible sections, unaffected by permissions. */
 const topLevelItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  // Every role including MEMBER holds announcements.view - this is one of
+  // very few pages an ordinary member can see, so it sits at the top level
+  // rather than inside a collapsible section a member has no reason to open.
+  { label: 'Announcements', path: '/announcements', icon: Newspaper, permission: 'announcements.view' },
   { label: 'Guide', path: '/guide', icon: BookOpen },
   { label: 'My Profile', path: '/profile', icon: UserCircle2, permission: 'profile.view_own' },
 ];
@@ -150,6 +156,12 @@ const navSections: NavSection[] = [
         path: '/encouragements/cards/manage',
         icon: LayoutTemplate,
         permission: 'encouragement_cards.edit',
+      },
+      {
+        label: 'Manage Announcements',
+        path: '/announcements/manage',
+        icon: FileEdit,
+        permission: 'announcements.create',
       },
     ],
   },
