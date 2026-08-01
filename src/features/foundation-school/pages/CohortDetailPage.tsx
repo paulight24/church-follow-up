@@ -14,6 +14,7 @@ import { formatDate } from '@/lib/formatters';
 import { foundationSchoolApi } from '../api/foundation-school.api';
 import { EnrollMemberModal } from '../components/EnrollMemberModal';
 import { ClassProgressCell } from '../components/ClassProgressCell';
+import { getInstructorLabel } from '../lib/instructorLabel';
 import { TOTAL_FOUNDATION_SCHOOL_CLASSES, type EnrollmentStatus } from '@/types/foundationSchool';
 
 const ENROLLMENT_STATUS_VARIANT: Record<EnrollmentStatus, 'gray' | 'info' | 'success' | 'danger'> = {
@@ -56,6 +57,7 @@ export function CohortDetailPage() {
 
   const cohort = cohortQuery.data;
   const enrollments = enrollmentsQuery.data?.data ?? [];
+  const instructorLabel = cohort ? getInstructorLabel(cohort) : null;
 
   if (cohortQuery.isLoading) {
     return (
@@ -68,7 +70,7 @@ export function CohortDetailPage() {
   if (!cohort) {
     return (
       <Card>
-        <EmptyState icon={GraduationCap} title="Cohort not found" />
+        <EmptyState icon={GraduationCap} title="Batch not found" />
       </Card>
     );
   }
@@ -85,7 +87,7 @@ export function CohortDetailPage() {
 
       <PageHeader
         title={cohort.name}
-        subtitle={`Started ${formatDate(cohort.startDate)}${cohort.instructor ? ` - ${cohort.instructor}` : ''}`}
+        subtitle={`Started ${formatDate(cohort.startDate)}${instructorLabel ? ` - ${instructorLabel}` : ''}`}
         actions={
           <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setEnrollModalOpen(true)}>
             Enroll Member
@@ -144,7 +146,7 @@ export function CohortDetailPage() {
               <TableEmpty
                 colSpan={5}
                 icon={<GraduationCap className="h-8 w-8" />}
-                message="No members enrolled in this cohort yet."
+                message="No members enrolled in this batch yet."
               />
             ) : (
               enrollments.map((enrollment) => {
