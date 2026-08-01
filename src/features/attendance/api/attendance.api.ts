@@ -7,6 +7,12 @@ import type {
   AttendanceRecord,
   MemberAttendanceRecord,
   RecordAttendanceRequest,
+  ServiceAttendanceSummaryRow,
+  ServiceAttendanceSummaryFilters,
+  MemberAttendanceSummaryRow,
+  MemberAttendanceSummaryFilters,
+  CheckInCodeRequest,
+  CheckInCodeResponse,
 } from '@/types/attendance';
 import type { PaginatedResponse } from '@/types';
 import api from '@/config/api';
@@ -49,5 +55,32 @@ export const attendanceApi = {
 
   getMemberAttendance(memberId: string): Promise<AxiosResponse<MemberAttendanceRecord[]>> {
     return api.get(`/members/${memberId}/attendance`);
+  },
+
+  // ─── Attendance reports (permission `attendance.view_reports`) ──────────
+
+  getAttendanceSummary(
+    filters?: ServiceAttendanceSummaryFilters,
+  ): Promise<AxiosResponse<PaginatedResponse<ServiceAttendanceSummaryRow>>> {
+    return api.get('/services/attendance/summary', { params: filters });
+  },
+
+  getAttendanceByMember(
+    filters?: MemberAttendanceSummaryFilters,
+  ): Promise<AxiosResponse<PaginatedResponse<MemberAttendanceSummaryRow>>> {
+    return api.get('/services/attendance/by-member', { params: filters });
+  },
+
+  // ─── Per-service QR check-in (permission `services.manage`) ────────────
+
+  generateCheckInCode(
+    serviceId: string,
+    data?: CheckInCodeRequest,
+  ): Promise<AxiosResponse<CheckInCodeResponse>> {
+    return api.post(`/services/${serviceId}/check-in-code`, data ?? {});
+  },
+
+  disableCheckInCode(serviceId: string): Promise<AxiosResponse<Service>> {
+    return api.delete(`/services/${serviceId}/check-in-code`);
   },
 };

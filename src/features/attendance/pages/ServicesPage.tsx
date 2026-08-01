@@ -17,6 +17,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatDate } from '@/lib/formatters';
+import { usePermission } from '@/hooks/usePermission';
 import { attendanceApi } from '../api/attendance.api';
 
 const SERVICE_TYPE_OPTIONS = (Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((value) => ({
@@ -29,6 +30,9 @@ const FILTER_OPTIONS = [{ value: '', label: 'All service types' }, ...SERVICE_TY
 export function ServicesPage() {
   const queryClient = useQueryClient();
   const [typeFilter, setTypeFilter] = useState('');
+  // Ushers hold services.view + attendance.record but NOT services.manage,
+  // so they can check people in without being offered a create action that 403s.
+  const canManageServices = usePermission('services.manage');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [serviceDate, setServiceDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -76,9 +80,11 @@ export function ServicesPage() {
         title="Services & Attendance"
         subtitle="Create a service, then check members in to record attendance"
         actions={
-          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setIsModalOpen(true)}>
-            New Service
-          </Button>
+          canManageServices ? (
+            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setIsModalOpen(true)}>
+              New Service
+            </Button>
+          ) : undefined
         }
       />
 
@@ -103,11 +109,17 @@ export function ServicesPage() {
           <EmptyState
             icon={CalendarDays}
             title="No services yet"
-            description="Create a service to start recording attendance."
+            description={
+              canManageServices
+                ? 'Create a service to start recording attendance.'
+                : 'No services have been scheduled yet. An administrator creates these.'
+            }
             action={
-              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setIsModalOpen(true)}>
-                New Service
-              </Button>
+              canManageServices ? (
+                <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setIsModalOpen(true)}>
+                  New Service
+                </Button>
+              ) : undefined
             }
           />
         ) : (

@@ -11,16 +11,19 @@ import { Badge } from '@/components/ui/Badge';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
 import { useToast } from '@/components/ui/Toast';
+import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
 import { formatDate } from '@/lib/formatters';
 import { membersApi } from '@/features/members/api/members.api';
 import { attendanceApi } from '../api/attendance.api';
+import { CheckInPanel } from '../components/CheckInPanel';
 
 export function ServiceAttendancePage() {
   const { id } = useParams<{ id: string }>();
   const serviceId = id!;
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
@@ -109,6 +112,8 @@ export function ServiceAttendancePage() {
           </div>
         </CardContent>
       </Card>
+
+      {service && hasPermission('services.manage') && <CheckInPanel service={service} />}
 
       <Card>
         <div className="border-b border-slate-100 p-4 sm:p-6">
