@@ -67,6 +67,10 @@ const CohortDetailPage = lazy(() => import('@/features/foundation-school/pages/C
 const CallGuideListPage = lazy(() => import('@/features/call-guides/pages/CallGuideListPage').then(m => ({ default: m.CallGuideListPage })));
 const CallGuideEditorPage = lazy(() => import('@/features/call-guides/pages/CallGuideEditorPage').then(m => ({ default: m.CallGuideEditorPage })));
 
+// Announcements
+const AnnouncementFeedPage = lazy(() => import('@/features/announcements/pages/AnnouncementFeedPage').then(m => ({ default: m.AnnouncementFeedPage })));
+const AnnouncementManagePage = lazy(() => import('@/features/announcements/pages/AnnouncementManagePage').then(m => ({ default: m.AnnouncementManagePage })));
+
 // Notifications
 const NotificationsPage = lazy(() => import('@/features/notifications/pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
 
@@ -199,6 +203,14 @@ export function AppRoutes() {
             <Route element={<ProtectedRoute permission="call_guides.view" />}>
               <Route path="/call-guides" element={<CallGuideListPage />} />
               <Route path="/call-guides/:id" element={<CallGuideEditorPage />} />
+            </Route>
+
+            {/* Announcements */}
+            <Route element={<ProtectedRoute permission="announcements.view" />}>
+              <Route path="/announcements" element={<AnnouncementFeedPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="announcements.create" />}>
+              <Route path="/announcements/manage" element={<AnnouncementManagePage />} />
             </Route>
 
             {/* Notifications */}
