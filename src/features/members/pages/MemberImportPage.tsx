@@ -52,17 +52,52 @@ const TARGET_FIELDS = [
   { label: 'Primary Phone', value: 'phonePrimary' },
   { label: 'Secondary Phone', value: 'phoneSecondary' },
   { label: 'Email', value: 'email' },
+  { label: 'Birthday (M/D or MM/DD/YYYY)', value: 'dateOfBirth' },
+  { label: 'Wedding Anniversary (M/D or MM/DD/YYYY)', value: 'weddingAnniversary' },
+  { label: 'Gender', value: 'gender' },
+  { label: 'Marital Status', value: 'maritalStatus' },
   { label: 'Membership Status (name)', value: 'membershipStatus' },
   { label: 'Department (name)', value: 'department' },
   { label: 'Cell Group (name)', value: 'fellowshipGroup' },
   { label: 'Last Attendance Date', value: 'lastAttendanceDate' },
   { label: 'Preferred Contact Method', value: 'preferredContactMethod' },
   { label: 'Preferred Language', value: 'preferredLanguage' },
+  { label: 'Is First Timer (true/false)', value: 'isFirstTimer' },
+  { label: 'First Visit Date', value: 'firstVisitDate' },
+  { label: 'Born Again Status', value: 'bornAgainStatus' },
+  { label: 'Invited By (Name)', value: 'inviterName' },
+  { label: 'Inviter Phone', value: 'inviterPhone' },
   { label: 'Email Consent (true/false)', value: 'emailConsent' },
   { label: 'SMS Consent (true/false)', value: 'smsConsent' },
   { label: 'Do Not Contact (true/false)', value: 'doNotContact' },
   { label: 'General Notes', value: 'generalNotes' },
 ];
+
+// Common spreadsheet column names that don't match the field key directly.
+const HEADER_ALIASES: Record<string, string> = {
+  birthday: 'dateOfBirth',
+  dob: 'dateOfBirth',
+  dateofbirth: 'dateOfBirth',
+  birthdate: 'dateOfBirth',
+  weddinganniversary: 'weddingAnniversary',
+  anniversary: 'weddingAnniversary',
+  marriagedate: 'weddingAnniversary',
+  weddingdate: 'weddingAnniversary',
+  phone: 'phonePrimary',
+  phonenumber: 'phonePrimary',
+  mobile: 'phonePrimary',
+  mobilenumber: 'phonePrimary',
+  cellphone: 'phonePrimary',
+  firsttimer: 'isFirstTimer',
+  isfirsttimer: 'isFirstTimer',
+  firstvisit: 'firstVisitDate',
+  firstvisitdate: 'firstVisitDate',
+  bornagain: 'bornAgainStatus',
+  bornagainstatus: 'bornAgainStatus',
+  invitedby: 'inviterName',
+  invitername: 'inviterName',
+  inviterphone: 'inviterPhone',
+};
 
 function normalizeHeader(header: string): string {
   return header.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -72,7 +107,8 @@ function guessDefaultMapping(headers: string[]): Record<string, string> {
   const byNormalized = new Map(TARGET_FIELDS.filter((f) => f.value).map((f) => [normalizeHeader(f.value), f.value]));
   const mapping: Record<string, string> = {};
   for (const header of headers) {
-    const match = byNormalized.get(normalizeHeader(header));
+    const norm = normalizeHeader(header);
+    const match = byNormalized.get(norm) ?? HEADER_ALIASES[norm];
     if (match) mapping[header] = match;
   }
   return mapping;
@@ -88,9 +124,9 @@ function applyMapping(row: ParsedRow, mapping: Record<string, string>): ParsedRo
 }
 
 const SAMPLE_ROWS = [
-  ['John', 'Doe', '', '', '+2348012345678', '', 'john@example.com', 'Visitor', '', '', '', 'PHONE', 'en', 'true', 'true', 'false', ''],
-  ['Jane', 'Smith', 'Ann', 'Jenny', '+2349087654321', '+2349011111111', 'jane@example.com', 'Visitor', 'Ushering', 'Zone A', '2026-07-20', 'EMAIL', 'en', 'true', 'true', 'false', 'First-time visitor from Zone A'],
-  ['David', 'Ola', '', '', '+2347033333333', '', '', '', '', '', '', 'PHONE', 'en', 'true', 'false', 'false', ''],
+  ['John', 'Doe', '', '', '+2348012345678', '', 'john@example.com', '6/15', '', 'Male', 'Single', 'Visitor', '', '', '', 'PHONE', 'en', 'false', '', '', '', '', 'true', 'true', 'false', ''],
+  ['Jane', 'Smith', 'Ann', 'Jenny', '+2349087654321', '+2349011111111', 'jane@example.com', '3/22/1990', '8/14/2015', 'Female', 'Married', 'Member', 'Ushering', 'Zone A', '2026-07-20', 'EMAIL', 'en', 'false', '', 'YES', 'Pastor Bola', '+2349022222222', 'true', 'true', 'false', 'First-time visitor from Zone A'],
+  ['David', 'Ola', '', '', '+2347033333333', '', '', '11/5', '', 'Male', '', '', '', '', '', 'PHONE', 'en', 'true', '2026-01-15', 'YES', '', '', 'true', 'false', 'false', ''],
 ];
 
 function downloadSampleTemplate() {
