@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Upload, Users2 } from 'lucide-react';
+import { Plus, Upload, Users2, UserPlus, X } from 'lucide-react';
 import type { Member, MemberListFilters as MemberListFiltersType } from '@/types/member';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -9,16 +9,22 @@ import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { Card } from '@/components/ui/Card';
 import { Alert } from '@/components/ui/Alert';
+import { useToast } from '@/components/ui/Toast';
 import { MemberFilters } from '@/features/members/components/MemberFilters';
 import { MemberTable } from '@/features/members/components/MemberTable';
+import { BulkInviteResultsModal } from '@/features/members/components/BulkInviteResultsModal';
 import { membersApi } from '@/features/members/api/members.api';
+import { invitesApi } from '@/features/members/api/invites.api';
+import type { BulkInviteOutcome } from '@/features/members/api/invites.api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { usePermission } from '@/hooks/usePermission';
 import type { ApiError } from '@/types';
 
 const DEFAULT_PAGE_SIZE = 25;
 
 export function MemberListPage() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [filters, setFilters] = useState<MemberListFiltersType>({});
@@ -27,6 +33,23 @@ export function MemberListPage() {
   const [sortBy, setSortBy] = useState<string | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [archiveTarget, setArchiveTarget] = useState<Member | null>(null);
+
+  // Backend permission codes, from routes.tsx / members.routes.ts:
+  // POST /members -> members.create, POST /members/import -> members.import,
+  // GET /members/possible-duplicates -> members.merge_duplicates,
+  // POST /users/invite(/bulk), POST /users/:id/resend-invite -> users.create.
+  const canCreateMember = usePermission('members.create');
+  const canImportMembers = usePermission('members.import');
+  const canMergeDuplicates = usePermission('members.merge_duplicates');
+  const canInvite = usePermission('users.create');
+  // PATCH /members/:id -> members.update, DELETE /members/:id (archive) -> members.delete.
+  const canUpdateMember = usePermission('members.update');
+  const canDeleteMember = usePermission('members.delete');
+
+  const [selectedMembers, setSelectedMembers] = useState<Map<string, Member>>(new Map());
+  const [invitingMemberId, setInvitingMemberId] = useState<string | null>(null);
+  const [bulkResults, setBulkResults] = useState<BulkInviteOutcome[] | null>(null);
+  const [bulkResultsLookup, setBulkResultsLookup] = useState<Map<string, Member>>(new Map());
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -53,6 +76,58 @@ export function MemberListPage() {
     },
   });
 
+  function extractErrorMessage(err: unknown, fallback: string): string {
+    return (err as { response?: { data?: ApiError } })?.response?.data?.message ?? fallback;
+  }
+
+  const inviteMutation = useMutation({
+    mutationFn: (member: Member) => invitesApi.inviteMember({ memberId: member.id }),
+    onMutate: (member) => setInvitingMemberId(member.id),
+    onSuccess: (_res, member) => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      toast({ title: `Invite sent to ${member.email}`, variant: 'success' });
+    },
+    onError: (err: unknown) => {
+      toast({ title: 'Could not send invite', description: extractErrorMessage(err, 'Please try again.'), variant: 'error' });
+    },
+    onSettled: () => setInvitingMemberId(null),
+  });
+
+  const resendMutation = useMutation({
+    mutationFn: (member: Member) => {
+      if (!member.userAccount) {
+        return Promise.reject(new Error('This member has no login to resend an invite for.'));
+      }
+      return invitesApi.resendInvite(member.userAccount.id);
+    },
+    onMutate: (member) => setInvitingMemberId(member.id),
+    onSuccess: (_res, member) => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      toast({ title: `Invite resent to ${member.email}`, variant: 'success' });
+    },
+    onError: (err: unknown) => {
+      toast({ title: 'Could not resend invite', description: extractErrorMessage(err, 'Please try again.'), variant: 'error' });
+    },
+    onSettled: () => setInvitingMemberId(null),
+  });
+
+  const bulkInviteMutation = useMutation({
+    mutationFn: (memberIds: string[]) => invitesApi.bulkInvite(memberIds),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      setBulkResultsLookup(new Map(selectedMembers));
+      setBulkResults(res.data);
+      setSelectedMembers(new Map());
+    },
+    onError: (err: unknown) => {
+      toast({
+        title: 'Could not send bulk invites',
+        description: extractErrorMessage(err, 'Please try again.'),
+        variant: 'error',
+      });
+    },
+  });
+
   const members = data?.data ?? [];
   const totalItems = data?.meta.total ?? 0;
   const totalPages = data?.meta.totalPages ?? 1;
@@ -62,6 +137,36 @@ export function MemberListPage() {
     setCurrentPage(1);
   };
 
+  function toggleSelect(memberId: string) {
+    setSelectedMembers((prev) => {
+      const next = new Map(prev);
+      if (next.has(memberId)) {
+        next.delete(memberId);
+      } else {
+        const member = members.find((m) => m.id === memberId);
+        if (member) next.set(memberId, member);
+      }
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelectedMembers((prev) => {
+      const allSelected = members.length > 0 && members.every((m) => prev.has(m.id));
+      const next = new Map(prev);
+      for (const m of members) {
+        if (allSelected) {
+          next.delete(m.id);
+        } else {
+          next.set(m.id, m);
+        }
+      }
+      return next;
+    });
+  }
+
+  const selectedCount = selectedMembers.size;
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -69,19 +174,25 @@ export function MemberListPage() {
         description="Manage church members"
         actions={
           <div className="flex items-center gap-2">
-            <Link to="/members/duplicates">
-              <Button variant="outline" leftIcon={<Users2 className="h-4 w-4" />}>
-                Duplicates
-              </Button>
-            </Link>
-            <Link to="/members/import">
-              <Button variant="outline" leftIcon={<Upload className="h-4 w-4" />}>
-                Import
-              </Button>
-            </Link>
-            <Link to="/members/new">
-              <Button leftIcon={<Plus className="h-4 w-4" />}>Add Member</Button>
-            </Link>
+            {canMergeDuplicates && (
+              <Link to="/members/duplicates">
+                <Button variant="outline" leftIcon={<Users2 className="h-4 w-4" />}>
+                  Duplicates
+                </Button>
+              </Link>
+            )}
+            {canImportMembers && (
+              <Link to="/members/import">
+                <Button variant="outline" leftIcon={<Upload className="h-4 w-4" />}>
+                  Import
+                </Button>
+              </Link>
+            )}
+            {canCreateMember && (
+              <Link to="/members/new">
+                <Button leftIcon={<Plus className="h-4 w-4" />}>Add Member</Button>
+              </Link>
+            )}
           </div>
         }
       />
@@ -111,6 +222,32 @@ export function MemberListPage() {
           <MemberFilters filters={filters} onFilterChange={handleFilterChange} />
         </div>
 
+        {canInvite && selectedCount > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-indigo-100 bg-indigo-50 px-4 py-3 sm:px-6">
+            <p className="text-sm font-medium text-indigo-900">
+              {selectedCount} member{selectedCount !== 1 ? 's' : ''} selected
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<X className="h-4 w-4" />}
+                onClick={() => setSelectedMembers(new Map())}
+              >
+                Clear
+              </Button>
+              <Button
+                size="sm"
+                leftIcon={<UserPlus className="h-4 w-4" />}
+                isLoading={bulkInviteMutation.isPending}
+                onClick={() => bulkInviteMutation.mutate(Array.from(selectedMembers.keys()))}
+              >
+                Invite selected
+              </Button>
+            </div>
+          </div>
+        )}
+
         <MemberTable
           members={members}
           isLoading={isLoading}
@@ -126,6 +263,15 @@ export function MemberListPage() {
             }
             setCurrentPage(1);
           }}
+          canInvite={canInvite}
+          selectedIds={new Set(selectedMembers.keys())}
+          onToggleSelect={toggleSelect}
+          onToggleSelectAll={toggleSelectAll}
+          onInvite={(member) => inviteMutation.mutate(member)}
+          onResendInvite={(member) => resendMutation.mutate(member)}
+          invitingMemberId={invitingMemberId}
+          canUpdate={canUpdateMember}
+          canDelete={canDeleteMember}
         />
 
         {totalItems > 0 && (
@@ -170,6 +316,15 @@ export function MemberListPage() {
             </div>
           </Card>
         </div>
+      )}
+
+      {bulkResults && (
+        <BulkInviteResultsModal
+          isOpen
+          onClose={() => setBulkResults(null)}
+          results={bulkResults}
+          memberLookup={bulkResultsLookup}
+        />
       )}
     </div>
   );

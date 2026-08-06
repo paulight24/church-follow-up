@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
+import { usePermission } from '@/hooks/usePermission';
 import { cn } from '@/lib/cn';
 import { mediaAssetsApi, mediaAssetUrl, type MediaAsset } from '../api/campaigns.api';
 
@@ -19,6 +20,11 @@ interface MediaLibraryProps {
 export function MediaLibrary({ onSelect, selectedAssetId }: MediaLibraryProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  // Reachable from anywhere the media picker is embedded (e.g. the campaign
+  // builder, gated only on campaigns.create); uploading/deleting an asset
+  // are separately permissioned here.
+  const canUpload = usePermission('media_assets.upload');
+  const canDelete = usePermission('media_assets.delete');
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
@@ -60,13 +66,15 @@ export function MediaLibrary({ onSelect, selectedAssetId }: MediaLibraryProps) {
         <CardTitle>Media Library</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <FileUpload
-          label="Upload a new image"
-          accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,application/pdf"
-          maxSizeMB={10}
-          helpText="PNG, JPEG, GIF, WEBP, SVG, or PDF up to 10MB"
-          onFileSelect={(file) => uploadMutation.mutate(file)}
-        />
+        {canUpload && (
+          <FileUpload
+            label="Upload a new image"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,application/pdf"
+            maxSizeMB={10}
+            helpText="PNG, JPEG, GIF, WEBP, SVG, or PDF up to 10MB"
+            onFileSelect={(file) => uploadMutation.mutate(file)}
+          />
+        )}
 
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -115,14 +123,16 @@ export function MediaLibrary({ onSelect, selectedAssetId }: MediaLibraryProps) {
                     <p className="truncate text-xs text-slate-600" title={asset.filename}>
                       {asset.filename}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => setPendingDeleteId(asset.id)}
-                      className="shrink-0 rounded p-0.5 text-slate-300 opacity-0 transition-opacity hover:text-rose-500 group-hover:opacity-100"
-                      aria-label={`Delete ${asset.filename}`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    {canDelete && (
+                      <button
+                        type="button"
+                        onClick={() => setPendingDeleteId(asset.id)}
+                        className="shrink-0 rounded p-0.5 text-slate-300 opacity-0 transition-opacity hover:text-rose-500 group-hover:opacity-100"
+                        aria-label={`Delete ${asset.filename}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );

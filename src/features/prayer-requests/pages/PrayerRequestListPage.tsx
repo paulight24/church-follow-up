@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
+import { usePermission } from '@/hooks/usePermission';
 import { prayerRequestsApi } from '../api/prayer-requests.api';
 import { PrayerRequestCard } from '../components/PrayerRequestCard';
 import { PrayerRequestFormModal } from '../components/PrayerRequestFormModal';
@@ -28,6 +29,9 @@ const STATUS_OPTIONS: Array<{ label: string; value: PrayerRequestStatus | '' }> 
 const PAGE_SIZE = 12;
 
 export function PrayerRequestListPage() {
+  // The route only requires prayer_requests.view to reach this page;
+  // submitting a new request needs prayer_requests.create on top of that.
+  const canCreate = usePermission('prayer_requests.create');
   const [status, setStatus] = useState<PrayerRequestStatus | ''>('');
   const [categoryId, setCategoryId] = useState('');
   const [page, setPage] = useState(1);
@@ -66,9 +70,11 @@ export function PrayerRequestListPage() {
                 Dashboard
               </Button>
             </Link>
-            <Button variant="primary" leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
-              New Request
-            </Button>
+            {canCreate && (
+              <Button variant="primary" leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
+                New Request
+              </Button>
+            )}
           </>
         }
       />
@@ -114,9 +120,11 @@ export function PrayerRequestListPage() {
             title="No prayer requests found"
             description="Prayer requests submitted by members and guests will appear here."
             action={
-              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
-                New Request
-              </Button>
+              canCreate ? (
+                <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
+                  New Request
+                </Button>
+              ) : undefined
             }
           />
         </Card>

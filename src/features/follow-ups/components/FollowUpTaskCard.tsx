@@ -89,16 +89,18 @@ export function FollowUpTaskCard({ task, onLogInteraction, onReassign }: FollowU
         </div>
       </CardContent>
 
-      {canLogInteraction && (
+      {canLogInteraction && (onLogInteraction || onReassign) && (
         <CardFooter className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            leftIcon={<MessageSquare className="h-4 w-4" />}
-            onClick={() => onLogInteraction?.(task)}
-          >
-            Log Interaction
-          </Button>
+          {onLogInteraction && (
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<MessageSquare className="h-4 w-4" />}
+              onClick={() => onLogInteraction(task)}
+            >
+              Log Interaction
+            </Button>
+          )}
           {onReassign && (
             <Button
               variant="ghost"

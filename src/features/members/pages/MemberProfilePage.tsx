@@ -16,12 +16,22 @@ import { CreateFollowUpModal } from '@/features/follow-ups/components/CreateFoll
 import { EscalationForm } from '@/features/escalations/components/EscalationForm';
 import { membersApi } from '@/features/members/api/members.api';
 import { formatDate, formatMemberName } from '@/lib/formatters';
+import { usePermission } from '@/hooks/usePermission';
 import type { ApiError } from '@/types';
 
 export function MemberProfilePage() {
   const { id } = useParams<{ id: string }>();
   const [showFollowUp, setShowFollowUp] = useState(false);
   const [showEscalate, setShowEscalate] = useState(false);
+
+  // Backend permission codes: PATCH /members/:id -> members.update,
+  // POST /follow-up-tasks -> follow_ups.create, POST /escalations ->
+  // escalations.create. "Edit" also lands on a route ProtectedRoute already
+  // guards, but the other two are plain modals with no route-level backstop -
+  // without this check either can be filled in full before 403ing.
+  const canEditMember = usePermission('members.update');
+  const canCreateFollowUp = usePermission('follow_ups.create');
+  const canEscalate = usePermission('escalations.create');
 
   const { data: member, isLoading, isError, error } = useQuery({
     queryKey: ['member', id],
@@ -70,17 +80,23 @@ export function MemberProfilePage() {
         title={fullName}
         actions={
           <div className="flex items-center gap-2">
-            <Link to={`/members/${id}/edit`}>
-              <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />}>
-                Edit
+            {canEditMember && (
+              <Link to={`/members/${id}/edit`}>
+                <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />}>
+                  Edit
+                </Button>
+              </Link>
+            )}
+            {canCreateFollowUp && (
+              <Button variant="secondary" size="sm" leftIcon={<Phone className="h-4 w-4" />} onClick={() => setShowFollowUp(true)}>
+                Follow Up
               </Button>
-            </Link>
-            <Button variant="secondary" size="sm" leftIcon={<Phone className="h-4 w-4" />} onClick={() => setShowFollowUp(true)}>
-              Follow Up
-            </Button>
-            <Button variant="danger" size="sm" leftIcon={<AlertTriangle className="h-4 w-4" />} onClick={() => setShowEscalate(true)}>
-              Escalate
-            </Button>
+            )}
+            {canEscalate && (
+              <Button variant="danger" size="sm" leftIcon={<AlertTriangle className="h-4 w-4" />} onClick={() => setShowEscalate(true)}>
+                Escalate
+              </Button>
+            )}
           </div>
         }
       />

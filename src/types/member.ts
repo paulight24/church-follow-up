@@ -148,6 +148,13 @@ export interface Member {
   contactVerifications?: MemberContactVerification[];
   createdBy?: { id: string; firstName: string; lastName: string } | null;
   updatedBy?: { id: string; firstName: string; lastName: string } | null;
+  /**
+   * The login linked to this member (Prisma: Member.userAccount, the reverse
+   * side of User.memberId). Selected by GET /members so the member list can
+   * show who already has an app login and who has an invite outstanding.
+   * Undefined is treated the same as null (no login) so the UI degrades safely.
+   */
+  userAccount?: { id: string; status: 'ACTIVE' | 'INVITED' | 'SUSPENDED' | 'DEACTIVATED' } | null;
 }
 
 export interface MemberListFilters {

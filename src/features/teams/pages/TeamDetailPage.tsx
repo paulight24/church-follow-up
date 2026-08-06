@@ -30,12 +30,16 @@ import { memberAssignmentsApi } from '../api/member-assignments.api';
 import type { TeamUser } from '@/types/team';
 import { formatDate, formatMemberName } from '@/lib/formatters';
 import type { ApiError } from '@/types';
+import { usePermission } from '@/hooks/usePermission';
 
 export function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<TeamUser | null>(null);
+  // Backend: POST /teams/:id/users and DELETE /teams/:id/users/:userId both
+  // require teams.manage_members. Gating both add + remove on the same code.
+  const canManageMembers = usePermission('teams.manage_members');
 
   const {
     data: team,
@@ -104,9 +108,11 @@ export function TeamDetailPage() {
       <PageHeader
         title={team.name}
         actions={
-          <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setShowAssignmentModal(true)}>
-            Add Worker
-          </Button>
+          canManageMembers ? (
+            <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setShowAssignmentModal(true)}>
+              Add Worker
+            </Button>
+          ) : undefined
         }
       />
 
@@ -186,7 +192,11 @@ export function TeamDetailPage() {
       <div>
         <h2 className="mb-3 text-lg font-semibold text-slate-900">Team Workers</h2>
         <Card>
-          <TeamMemberList members={workers} onRemove={(member) => setRemoveTarget(member)} />
+          <TeamMemberList
+            members={workers}
+            onRemove={canManageMembers ? (member) => setRemoveTarget(member) : undefined}
+            canManageMembers={canManageMembers}
+          />
         </Card>
       </div>
 

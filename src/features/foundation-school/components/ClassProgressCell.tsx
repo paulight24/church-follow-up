@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/cn';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { useToast } from '@/components/ui/Toast';
+import { usePermission } from '@/hooks/usePermission';
 import { foundationSchoolApi } from '../api/foundation-school.api';
 import type { ClassProgressStatus, FoundationSchoolClassProgress } from '@/types/foundationSchool';
 
@@ -36,6 +37,9 @@ interface ClassProgressCellProps {
 export function ClassProgressCell({ progress }: ClassProgressCellProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  // Reachable from any page that can view a cohort's roster; changing a
+  // class's status needs foundation_school.mark_attendance specifically.
+  const canMarkAttendance = usePermission('foundation_school.mark_attendance');
 
   const updateMutation = useMutation({
     mutationFn: (status: ClassProgressStatus) => {
@@ -55,20 +59,27 @@ export function ClassProgressCell({ progress }: ClassProgressCellProps) {
     },
   });
 
+  const badge = (
+    <span
+      title={`Class ${progress.classNumber}: ${statusLabel(progress.status)}`}
+      className={cn(
+        'flex h-9 w-9 items-center justify-center rounded-lg border text-xs font-semibold transition-colors',
+        canMarkAttendance && 'hover:brightness-95',
+        STATUS_STYLES[progress.status],
+      )}
+    >
+      {progress.classNumber}
+    </span>
+  );
+
+  if (!canMarkAttendance) {
+    return badge;
+  }
+
   return (
     <Dropdown
       align="left"
-      trigger={
-        <span
-          title={`Class ${progress.classNumber}: ${statusLabel(progress.status)}`}
-          className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg border text-xs font-semibold transition-colors hover:brightness-95',
-            STATUS_STYLES[progress.status],
-          )}
-        >
-          {progress.classNumber}
-        </span>
-      }
+      trigger={badge}
       items={STATUS_OPTIONS.map((status) => ({
         label: statusLabel(status),
         onClick: () => updateMutation.mutate(status),

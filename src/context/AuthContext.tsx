@@ -53,6 +53,13 @@ export interface AuthContextValue {
   refreshToken: () => Promise<void>;
   hasPermission: (code: string) => boolean;
   hasRole: (role: UserRole) => boolean;
+  /**
+   * Adopt an already-issued session (tokens + user) without hitting
+   * /auth/login. Used by the accept-invite flow: that endpoint sets the
+   * member's password and returns a normal auth session in one call, so we
+   * just need to store it and land them signed in - no second login round trip.
+   */
+  setSession: (data: LoginResponse) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,6 +77,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(async (email: string, password: string) => {
     const data = await loginRequest(email, password);
 
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    setUser(data.user);
+  }, []);
+
+  const setSession = useCallback((data: LoginResponse) => {
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
     setUser(data.user);
@@ -154,8 +167,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       refreshToken,
       hasPermission,
       hasRole,
+      setSession,
     }),
-    [user, isLoading, isAuthenticated, login, logout, refreshToken, hasPermission, hasRole],
+    [user, isLoading, isAuthenticated, login, logout, refreshToken, hasPermission, hasRole, setSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

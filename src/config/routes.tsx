@@ -8,6 +8,7 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
 const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const AcceptInvitePage = lazy(() => import('@/features/auth/pages/AcceptInvitePage').then(m => ({ default: m.AcceptInvitePage })));
 
 // Dashboard
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -102,6 +103,7 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/accept-invite" element={<AcceptInvitePage />} />
         <Route path="/prayer" element={<PublicPrayerRequestPage />} />
 
         {/* Protected routes */}

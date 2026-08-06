@@ -30,6 +30,7 @@ import { CallGuidePanel } from '../components/CallGuidePanel';
 import { ReassignTaskModal } from '../components/ReassignTaskModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermission } from '@/hooks/usePermission';
 import { followUpTasksApi } from '../api/follow-up-tasks.api';
 import { formatDate, formatMemberName } from '@/lib/formatters';
 import {
@@ -47,6 +48,11 @@ import {
 export function MyFollowUpsPage() {
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { user } = useAuth();
+  // The route only requires follow_ups.view or follow_ups.view_own; logging
+  // an interaction and reassigning a task are separately-permissioned actions
+  // (reassign in particular is typically Team Lead/Administrator only).
+  const canRecordInteraction = usePermission('follow_ups.record_interaction');
+  const canReassign = usePermission('follow_ups.reassign');
   const [filters, setFilters] = useState<TaskFiltersState>({
     statusTab: 'all',
     priority: '',
@@ -258,22 +264,26 @@ export function MyFollowUpsPage() {
                       <TableCell>
                         {isTaskOpen(task.status) && (
                           <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
-                              onClick={() => handleLogInteraction(task.id)}
-                            >
-                              Log Interaction
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              leftIcon={<UserCog className="h-3.5 w-3.5" />}
-                              onClick={() => setReassignTaskId(task.id)}
-                            >
-                              Reassign
-                            </Button>
+                            {canRecordInteraction && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
+                                onClick={() => handleLogInteraction(task.id)}
+                              >
+                                Log Interaction
+                              </Button>
+                            )}
+                            {canReassign && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                leftIcon={<UserCog className="h-3.5 w-3.5" />}
+                                onClick={() => setReassignTaskId(task.id)}
+                              >
+                                Reassign
+                              </Button>
+                            )}
                           </div>
                         )}
                       </TableCell>
@@ -288,8 +298,8 @@ export function MyFollowUpsPage() {
                 <FollowUpTaskCard
                   key={task.id}
                   task={task}
-                  onLogInteraction={() => handleLogInteraction(task.id)}
-                  onReassign={() => setReassignTaskId(task.id)}
+                  onLogInteraction={canRecordInteraction ? () => handleLogInteraction(task.id) : undefined}
+                  onReassign={canReassign ? () => setReassignTaskId(task.id) : undefined}
                 />
               ))}
             </div>

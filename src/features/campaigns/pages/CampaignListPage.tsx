@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Pagination } from '@/components/ui/Pagination';
 import { useToast } from '@/components/ui/Toast';
+import { usePermission } from '@/hooks/usePermission';
 import {
   Table,
   TableHeader,
@@ -38,6 +39,10 @@ export function CampaignListPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  // /campaigns/new (used for both create and edit) is itself route-gated on
+  // campaigns.create, so both actions need the same check here.
+  const canCreate = usePermission('campaigns.create');
+  const canDelete = usePermission('campaigns.delete');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -74,9 +79,11 @@ export function CampaignListPage() {
         title="Campaigns"
         subtitle="Create and manage outreach campaigns"
         actions={
-          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => navigate('/campaigns/new')}>
-            New Campaign
-          </Button>
+          canCreate ? (
+            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => navigate('/campaigns/new')}>
+              New Campaign
+            </Button>
+          ) : undefined
         }
       />
 
@@ -105,11 +112,17 @@ export function CampaignListPage() {
           <EmptyState
             icon={Megaphone}
             title="No campaigns yet"
-            description="Create your first outreach campaign to get started."
+            description={
+              canCreate
+                ? 'Create your first outreach campaign to get started.'
+                : 'No campaigns have been created yet. Ask a Communications Manager or Administrator to create one.'
+            }
             action={
-              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => navigate('/campaigns/new')}>
-                New Campaign
-              </Button>
+              canCreate ? (
+                <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => navigate('/campaigns/new')}>
+                  New Campaign
+                </Button>
+              ) : undefined
             }
           />
         ) : (
@@ -155,7 +168,7 @@ export function CampaignListPage() {
                         >
                           View
                         </Button>
-                        {campaign.status === 'DRAFT' && (
+                        {campaign.status === 'DRAFT' && canCreate && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -165,7 +178,7 @@ export function CampaignListPage() {
                             Edit
                           </Button>
                         )}
-                        {['DRAFT', 'CANCELLED', 'FAILED'].includes(campaign.status) && (
+                        {['DRAFT', 'CANCELLED', 'FAILED'].includes(campaign.status) && canDelete && (
                           <Button
                             variant="ghost"
                             size="sm"

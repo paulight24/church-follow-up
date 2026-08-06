@@ -115,6 +115,11 @@ export const usersApi = {
     return api.post(`/users/${id}/deactivate`);
   },
 
+  /** POST /users/:id/resend-invite - gated server-side on users.create. Only meaningful for status === 'INVITED'. */
+  resendInvite(id: string): Promise<AxiosResponse<AdminUserListItem>> {
+    return api.post(`/users/${id}/resend-invite`);
+  },
+
   getUserRoles(id: string): Promise<AxiosResponse<AdminUserRoleDetail[]>> {
     return api.get(`/users/${id}/roles`);
   },

@@ -80,12 +80,15 @@ function processQueue(error: unknown, token: string | null = null) {
 // into the frontend's ApiError shape ({ message, statusCode, errors }) so
 // `error.response.data.message` / `.errors` work everywhere consumers check them.
 function normalizeError(error: AxiosError): AxiosError {
-  const body = error.response?.data as { error?: { message?: string; details?: Record<string, string[]> } } | undefined;
+  const body = error.response?.data as
+    | { error?: { code?: string; message?: string; details?: Record<string, string[]> } }
+    | undefined;
   if (body?.error) {
     (error.response as { data: unknown }).data = {
       message: body.error.message,
       statusCode: error.response?.status ?? 500,
       errors: body.error.details,
+      code: body.error.code,
     };
   }
   return error;

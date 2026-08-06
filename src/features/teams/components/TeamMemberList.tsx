@@ -20,6 +20,8 @@ import { cn } from '@/lib/cn';
 interface TeamMemberListProps {
   members: TeamUser[];
   onRemove?: (member: TeamUser) => void;
+  /** Backend: DELETE /teams/:id/users/:userId requires teams.manage_members. */
+  canManageMembers?: boolean;
 }
 
 const roleVariant: Record<TeamUser['teamRole'], 'purple' | 'info' | 'gray'> = {
@@ -28,13 +30,17 @@ const roleVariant: Record<TeamUser['teamRole'], 'purple' | 'info' | 'gray'> = {
   BACKUP: 'gray',
 };
 
-export function TeamMemberList({ members, onRemove }: TeamMemberListProps) {
+export function TeamMemberList({ members, onRemove, canManageMembers = false }: TeamMemberListProps) {
   if (members.length === 0) {
     return (
       <EmptyState
         icon={Users}
         title="No team workers"
-        description="This team has no workers yet. Add workers to get started."
+        description={
+          canManageMembers
+            ? 'This team has no workers yet. Add workers to get started.'
+            : 'This team has no workers yet. Ask a Team Lead or Administrator to add one.'
+        }
       />
     );
   }
@@ -46,7 +52,7 @@ export function TeamMemberList({ members, onRemove }: TeamMemberListProps) {
           <TableHead>Name</TableHead>
           <TableHead>Role</TableHead>
           <TableHead>Since</TableHead>
-          <TableHead className="w-12" />
+          {canManageMembers && <TableHead className="w-12" />}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -87,16 +93,18 @@ export function TeamMemberList({ members, onRemove }: TeamMemberListProps) {
                 </div>
               </TableCell>
               <TableCell className="text-slate-500">{formatDate(member.startsAt)}</TableCell>
-              <TableCell>
-                <Dropdown
-                  trigger={
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </span>
-                  }
-                  items={actions}
-                />
-              </TableCell>
+              {canManageMembers && (
+                <TableCell>
+                  <Dropdown
+                    trigger={
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </span>
+                    }
+                    items={actions}
+                  />
+                </TableCell>
+              )}
             </TableRow>
           );
         })}

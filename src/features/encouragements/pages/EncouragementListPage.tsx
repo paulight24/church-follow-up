@@ -53,6 +53,9 @@ export function EncouragementListPage() {
   const canSend = usePermission('encouragements.send');
   const canUpdate = usePermission('encouragements.update');
   const canDelete = usePermission('encouragements.delete');
+  // /encouragements/cards is route-gated on encouragement_cards.print, a
+  // separate permission from the encouragements.view this list needs.
+  const canPrintCards = usePermission('encouragement_cards.print');
 
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
@@ -151,14 +154,18 @@ export function EncouragementListPage() {
         subtitle="Send uplifting messages and scripture to your congregation"
         actions={
           <div className="flex items-center gap-2">
-            <Link to="/encouragements/cards">
-              <Button variant="outline" leftIcon={<Printer className="h-4 w-4" />}>
-                Print Cards
+            {canPrintCards && (
+              <Link to="/encouragements/cards">
+                <Button variant="outline" leftIcon={<Printer className="h-4 w-4" />}>
+                  Print Cards
+                </Button>
+              </Link>
+            )}
+            {canCreate && (
+              <Button onClick={() => navigate('/encouragements/new')} leftIcon={<Heart className="h-4 w-4" />}>
+                Send New
               </Button>
-            </Link>
-            <Button onClick={() => navigate('/encouragements/new')} leftIcon={<Heart className="h-4 w-4" />}>
-              Send New
-            </Button>
+            )}
           </div>
         }
       />

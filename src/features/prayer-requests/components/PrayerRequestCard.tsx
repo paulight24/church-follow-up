@@ -17,6 +17,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Textarea } from '@/components/ui/Textarea';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { useToast } from '@/components/ui/Toast';
+import { usePermission } from '@/hooks/usePermission';
 import { formatRelativeDate } from '@/lib/formatters';
 import { prayerRequestsApi } from '../api/prayer-requests.api';
 import type { PrayerRequest, PrayerRequestStatus } from '@/types/prayerRequest';
@@ -59,6 +60,11 @@ interface PrayerRequestCardProps {
 export function PrayerRequestCard({ request, onAssign }: PrayerRequestCardProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  // The route only requires prayer_requests.view to reach this list; each
+  // action below needs its own, separate permission on top of that.
+  const canMarkPrayed = usePermission('prayer_requests.mark_prayed');
+  const canAssign = usePermission('prayer_requests.assign');
+  const canUpdate = usePermission('prayer_requests.update');
   const [testimonyModalOpen, setTestimonyModalOpen] = useState(false);
   const [testimonyText, setTestimonyText] = useState('');
 
@@ -104,42 +110,42 @@ export function PrayerRequestCard({ request, onAssign }: PrayerRequestCardProps)
   const isLocked = Boolean(request.requestRedacted);
 
   const dropdownItems = [
-    {
+    canAssign && {
       label: request.assignedTo ? 'Reassign' : 'Assign to worker',
       icon: <UserPlus className="h-4 w-4" />,
       onClick: () => onAssign(request.id),
       disabled: isLocked,
     },
-    {
+    canAssign && {
       label: canFollowUp ? 'Create Follow-Up Task' : 'Create Follow-Up Task (requires linked member + call/pastoral request)',
       icon: <ClipboardPlus className="h-4 w-4" />,
       onClick: () => followUpTaskMutation.mutate(),
       disabled: isLocked || !canFollowUp,
     },
-    {
+    canUpdate && {
       label: 'Mark Follow-Up Needed',
       icon: <Heart className="h-4 w-4" />,
       onClick: () => updateStatusMutation.mutate({ status: 'FOLLOW_UP_NEEDED' }),
       disabled: isLocked || request.status === 'FOLLOW_UP_NEEDED' || request.status === 'CLOSED',
     },
-    {
+    canUpdate && {
       label: 'Record Testimony',
       icon: <Sparkles className="h-4 w-4" />,
       onClick: () => setTestimonyModalOpen(true),
       disabled: isLocked || request.status === 'TESTIMONY_RECEIVED',
     },
-    {
+    canUpdate && {
       label: 'divider',
       onClick: () => {},
       divider: true,
     },
-    {
+    canUpdate && {
       label: 'Close Request',
       icon: <CheckCircle2 className="h-4 w-4" />,
       onClick: () => updateStatusMutation.mutate({ status: 'CLOSED' }),
       disabled: isLocked || request.status === 'CLOSED',
     },
-  ];
+  ].filter((item): item is Exclude<typeof item, false> => item !== false);
 
   return (
     <>
@@ -155,14 +161,16 @@ export function PrayerRequestCard({ request, onAssign }: PrayerRequestCardProps)
                 <p className="text-xs text-slate-400">{formatRelativeDate(request.createdAt)}</p>
               </div>
             </div>
-            <Dropdown
-              trigger={
-                <span className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                  <MoreVertical className="h-4 w-4" />
-                </span>
-              }
-              items={dropdownItems}
-            />
+            {dropdownItems.length > 0 && (
+              <Dropdown
+                trigger={
+                  <span className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                    <MoreVertical className="h-4 w-4" />
+                  </span>
+                }
+                items={dropdownItems}
+              />
+            )}
           </div>
 
           <div className="flex items-start gap-2">
@@ -210,7 +218,7 @@ export function PrayerRequestCard({ request, onAssign }: PrayerRequestCardProps)
                 </p>
               )}
             </div>
-            {request.status !== 'PRAYED' && request.status !== 'CLOSED' && (
+            {canMarkPrayed && request.status !== 'PRAYED' && request.status !== 'CLOSED' && (
               <Button
                 variant="outline"
                 size="sm"
