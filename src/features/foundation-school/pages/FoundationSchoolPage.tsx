@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatDate } from '@/lib/formatters';
+import { usePermission } from '@/hooks/usePermission';
 import { foundationSchoolApi } from '../api/foundation-school.api';
 import { CohortFormModal } from '../components/CohortFormModal';
 import { getInstructorLabel } from '../lib/instructorLabel';
@@ -23,6 +24,9 @@ const STATUS_VARIANT: Record<CohortStatus, 'success' | 'info' | 'warning' | 'gra
 
 export function FoundationSchoolPage() {
   const navigate = useNavigate();
+  // The route only requires foundation_school.view to reach this page;
+  // creating a batch needs foundation_school.manage_cohorts on top of that.
+  const canManageCohorts = usePermission('foundation_school.manage_cohorts');
   const [formOpen, setFormOpen] = useState(false);
 
   const cohortsQuery = useQuery({
@@ -38,9 +42,11 @@ export function FoundationSchoolPage() {
         title="Foundation School"
         description="Manage batches, enrollments, and 7-class progress tracking"
         actions={
-          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
-            New Batch
-          </Button>
+          canManageCohorts ? (
+            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
+              New Batch
+            </Button>
+          ) : undefined
         }
       />
 
@@ -53,11 +59,17 @@ export function FoundationSchoolPage() {
           <EmptyState
             icon={GraduationCap}
             title="No batches yet"
-            description="Create your first Foundation School batch to start enrolling members."
+            description={
+              canManageCohorts
+                ? 'Create your first Foundation School batch to start enrolling members.'
+                : 'No Foundation School batches have been created yet. Ask a Foundation School Teacher or Administrator to create one.'
+            }
             action={
-              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
-                New Batch
-              </Button>
+              canManageCohorts ? (
+                <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setFormOpen(true)}>
+                  New Batch
+                </Button>
+              ) : undefined
             }
           />
         </Card>

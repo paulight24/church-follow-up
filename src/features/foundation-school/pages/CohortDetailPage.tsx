@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableEmpty } from '@/components/ui/Table';
 import { useToast } from '@/components/ui/Toast';
+import { usePermission } from '@/hooks/usePermission';
 import { formatDate } from '@/lib/formatters';
 import { foundationSchoolApi } from '../api/foundation-school.api';
 import { EnrollMemberModal } from '../components/EnrollMemberModal';
@@ -28,6 +29,10 @@ export function CohortDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  // The route only requires foundation_school.view to reach this page;
+  // enrolling and graduating a member each need their own permission.
+  const canEnroll = usePermission('foundation_school.enroll');
+  const canGraduate = usePermission('foundation_school.graduate');
   const [enrollModalOpen, setEnrollModalOpen] = useState(false);
 
   const cohortQuery = useQuery({
@@ -89,9 +94,11 @@ export function CohortDetailPage() {
         title={cohort.name}
         subtitle={`Started ${formatDate(cohort.startDate)}${instructorLabel ? ` - ${instructorLabel}` : ''}`}
         actions={
-          <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setEnrollModalOpen(true)}>
-            Enroll Member
-          </Button>
+          canEnroll ? (
+            <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setEnrollModalOpen(true)}>
+              Enroll Member
+            </Button>
+          ) : undefined
         }
       />
 
@@ -180,7 +187,7 @@ export function CohortDetailPage() {
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
                           <Award className="h-3.5 w-3.5" /> Graduated
                         </span>
-                      ) : (
+                      ) : canGraduate ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -196,6 +203,8 @@ export function CohortDetailPage() {
                         >
                           Graduate
                         </Button>
+                      ) : (
+                        <span className="text-xs text-slate-400">--</span>
                       )}
                     </TableCell>
                   </TableRow>

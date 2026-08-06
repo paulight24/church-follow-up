@@ -24,3 +24,13 @@ export interface ResetPasswordRequest {
   token: string;
   password: string;
 }
+
+export interface InviteInfo {
+  firstName: string;
+  email: string;
+}
+
+export interface AcceptInviteRequest {
+  token: string;
+  password: string;
+}

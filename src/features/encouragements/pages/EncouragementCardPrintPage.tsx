@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { usePermission } from '@/hooks/usePermission';
 import api from '@/config/api';
 
 interface CardTemplate {
@@ -95,6 +96,9 @@ function PrintableCards({ templates }: { templates: CardTemplate[] }) {
 
 export function EncouragementCardPrintPage() {
   const { data: templates, isLoading } = useCardTemplates();
+  // The route only requires encouragement_cards.print to reach this page;
+  // /encouragements/cards/manage is separately gated on encouragement_cards.edit.
+  const canManageTemplates = usePermission('encouragement_cards.edit');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showPreview, setShowPreview] = useState(false);
 
@@ -161,11 +165,13 @@ export function EncouragementCardPrintPage() {
                 <ChevronLeft className="mr-1 h-4 w-4" /> Encouragements
               </Button>
             </Link>
-            <Link to="/encouragements/cards/manage">
-              <Button variant="outline" size="sm">
-                <Settings className="mr-1 h-4 w-4" /> Manage Templates
-              </Button>
-            </Link>
+            {canManageTemplates && (
+              <Link to="/encouragements/cards/manage">
+                <Button variant="outline" size="sm">
+                  <Settings className="mr-1 h-4 w-4" /> Manage Templates
+                </Button>
+              </Link>
+            )}
             <Button
               size="sm"
               disabled={activeTemplates.length === 0}

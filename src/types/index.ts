@@ -46,6 +46,8 @@ export interface ApiError {
   message: string;
   statusCode: number;
   errors?: Record<string, string[]>;
+  /** Machine-readable error code from the backend envelope (e.g. INVITE_EXPIRED), when present. */
+  code?: string;
 }
 
 export interface SelectOption {

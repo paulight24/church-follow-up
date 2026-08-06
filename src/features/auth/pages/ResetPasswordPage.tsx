@@ -8,32 +8,10 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { resetPasswordSchema } from '@/lib/validators';
+import { getPasswordStrength } from '@/lib/passwordStrength';
 import { authApi } from '../api/auth.api';
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
-
-function getPasswordStrength(password: string): {
-  level: 'weak' | 'medium' | 'strong';
-  label: string;
-  color: string;
-  width: string;
-} {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[a-z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-
-  if (score <= 2) {
-    return { level: 'weak', label: 'Weak', color: 'bg-rose-500', width: 'w-1/3' };
-  }
-  if (score <= 4) {
-    return { level: 'medium', label: 'Medium', color: 'bg-amber-500', width: 'w-2/3' };
-  }
-  return { level: 'strong', label: 'Strong', color: 'bg-emerald-500', width: 'w-full' };
-}
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();

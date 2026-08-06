@@ -15,6 +15,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Textarea } from '@/components/ui/Textarea';
 import { useToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
+import { usePermission } from '@/hooks/usePermission';
 import {
   Table,
   TableHeader,
@@ -88,6 +89,9 @@ function restoreDepartment(id: string) {
 export function DepartmentsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  // The route only requires departments.view to reach this page; creating,
+  // editing, archiving, and restoring all need departments.manage on top of that.
+  const canManage = usePermission('departments.manage');
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -155,9 +159,11 @@ export function DepartmentsPage() {
         title="Departments"
         description="Manage church departments"
         actions={
-          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>
-            Add Department
-          </Button>
+          canManage ? (
+            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>
+              Add Department
+            </Button>
+          ) : undefined
         }
       />
 
@@ -220,36 +226,40 @@ export function DepartmentsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        leftIcon={<Pencil className="h-3.5 w-3.5" />}
-                        onClick={() => openEdit(dept)}
-                      >
-                        Edit
-                      </Button>
-                      {dept.status === 'ACTIVE' ? (
+                    {canManage ? (
+                      <div className="flex items-center gap-1">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          onClick={() => setArchiveTarget(dept)}
-                          title="Archive department"
+                          leftIcon={<Pencil className="h-3.5 w-3.5" />}
+                          onClick={() => openEdit(dept)}
                         >
-                          <Trash2 className="h-4 w-4 text-rose-500" />
+                          Edit
                         </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          isLoading={restoreMutation.isPending}
-                          onClick={() => restoreMutation.mutate(dept.id)}
-                          title="Restore department"
-                        >
-                          <RotateCcw className="h-4 w-4 text-emerald-600" />
-                        </Button>
-                      )}
-                    </div>
+                        {dept.status === 'ACTIVE' ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setArchiveTarget(dept)}
+                            title="Archive department"
+                          >
+                            <Trash2 className="h-4 w-4 text-rose-500" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            isLoading={restoreMutation.isPending}
+                            onClick={() => restoreMutation.mutate(dept.id)}
+                            title="Restore department"
+                          >
+                            <RotateCcw className="h-4 w-4 text-emerald-600" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

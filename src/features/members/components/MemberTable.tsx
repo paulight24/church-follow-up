@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Archive, MoreHorizontal, Users, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Eye, Pencil, Archive, MoreHorizontal, Users, ArrowUp, ArrowDown, ArrowUpDown, UserPlus, RefreshCw } from 'lucide-react';
 import type { Member } from '@/types/member';
 import {
   Table,
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Dropdown } from '@/components/ui/Dropdown';
 import type { DropdownItem } from '@/components/ui/Dropdown';
+import { Spinner } from '@/components/ui/Spinner';
 import { formatDate, formatPhone, formatMemberName } from '@/lib/formatters';
 import { cn } from '@/lib/cn';
 
@@ -24,11 +25,69 @@ interface MemberTableProps {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   onSort?: (field: string) => void;
+  /**
+   * "Invite to app" / "Resend invite" only make sense for someone who can
+   * actually issue invites (backend: users.create). When false the whole
+   * app-access column and the bulk-select checkboxes are hidden rather than
+   * shown-and-403ing.
+   */
+  canInvite?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (memberId: string) => void;
+  onToggleSelectAll?: () => void;
+  onInvite?: (member: Member) => void;
+  onResendInvite?: (member: Member) => void;
+  /** Member id of an invite/resend mutation currently in flight, to show a per-row spinner. */
+  invitingMemberId?: string | null;
+  /** PATCH /members/:id requires members.update. Edit also lands on a route ProtectedRoute guards, but the button is still hidden to match the rest of the app - no point offering a link that dead-ends on Access Denied. */
+  canUpdate?: boolean;
+  /** DELETE /members/:id (archive) requires members.delete - no route-level backstop, this is a direct mutation from the dropdown. */
+  canDelete?: boolean;
 }
 
-function SkeletonRow() {
+/** "Obvious at a glance" status chip for the member's login, per the invite screen's whole reason for existing. */
+function AppAccessBadge({ member }: { member: Member }) {
+  const account = member.userAccount;
+
+  if (!account) {
+    return (
+      <Badge variant="gray" size="sm">
+        No login
+      </Badge>
+    );
+  }
+  if (account.status === 'INVITED') {
+    return (
+      <Badge variant="info" size="sm" dot>
+        Invite sent
+      </Badge>
+    );
+  }
+  if (account.status === 'ACTIVE') {
+    return (
+      <Badge variant="success" size="sm" dot>
+        Active login
+      </Badge>
+    );
+  }
+  if (account.status === 'SUSPENDED') {
+    return (
+      <Badge variant="warning" size="sm" dot>
+        Suspended
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="gray" size="sm" dot>
+      Deactivated
+    </Badge>
+  );
+}
+
+function SkeletonRow({ canInvite }: { canInvite: boolean }) {
   return (
     <TableRow>
+      {canInvite && <TableCell><div className="h-4 w-4 animate-pulse rounded bg-slate-200" /></TableCell>}
       <TableCell>
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 animate-pulse rounded-full bg-slate-200" />
@@ -42,6 +101,7 @@ function SkeletonRow() {
       <TableCell><div className="h-4 w-28 animate-pulse rounded bg-slate-200" /></TableCell>
       <TableCell><div className="h-5 w-20 animate-pulse rounded-full bg-slate-200" /></TableCell>
       <TableCell><div className="h-4 w-24 animate-pulse rounded bg-slate-200" /></TableCell>
+      {canInvite && <TableCell><div className="h-5 w-20 animate-pulse rounded-full bg-slate-200" /></TableCell>}
       <TableCell><div className="h-4 w-20 animate-pulse rounded bg-slate-200" /></TableCell>
       <TableCell><div className="h-8 w-8 animate-pulse rounded bg-slate-200" /></TableCell>
     </TableRow>
@@ -65,11 +125,40 @@ function SortIcon({ field, sortBy, sortOrder }: { field?: string; sortBy?: strin
     : <ArrowDown className="ml-1 inline h-3.5 w-3.5 text-indigo-600" />;
 }
 
-export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, onSort }: MemberTableProps) {
+export function MemberTable({
+  members,
+  isLoading,
+  onArchive,
+  sortBy,
+  sortOrder,
+  onSort,
+  canInvite = false,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
+  onInvite,
+  onResendInvite,
+  invitingMemberId,
+  canUpdate = false,
+  canDelete = false,
+}: MemberTableProps) {
   const navigate = useNavigate();
+
+  const allSelected = canInvite && members.length > 0 && members.every((m) => selectedIds?.has(m.id));
 
   const headerRow = (
     <TableRow>
+      {canInvite && (
+        <TableHead className="w-10">
+          <input
+            type="checkbox"
+            aria-label="Select all members on this page"
+            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            checked={allSelected}
+            onChange={() => onToggleSelectAll?.()}
+          />
+        </TableHead>
+      )}
       {sortableColumns.map((col) => (
         <TableHead
           key={col.label}
@@ -80,6 +169,7 @@ export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, 
           <SortIcon field={col.field} sortBy={sortBy} sortOrder={sortOrder} />
         </TableHead>
       ))}
+      {canInvite && <TableHead>App Access</TableHead>}
       <TableHead className="w-12" />
     </TableRow>
   );
@@ -90,7 +180,7 @@ export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, 
         <TableHeader>{headerRow}</TableHeader>
         <TableBody>
           {Array.from({ length: 5 }, (_, i) => (
-            <SkeletonRow key={i} />
+            <SkeletonRow key={i} canInvite={canInvite} />
           ))}
         </TableBody>
       </Table>
@@ -116,25 +206,56 @@ export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, 
           const showPreferred =
             member.preferredName && member.preferredName !== member.firstName;
 
+          const hasEmail = !!member.email;
+          const account = member.userAccount;
+          const isInvitingThisRow = invitingMemberId === member.id;
+
           const actions: DropdownItem[] = [
             {
               label: 'View profile',
               icon: <Eye />,
               onClick: () => navigate(`/members/${member.id}`),
             },
-            {
+          ];
+
+          if (canUpdate) {
+            actions.push({
               label: 'Edit',
               icon: <Pencil />,
               onClick: () => navigate(`/members/${member.id}/edit`),
-            },
-            { label: '', onClick: () => {}, divider: true },
-            {
-              label: 'Archive',
-              icon: <Archive />,
-              variant: 'danger',
-              onClick: () => onArchive?.(member),
-            },
-          ];
+            });
+          }
+
+          if (canInvite) {
+            actions.push({ label: '', onClick: () => {}, divider: true });
+            if (!account) {
+              actions.push({
+                label: hasEmail ? 'Invite to app' : 'Invite to app (no email on file)',
+                icon: <UserPlus />,
+                disabled: !hasEmail || isInvitingThisRow,
+                onClick: () => onInvite?.(member),
+              });
+            } else if (account.status === 'INVITED') {
+              actions.push({
+                label: 'Resend invite',
+                icon: <RefreshCw />,
+                disabled: isInvitingThisRow,
+                onClick: () => onResendInvite?.(member),
+              });
+            }
+          }
+
+          if (canDelete) {
+            actions.push(
+              { label: '', onClick: () => {}, divider: true },
+              {
+                label: 'Archive',
+                icon: <Archive />,
+                variant: 'danger',
+                onClick: () => onArchive?.(member),
+              },
+            );
+          }
 
           return (
             <TableRow
@@ -142,6 +263,17 @@ export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, 
               className="cursor-pointer"
               onClick={() => navigate(`/members/${member.id}`)}
             >
+              {canInvite && (
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${fullName}`}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    checked={selectedIds?.has(member.id) ?? false}
+                    onChange={() => onToggleSelect?.(member.id)}
+                  />
+                </TableCell>
+              )}
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar
@@ -159,7 +291,13 @@ export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, 
                   </div>
                 </div>
               </TableCell>
-              <TableCell>{member.email ?? '--'}</TableCell>
+              <TableCell>
+                {member.email ?? (
+                  <span className="text-slate-400" title="No email on file - this member cannot be invited to the app">
+                    --
+                  </span>
+                )}
+              </TableCell>
               <TableCell>
                 {member.phonePrimary ? formatPhone(member.phonePrimary) : '--'}
               </TableCell>
@@ -185,6 +323,17 @@ export function MemberTable({ members, isLoading, onArchive, sortBy, sortOrder, 
                 </div>
               </TableCell>
               <TableCell>{member.department?.name ?? '--'}</TableCell>
+              {canInvite && (
+                <TableCell>
+                  <div className="flex items-center gap-1.5">
+                    <AppAccessBadge member={member} />
+                    {isInvitingThisRow && <Spinner size="sm" className="text-indigo-500" />}
+                  </div>
+                  {!hasEmail && !account && (
+                    <p className="mt-0.5 text-xs text-slate-400">No email on file</p>
+                  )}
+                </TableCell>
+              )}
               <TableCell>{formatDate(member.createdAt)}</TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Dropdown

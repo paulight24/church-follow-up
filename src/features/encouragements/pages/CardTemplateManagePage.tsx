@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { useToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
+import { usePermission } from '@/hooks/usePermission';
 import {
   Table,
   TableHeader,
@@ -103,6 +104,9 @@ function deleteTemplate(id: string) {
 export function CardTemplateManagePage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  // The route only requires encouragement_cards.edit to reach this page;
+  // creating a new template needs encouragement_cards.create on top of that.
+  const canCreate = usePermission('encouragement_cards.create');
 
   // List state
   const [statusFilter, setStatusFilter] = useState('');
@@ -247,9 +251,11 @@ export function CardTemplateManagePage() {
         title="Card Templates"
         description="Manage encouragement card templates for printing and distribution"
         actions={
-          <Button onClick={openCreateModal} leftIcon={<Plus className="h-4 w-4" />}>
-            New Template
-          </Button>
+          canCreate ? (
+            <Button onClick={openCreateModal} leftIcon={<Plus className="h-4 w-4" />}>
+              New Template
+            </Button>
+          ) : undefined
         }
       />
 
@@ -286,11 +292,17 @@ export function CardTemplateManagePage() {
           <EmptyState
             icon={FileText}
             title="No templates yet"
-            description="Create your first encouragement card template."
+            description={
+              canCreate
+                ? 'Create your first encouragement card template.'
+                : 'No card templates have been created yet. Ask a Communications Manager or Administrator to create one.'
+            }
             action={
-              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreateModal}>
-                New Template
-              </Button>
+              canCreate ? (
+                <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreateModal}>
+                  New Template
+                </Button>
+              ) : undefined
             }
           />
         ) : (

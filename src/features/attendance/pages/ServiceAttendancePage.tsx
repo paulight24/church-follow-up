@@ -24,6 +24,9 @@ export function ServiceAttendancePage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { hasPermission } = useAuth();
+  // The route only requires services.view to reach this page (e.g. Auditor,
+  // Viewer); tapping a member to record attendance needs attendance.record.
+  const canRecordAttendance = hasPermission('attendance.record');
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
@@ -115,81 +118,90 @@ export function ServiceAttendancePage() {
 
       {service && hasPermission('services.manage') && <CheckInPanel service={service} />}
 
-      <Card>
-        <div className="border-b border-slate-100 p-4 sm:p-6">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search members by name, email, or phone..."
-            className="sm:max-w-md"
-          />
-          <p className="mt-2 text-xs text-slate-500">
-            Tap a member to mark them present. Tap again to undo.
-          </p>
-        </div>
-
-        {membersLoading || attendanceLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner size="lg" className="text-indigo-600" />
+      {canRecordAttendance ? (
+        <Card>
+          <div className="border-b border-slate-100 p-4 sm:p-6">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search members by name, email, or phone..."
+              className="sm:max-w-md"
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              Tap a member to mark them present. Tap again to undo.
+            </p>
           </div>
-        ) : (members ?? []).length === 0 ? (
-          <p className="py-16 text-center text-sm text-slate-500">No members match that search.</p>
-        ) : (
-          <ul className="divide-y divide-slate-100">
-            {(members ?? []).map((member) => {
-              const status = statusByMember.get(member.id);
-              const isPresent = status === 'PRESENT';
-              const isSaving = pendingMemberId === member.id;
 
-              return (
-                <li key={member.id}>
-                  <button
-                    type="button"
-                    disabled={isSaving}
-                    onClick={() =>
-                      mutation.mutate({
-                        memberId: member.id,
-                        status: isPresent ? 'ABSENT' : 'PRESENT',
-                      })
-                    }
-                    className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors sm:px-6 ${
-                      isPresent ? 'bg-emerald-50 hover:bg-emerald-100' : 'hover:bg-slate-50'
-                    } disabled:opacity-60`}
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">{member.displayName}</p>
-                      {member.phonePrimary && (
-                        <p className="truncate text-xs text-slate-500">{member.phonePrimary}</p>
-                      )}
-                    </div>
+          {membersLoading || attendanceLoading ? (
+            <div className="flex justify-center py-16">
+              <Spinner size="lg" className="text-indigo-600" />
+            </div>
+          ) : (members ?? []).length === 0 ? (
+            <p className="py-16 text-center text-sm text-slate-500">No members match that search.</p>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {(members ?? []).map((member) => {
+                const status = statusByMember.get(member.id);
+                const isPresent = status === 'PRESENT';
+                const isSaving = pendingMemberId === member.id;
 
-                    <div className="flex shrink-0 items-center gap-2">
-                      {status && status !== 'PRESENT' && (
-                        <Badge variant="gray" size="sm">
-                          {status === 'ABSENT' ? 'Absent' : 'Excused'}
-                        </Badge>
-                      )}
-                      {isSaving ? (
-                        <Spinner size="sm" />
-                      ) : (
-                        <span
-                          className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${
-                            isPresent
-                              ? 'border-emerald-500 bg-emerald-500 text-white'
-                              : 'border-slate-300 bg-white'
-                          }`}
-                        >
-                          {isPresent && <Check className="h-4 w-4" />}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </Card>
+                return (
+                  <li key={member.id}>
+                    <button
+                      type="button"
+                      disabled={isSaving}
+                      onClick={() =>
+                        mutation.mutate({
+                          memberId: member.id,
+                          status: isPresent ? 'ABSENT' : 'PRESENT',
+                        })
+                      }
+                      className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors sm:px-6 ${
+                        isPresent ? 'bg-emerald-50 hover:bg-emerald-100' : 'hover:bg-slate-50'
+                      } disabled:opacity-60`}
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900">{member.displayName}</p>
+                        {member.phonePrimary && (
+                          <p className="truncate text-xs text-slate-500">{member.phonePrimary}</p>
+                        )}
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-2">
+                        {status && status !== 'PRESENT' && (
+                          <Badge variant="gray" size="sm">
+                            {status === 'ABSENT' ? 'Absent' : 'Excused'}
+                          </Badge>
+                        )}
+                        {isSaving ? (
+                          <Spinner size="sm" />
+                        ) : (
+                          <span
+                            className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${
+                              isPresent
+                                ? 'border-emerald-500 bg-emerald-500 text-white'
+                                : 'border-slate-300 bg-white'
+                            }`}
+                          >
+                            {isPresent && <Check className="h-4 w-4" />}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-8 text-center text-sm text-slate-500">
+            You can view this service, but recording attendance requires the attendance.record
+            permission. Ask an Usher or Administrator to check members in.
+          </CardContent>
+        </Card>
+      )}
 
       {service && (
         <p className="flex items-center justify-center gap-1.5 pb-4 text-xs text-slate-400">

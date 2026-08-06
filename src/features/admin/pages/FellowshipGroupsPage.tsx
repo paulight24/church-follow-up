@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Spinner } from '@/components/ui/Spinner';
 import { useToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
+import { usePermission } from '@/hooks/usePermission';
 import {
   Table,
   TableHeader,
@@ -94,6 +95,9 @@ function restoreFellowshipGroup(id: string) {
 export function FellowshipGroupsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  // The route only requires fellowship_groups.view to reach this page;
+  // creating, editing, archiving, and restoring all need fellowship_groups.manage too.
+  const canManage = usePermission('fellowship_groups.manage');
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -169,9 +173,11 @@ export function FellowshipGroupsPage() {
         title="Cell Groups"
         description="Manage cell groups and their meeting locations"
         actions={
-          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>
-            Add Cell Group
-          </Button>
+          canManage ? (
+            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>
+              Add Cell Group
+            </Button>
+          ) : undefined
         }
       />
 
@@ -237,36 +243,40 @@ export function FellowshipGroupsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        leftIcon={<Pencil className="h-3.5 w-3.5" />}
-                        onClick={() => openEdit(group)}
-                      >
-                        Edit
-                      </Button>
-                      {group.status === 'ACTIVE' ? (
+                    {canManage ? (
+                      <div className="flex items-center gap-1">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          onClick={() => setArchiveTarget(group)}
-                          title="Archive cell group"
+                          leftIcon={<Pencil className="h-3.5 w-3.5" />}
+                          onClick={() => openEdit(group)}
                         >
-                          <Trash2 className="h-4 w-4 text-rose-500" />
+                          Edit
                         </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          isLoading={restoreMutation.isPending}
-                          onClick={() => restoreMutation.mutate(group.id)}
-                          title="Restore cell group"
-                        >
-                          <RotateCcw className="h-4 w-4 text-emerald-600" />
-                        </Button>
-                      )}
-                    </div>
+                        {group.status === 'ACTIVE' ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setArchiveTarget(group)}
+                            title="Archive cell group"
+                          >
+                            <Trash2 className="h-4 w-4 text-rose-500" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            isLoading={restoreMutation.isPending}
+                            onClick={() => restoreMutation.mutate(group.id)}
+                            title="Restore cell group"
+                          >
+                            <RotateCcw className="h-4 w-4 text-emerald-600" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

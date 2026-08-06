@@ -12,12 +12,16 @@ import { TeamCard } from '../components/TeamCard';
 import { CreateTeamModal } from '../components/CreateTeamModal';
 import { teamsApi } from '../api/teams.api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { usePermission } from '@/hooks/usePermission';
 import type { ApiError } from '@/types';
 
 export function TeamListPage() {
   const [search, setSearch] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
+  // Backend: POST /teams requires teams.create. Without this check a Pastor
+  // (or anyone else lacking teams.create) sees a button that always 403s.
+  const canCreateTeam = usePermission('teams.create');
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['teams', { search: debouncedSearch }],
@@ -34,9 +38,11 @@ export function TeamListPage() {
         title="Teams"
         description="Manage follow-up teams"
         actions={
-          <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setShowCreateModal(true)}>
-            Create Team
-          </Button>
+          canCreateTeam ? (
+            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setShowCreateModal(true)}>
+              Create Team
+            </Button>
+          ) : undefined
         }
       />
 
@@ -61,11 +67,17 @@ export function TeamListPage() {
         <EmptyState
           icon={Users}
           title="No teams yet"
-          description="Create your first follow-up team to start assigning members to workers."
+          description={
+            canCreateTeam
+              ? 'Create your first follow-up team to start assigning members to workers.'
+              : 'Ask an Administrator or Pastor to create a follow-up team.'
+          }
           action={
-            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setShowCreateModal(true)}>
-              Create Team
-            </Button>
+            canCreateTeam ? (
+              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setShowCreateModal(true)}>
+                Create Team
+              </Button>
+            ) : undefined
           }
         />
       ) : (

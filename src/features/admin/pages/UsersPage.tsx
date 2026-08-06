@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, ShieldOff, Settings2, X } from 'lucide-react';
+import { UserPlus, ShieldOff, Settings2, X, RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Spinner } from '@/components/ui/Spinner';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermission } from '@/hooks/usePermission';
 import { formatRelativeDate } from '@/lib/formatters';
 import {
   Table,
@@ -67,6 +68,14 @@ export function UsersPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Backend: POST /users and POST /users/:id/resend-invite both require
+  // users.create; POST/DELETE /users/:id/roles require users.manage_roles;
+  // POST /users/:id/deactivate requires users.deactivate (see
+  // backend/src/modules/users/users.routes.ts).
+  const canCreateUsers = usePermission('users.create');
+  const canManageRoles = usePermission('users.manage_roles');
+  const canDeactivateUsers = usePermission('users.deactivate');
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
@@ -74,6 +83,21 @@ export function UsersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [manageRolesUserId, setManageRolesUserId] = useState<string | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<AdminUserListItem | null>(null);
+  const [resendingUserId, setResendingUserId] = useState<string | null>(null);
+
+  const resendInviteMutation = useMutation({
+    mutationFn: (id: string) => usersApi.resendInvite(id),
+    onMutate: (id) => setResendingUserId(id),
+    onSuccess: () => {
+      toast({ title: 'Invite resent', variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+    onError: (err: unknown) => {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast({ title: 'Could not resend invite', description: message, variant: 'error' });
+    },
+    onSettled: () => setResendingUserId(null),
+  });
 
   const usersQuery = useQuery({
     queryKey: ['admin', 'users', { page, search, status }],
@@ -110,9 +134,11 @@ export function UsersPage() {
         title="User Management"
         description="Manage system users and their role assignments"
         actions={
-          <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>
-            Add User
-          </Button>
+          canCreateUsers ? (
+            <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>
+              Add User
+            </Button>
+          ) : undefined
         }
       />
 
@@ -195,23 +221,38 @@ export function UsersPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          leftIcon={<Settings2 className="h-3.5 w-3.5" />}
-                          onClick={() => setManageRolesUserId(u.id)}
-                        >
-                          Roles
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={isSelf || u.status === 'DEACTIVATED'}
-                          title={isSelf ? "You cannot deactivate your own account" : undefined}
-                          onClick={() => setDeactivateTarget(u)}
-                        >
-                          <ShieldOff className="h-4 w-4 text-rose-500" />
-                        </Button>
+                        {canCreateUsers && u.status === 'INVITED' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
+                            isLoading={resendingUserId === u.id}
+                            onClick={() => resendInviteMutation.mutate(u.id)}
+                          >
+                            Resend
+                          </Button>
+                        )}
+                        {canManageRoles && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<Settings2 className="h-3.5 w-3.5" />}
+                            onClick={() => setManageRolesUserId(u.id)}
+                          >
+                            Roles
+                          </Button>
+                        )}
+                        {canDeactivateUsers && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={isSelf || u.status === 'DEACTIVATED'}
+                            title={isSelf ? "You cannot deactivate your own account" : undefined}
+                            onClick={() => setDeactivateTarget(u)}
+                          >
+                            <ShieldOff className="h-4 w-4 text-rose-500" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

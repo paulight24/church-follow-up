@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { FileText, X } from 'lucide-react';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { useToast } from '@/components/ui/Toast';
+import { usePermission } from '@/hooks/usePermission';
 import { mediaAssetsApi, mediaAssetUrl } from '../api/encouragements.api';
 import type { MediaAssetSummary } from '@/types/encouragement';
 
@@ -23,6 +24,10 @@ interface ImageAttachmentPickerProps {
  */
 export function ImageAttachmentPicker({ value, onChange, disabled }: ImageAttachmentPickerProps) {
   const { toast } = useToast();
+  // The surrounding Quick Send form is gated on encouragements.send_as_pastor,
+  // but the upload itself hits the shared media-assets endpoint, which needs
+  // its own media_assets.upload permission.
+  const canUpload = usePermission('media_assets.upload');
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => mediaAssetsApi.uploadMediaAsset(file),
@@ -67,13 +72,17 @@ export function ImageAttachmentPicker({ value, onChange, disabled }: ImageAttach
             <X className="h-4 w-4" />
           </button>
         </div>
-      ) : (
+      ) : canUpload ? (
         <FileUpload
           accept={ACCEPTED_TYPES}
           maxSizeMB={MAX_SIZE_MB}
           helpText={`PNG, JPEG, GIF, WEBP, SVG, or PDF up to ${MAX_SIZE_MB}MB${uploadMutation.isPending ? ' - uploading...' : ''}`}
           onFileSelect={(file) => uploadMutation.mutate(file)}
         />
+      ) : (
+        <p className="text-sm text-slate-400">
+          You don&apos;t have permission to upload images. Ask an administrator to grant it.
+        </p>
       )}
     </div>
   );
