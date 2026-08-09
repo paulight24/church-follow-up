@@ -18,6 +18,7 @@ export type BulkInviteOutcomeStatus =
   | 'skipped-no-email'
   | 'skipped-already-linked'
   | 'skipped-invite-pending'
+  | 'skipped-archived'
   | 'failed';
 
 export interface BulkInviteOutcome {

@@ -23,6 +23,7 @@ const outcomeMeta: Record<
   'skipped-no-email': { label: 'Skipped - no email on file', badgeVariant: 'warning', icon: MailX },
   'skipped-already-linked': { label: 'Skipped - already has a login', badgeVariant: 'gray', icon: Link2Off },
   'skipped-invite-pending': { label: 'Skipped - invite already sent', badgeVariant: 'gray', icon: Link2Off },
+  'skipped-archived': { label: 'Skipped - member is archived', badgeVariant: 'gray', icon: Link2Off },
   failed: { label: 'Failed', badgeVariant: 'danger', icon: XCircle },
 };
 
