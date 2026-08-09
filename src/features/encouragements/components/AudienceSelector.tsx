@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users, Filter, UserCheck, Search, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
@@ -24,7 +24,12 @@ interface AudienceSelectorProps {
 }
 
 export function AudienceSelector({ value, onChange }: AudienceSelectorProps) {
-  const mode = deriveMode(value);
+  // Mode is real state, not derived on every render. `deriveMode` only seeds the
+  // initial value. Deriving it continuously made "By Criteria" and "Specific
+  // Members" unselectable: picking either sets empty arrays, whose .length is 0,
+  // so deriveMode fell through to 'all' and the radio snapped straight back.
+  // An empty selection has to stay distinguishable from "everyone".
+  const [mode, setModeState] = useState<Mode>(() => deriveMode(value));
   const [memberSearch, setMemberSearch] = useState('');
   const debouncedSearch = useDebounce(memberSearch, 300);
 
@@ -60,10 +65,18 @@ export function AudienceSelector({ value, onChange }: AudienceSelectorProps) {
   const teamOptions = useMemo(() => (teams ?? []).map((t) => ({ label: t.name, value: t.id })), [teams]);
 
   function setMode(next: Mode) {
+    setModeState(next);
     if (next === 'all') onChange({ all: true });
     else if (next === 'criteria') onChange({ departmentIds: [], fellowshipGroupIds: [], teamIds: [] });
     else onChange({ memberIds: [] });
   }
+
+  // Re-sync when the parent resets the audience from outside (e.g. after a send
+  // clears the form). Guarded on `all === true` so it cannot fight the user's
+  // own in-progress selection, which is what caused the original bug.
+  useEffect(() => {
+    if (value.all === true && mode !== 'all') setModeState('all');
+  }, [value.all, mode]);
 
   function toggleMember(member: { id: string; firstName: string; lastName: string }) {
     const isSelected = selectedMemberIds.includes(member.id);
