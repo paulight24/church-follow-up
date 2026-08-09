@@ -118,6 +118,8 @@ export interface Member {
   lastAttendanceDate?: string | null;
   communicationConsentEmail: boolean;
   communicationConsentSms: boolean;
+  /** Meta requires explicit opt-in before the system can WhatsApp a member - defaults to false, so a member is silently unreachable over WhatsApp until this is set. */
+  communicationConsentWhatsapp: boolean;
   doNotContact: boolean;
   generalNotes?: string | null;
   /** Only present when the caller has `members.view_pastoral_notes`; otherwise the key is stripped by the API. */
@@ -195,6 +197,7 @@ export interface CreateMemberRequest {
   lastAttendanceDate?: string;
   communicationConsentEmail?: boolean;
   communicationConsentSms?: boolean;
+  communicationConsentWhatsapp?: boolean;
   doNotContact?: boolean;
   generalNotes?: string;
   pastoralNotes?: string;

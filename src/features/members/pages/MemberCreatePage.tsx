@@ -43,6 +43,9 @@ function toCreateRequest(values: MemberFormValues): CreateMemberRequest {
   }
   if (values.communicationConsentEmail != null) payload.communicationConsentEmail = values.communicationConsentEmail;
   if (values.communicationConsentSms != null) payload.communicationConsentSms = values.communicationConsentSms;
+  if (values.communicationConsentWhatsapp != null) {
+    payload.communicationConsentWhatsapp = values.communicationConsentWhatsapp;
+  }
   if (values.doNotContact != null) payload.doNotContact = values.doNotContact;
   if (values.generalNotes) payload.generalNotes = values.generalNotes;
   if (values.pastoralNotes) payload.pastoralNotes = values.pastoralNotes;

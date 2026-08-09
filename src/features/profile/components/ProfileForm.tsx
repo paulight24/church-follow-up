@@ -13,6 +13,7 @@ const profileFormSchema = z.object({
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   dateOfBirth: z.string().optional().or(z.literal('')),
   weddingAnniversary: z.string().optional().or(z.literal('')),
+  communicationConsentWhatsapp: z.boolean().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -42,6 +43,7 @@ export function ProfileForm({ member, onSubmit, isSubmitting }: ProfileFormProps
       email: member.email ?? '',
       dateOfBirth: toDateInputValue(member.dateOfBirth),
       weddingAnniversary: toDateInputValue(member.weddingAnniversary),
+      communicationConsentWhatsapp: member.communicationConsentWhatsapp ?? false,
     },
   });
 
@@ -88,6 +90,23 @@ export function ProfileForm({ member, onSubmit, isSubmitting }: ProfileFormProps
           error={errors.weddingAnniversary?.message}
           {...register('weddingAnniversary')}
         />
+      </div>
+
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
+        <label className="flex items-start gap-2.5 text-sm text-slate-800">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            {...register('communicationConsentWhatsapp')}
+          />
+          <span>
+            <span className="font-medium">Message me on WhatsApp</span>
+            <p className="mt-0.5 text-xs text-slate-600">
+              This is off by default. Turn it on if you&apos;re fine with the church reaching you on WhatsApp - you
+              can turn it back off here at any time.
+            </p>
+          </span>
+        </label>
       </div>
 
       <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">

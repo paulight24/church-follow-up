@@ -29,6 +29,9 @@ function toUpdateRequest(values: ProfileFormValues): UpdateMyProfileRequest {
   if (values.email) payload.email = values.email;
   if (values.dateOfBirth) payload.dateOfBirth = values.dateOfBirth;
   if (values.weddingAnniversary) payload.weddingAnniversary = values.weddingAnniversary;
+  // Always send this one (unlike the string fields above) so explicitly turning
+  // consent OFF is actually saved instead of being treated as "left blank".
+  payload.communicationConsentWhatsapp = values.communicationConsentWhatsapp ?? false;
   return payload;
 }
 
@@ -230,6 +233,16 @@ export function ProfilePage() {
                       Secondary phone
                     </dt>
                     <dd className="mt-1 text-sm text-slate-700">{member.phoneSecondary ?? '--'}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                      WhatsApp messages
+                    </dt>
+                    <dd className="mt-1">
+                      <Badge variant={member.communicationConsentWhatsapp ? 'success' : 'gray'} size="sm">
+                        {member.communicationConsentWhatsapp ? 'Opted in' : 'Opted out'}
+                      </Badge>
+                    </dd>
                   </div>
                 </dl>
               )}

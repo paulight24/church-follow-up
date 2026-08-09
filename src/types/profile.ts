@@ -35,4 +35,10 @@ export interface UpdateMyProfileRequest {
   dateOfBirth?: string;
   weddingAnniversary?: string;
   profileImageUrl?: string;
+  /**
+   * Self-service WhatsApp opt-in/opt-out. Meta requires explicit consent
+   * before the system can message someone on WhatsApp, and this is the
+   * member's own preference to control - see ProfilePage.
+   */
+  communicationConsentWhatsapp?: boolean;
 }

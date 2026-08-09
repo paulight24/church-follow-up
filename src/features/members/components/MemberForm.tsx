@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -52,6 +53,7 @@ const memberFormSchema = z.object({
     .optional(),
   communicationConsentEmail: z.boolean().optional(),
   communicationConsentSms: z.boolean().optional(),
+  communicationConsentWhatsapp: z.boolean().optional(),
   doNotContact: z.boolean().optional(),
   generalNotes: z.string().max(5000).optional().or(z.literal('')),
   pastoralNotes: z.string().max(5000).optional().or(z.literal('')),
@@ -142,6 +144,7 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<MemberFormValues>({
     resolver: zodResolver(memberFormSchema),
@@ -173,6 +176,9 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
         (initialData?.visitorJourneyStage as MemberFormValues['visitorJourneyStage']) ?? '',
       communicationConsentEmail: initialData?.communicationConsentEmail ?? true,
       communicationConsentSms: initialData?.communicationConsentSms ?? true,
+      // Meta requires explicit opt-in for WhatsApp - unlike email/SMS this defaults to
+      // false, so a member is unreachable over WhatsApp until someone records consent.
+      communicationConsentWhatsapp: initialData?.communicationConsentWhatsapp ?? false,
       doNotContact: initialData?.doNotContact ?? false,
       generalNotes: initialData?.generalNotes ?? '',
       pastoralNotes: initialData?.pastoralNotes ?? '',
@@ -301,6 +307,37 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
               />
               Do not contact
             </label>
+          </div>
+
+          {/* WhatsApp consent is deliberately separated from the row above: Meta requires
+              explicit opt-in before the system can message someone on WhatsApp, and it
+              defaults to false, so an un-checked box here silently means "unreachable on
+              WhatsApp" - not a minor preference to skim past. */}
+          <div className="sm:col-span-2">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
+              <label className="flex items-start gap-2.5 text-sm text-slate-800">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  {...register('communicationConsentWhatsapp')}
+                />
+                <span>
+                  <span className="font-medium">Member has consented to WhatsApp messages</span>
+                  <p className="mt-0.5 text-xs text-slate-600">
+                    Meta requires the member to have opted in before the system can WhatsApp them - only check this
+                    if they've given that consent (e.g. in person, on a form). Leaving it unchecked means every
+                    WhatsApp send will skip this member, even if a phone number is on file.
+                  </p>
+                </span>
+              </label>
+              {watch('preferredContactMethod') === 'WHATSAPP' && !watch('communicationConsentWhatsapp') && (
+                <p className="mt-2 flex items-start gap-1.5 text-xs font-medium text-amber-700">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  Preferred contact method is set to WhatsApp, but consent hasn&apos;t been recorded - this member
+                  won&apos;t actually receive WhatsApp messages until it is.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </section>

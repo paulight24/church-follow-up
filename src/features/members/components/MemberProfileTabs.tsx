@@ -145,12 +145,15 @@ export function MemberProfileTabs({ member }: MemberProfileTabsProps) {
             />
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant={member.communicationConsentEmail ? 'success' : 'gray'} size="sm">
               {member.communicationConsentEmail ? 'OK to email' : 'Email consent declined'}
             </Badge>
             <Badge variant={member.communicationConsentSms ? 'success' : 'gray'} size="sm">
               {member.communicationConsentSms ? 'OK to text' : 'SMS consent declined'}
+            </Badge>
+            <Badge variant={member.communicationConsentWhatsapp ? 'success' : 'gray'} size="sm">
+              {member.communicationConsentWhatsapp ? 'OK for WhatsApp' : 'No WhatsApp consent'}
             </Badge>
             {member.doNotContact && (
               <Badge variant="danger" size="sm">
@@ -158,6 +161,15 @@ export function MemberProfileTabs({ member }: MemberProfileTabsProps) {
               </Badge>
             )}
           </div>
+          {member.preferredContactMethod === 'WHATSAPP' && !member.communicationConsentWhatsapp && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>
+                Preferred contact method is WhatsApp, but this member hasn&apos;t consented to WhatsApp messages -
+                they will not receive WhatsApp sends until consent is recorded on the Edit page.
+              </p>
+            </div>
+          )}
 
           {(member.generalNotes || member.pastoralNotes) && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

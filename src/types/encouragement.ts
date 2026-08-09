@@ -14,9 +14,16 @@ export type EncouragementMessageType =
   | 'PERSONAL'
   | 'RECURRING_SERIES';
 
-export type DeliveryChannel = 'IN_APP' | 'EMAIL' | 'SMS' | 'PUSH';
+export type DeliveryChannel = 'IN_APP' | 'EMAIL' | 'SMS' | 'PUSH' | 'WHATSAPP';
 
-/** Channels that are actually deliverable this phase (see encouragements.service.ts#DELIVERABLE_CHANNELS). */
+/**
+ * Channels that are actually deliverable this phase (see
+ * encouragements.service.ts#DELIVERABLE_CHANNELS). WHATSAPP is deliberately
+ * excluded here - unlike the others, whether it can be delivered isn't fixed
+ * per phase, it depends on whether the Meta Cloud API is configured right
+ * now (GET /whatsapp/status). ChannelSelector checks that status directly
+ * instead of relying on this static list.
+ */
 export const DELIVERABLE_CHANNELS: DeliveryChannel[] = ['IN_APP', 'EMAIL', 'SMS'];
 
 export type EncouragementRecipientStatus = 'PENDING' | 'SENT' | 'DELIVERED' | 'FAILED';
@@ -125,6 +132,14 @@ export interface CreateEncouragementRequest {
   scheduledAt?: string;
   recurrenceRule?: string;
   timezone?: string;
+  /**
+   * Required by Meta for any recipient outside the 24-hour customer-service
+   * window - only meaningful when `deliveryChannelsJson` includes WHATSAPP
+   * and WhatsApp is configured. See WhatsAppTemplatePicker.
+   */
+  whatsappTemplateId?: string;
+  /** Ordered values for the template's {{1}}, {{2}}, ... placeholders. */
+  whatsappTemplateParams?: string[];
 }
 
 export type UpdateEncouragementRequest = Partial<CreateEncouragementRequest>;
@@ -136,6 +151,8 @@ export interface QuickSendRequest {
   senderDisplayName?: string;
   audienceDefinitionJson?: AudienceDefinition;
   deliveryChannelsJson?: DeliveryChannel[];
+  whatsappTemplateId?: string;
+  whatsappTemplateParams?: string[];
 }
 
 export interface EncouragementSendResult {
@@ -185,6 +202,7 @@ export interface MemberMessagePreference {
   emailConsent: boolean;
   smsConsent: boolean;
   pushConsent: boolean;
+  whatsappConsent: boolean;
   quietHoursStart?: string | null;
   quietHoursEnd?: string | null;
   maxPerDay: number;

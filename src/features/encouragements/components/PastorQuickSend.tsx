@@ -14,6 +14,8 @@ import { ChannelSelector } from './ChannelSelector';
 import { AudienceSelector } from './AudienceSelector';
 import { ImageAttachmentPicker } from './ImageAttachmentPicker';
 import { WhatsAppSharePanel } from './WhatsAppSharePanel';
+import { WhatsAppTemplatePicker } from '@/features/whatsapp/components/WhatsAppTemplatePicker';
+import { useWhatsAppStatus } from '@/features/whatsapp/hooks/useWhatsAppStatus';
 import { encouragementsApi, mediaAssetUrl } from '../api/encouragements.api';
 import type { AudienceDefinition, DeliveryChannel, MediaAssetSummary } from '@/types/encouragement';
 
@@ -34,6 +36,12 @@ export function PastorQuickSend() {
   const [scheduledDate, setScheduledDate] = useState('');
   const [imageAsset, setImageAsset] = useState<MediaAssetSummary | null>(null);
   const [whatsAppShareEnabled, setWhatsAppShareEnabled] = useState(false);
+  const [whatsAppTemplateId, setWhatsAppTemplateId] = useState<string | null>(null);
+  const [whatsAppTemplateParams, setWhatsAppTemplateParams] = useState<string[]>([]);
+
+  const { data: whatsAppStatus } = useWhatsAppStatus();
+  const whatsAppConfigured = whatsAppStatus?.configured ?? false;
+  const showWhatsAppTemplatePicker = whatsAppConfigured && channels.includes('WHATSAPP');
 
   function handleScriptureChange(reference: string, text: string) {
     setScriptureReference(reference);
@@ -52,6 +60,8 @@ export function PastorQuickSend() {
     setScheduledDate('');
     setImageAsset(null);
     setWhatsAppShareEnabled(false);
+    setWhatsAppTemplateId(null);
+    setWhatsAppTemplateParams([]);
   }
 
   const quickSendMutation = useMutation({
@@ -62,6 +72,8 @@ export function PastorQuickSend() {
         imageAssetId: imageAsset?.id,
         audienceDefinitionJson: audience,
         deliveryChannelsJson: channels,
+        whatsappTemplateId: showWhatsAppTemplatePicker ? whatsAppTemplateId ?? undefined : undefined,
+        whatsappTemplateParams: showWhatsAppTemplatePicker ? whatsAppTemplateParams : undefined,
       }),
     onSuccess: (res) => {
       toast({
@@ -94,6 +106,8 @@ export function PastorQuickSend() {
         sendAsPastor: true,
         audienceDefinitionJson: audience,
         deliveryChannelsJson: channels,
+        whatsappTemplateId: showWhatsAppTemplatePicker ? whatsAppTemplateId ?? undefined : undefined,
+        whatsappTemplateParams: showWhatsAppTemplatePicker ? whatsAppTemplateParams : undefined,
       });
       const scheduledAtIso = new Date(`${scheduledDate}T08:00:00`).toISOString();
       return encouragementsApi.scheduleEncouragement(created.data.id, scheduledAtIso);
@@ -173,9 +187,19 @@ export function PastorQuickSend() {
             value={channels}
             onChange={setChannels}
             hasImage={Boolean(imageAsset)}
+            whatsAppConfigured={whatsAppConfigured}
             whatsAppShareEnabled={whatsAppShareEnabled}
             onWhatsAppShareChange={setWhatsAppShareEnabled}
           />
+
+          {showWhatsAppTemplatePicker && (
+            <WhatsAppTemplatePicker
+              templateId={whatsAppTemplateId}
+              onTemplateChange={setWhatsAppTemplateId}
+              params={whatsAppTemplateParams}
+              onParamsChange={setWhatsAppTemplateParams}
+            />
+          )}
 
           {whatsAppShareEnabled && <WhatsAppSharePanel message={previewMessage} imageUrl={imageUrl} />}
 

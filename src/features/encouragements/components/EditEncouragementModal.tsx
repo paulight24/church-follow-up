@@ -11,6 +11,8 @@ import { ScriptureSelector } from './ScriptureSelector';
 import { ChannelSelector } from './ChannelSelector';
 import { AudienceSelector } from './AudienceSelector';
 import { ImageAttachmentPicker } from './ImageAttachmentPicker';
+import { WhatsAppTemplatePicker } from '@/features/whatsapp/components/WhatsAppTemplatePicker';
+import { useWhatsAppStatus } from '@/features/whatsapp/hooks/useWhatsAppStatus';
 import { encouragementsApi } from '../api/encouragements.api';
 import type { AudienceDefinition, DeliveryChannel, Encouragement, MediaAssetSummary } from '@/types/encouragement';
 
@@ -58,6 +60,15 @@ export function EditEncouragementModal({ encouragement, onClose }: EditEncourage
   const [audience, setAudience] = useState<AudienceDefinition>(parseAudience(encouragement.audienceDefinitionJson));
   const [imageAsset, setImageAsset] = useState<MediaAssetSummary | null>(encouragement.imageAsset ?? null);
   const [confirmRevertOpen, setConfirmRevertOpen] = useState(false);
+  // Not hydrated from `encouragement` - the backend doesn't return the previously
+  // chosen template/params on the message yet, so editing a WhatsApp-channel
+  // message currently requires re-picking the template.
+  const [whatsAppTemplateId, setWhatsAppTemplateId] = useState<string | null>(null);
+  const [whatsAppTemplateParams, setWhatsAppTemplateParams] = useState<string[]>([]);
+
+  const { data: whatsAppStatus } = useWhatsAppStatus();
+  const whatsAppConfigured = whatsAppStatus?.configured ?? false;
+  const showWhatsAppTemplatePicker = whatsAppConfigured && channels.includes('WHATSAPP');
 
   const willRevertToDraft = useMemo(
     () => encouragement.status === 'APPROVED' || encouragement.status === 'SCHEDULED',
@@ -74,6 +85,8 @@ export function EditEncouragementModal({ encouragement, onClose }: EditEncourage
         imageAssetId: imageAsset?.id,
         audienceDefinitionJson: audience,
         deliveryChannelsJson: channels,
+        whatsappTemplateId: showWhatsAppTemplatePicker ? whatsAppTemplateId ?? undefined : undefined,
+        whatsappTemplateParams: showWhatsAppTemplatePicker ? whatsAppTemplateParams : undefined,
       }),
     onSuccess: () => {
       toast({ title: 'Encouragement updated', variant: 'success' });
@@ -147,7 +160,21 @@ export function EditEncouragementModal({ encouragement, onClose }: EditEncourage
 
           <ImageAttachmentPicker value={imageAsset} onChange={setImageAsset} />
 
-          <ChannelSelector value={channels} onChange={setChannels} hasImage={Boolean(imageAsset)} />
+          <ChannelSelector
+            value={channels}
+            onChange={setChannels}
+            hasImage={Boolean(imageAsset)}
+            whatsAppConfigured={whatsAppConfigured}
+          />
+
+          {showWhatsAppTemplatePicker && (
+            <WhatsAppTemplatePicker
+              templateId={whatsAppTemplateId}
+              onTemplateChange={setWhatsAppTemplateId}
+              params={whatsAppTemplateParams}
+              onParamsChange={setWhatsAppTemplateParams}
+            />
+          )}
 
           <AudienceSelector value={audience} onChange={setAudience} />
         </div>

@@ -1,4 +1,4 @@
-import { MessageSquare, Mail, Bell, Smartphone, Share2 } from 'lucide-react';
+import { MessageSquare, Mail, Bell, Smartphone, Share2, MessageCircle } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { DELIVERABLE_CHANNELS, type DeliveryChannel } from '@/types/encouragement';
@@ -23,6 +23,7 @@ const IMAGE_DELIVERY_NOTE: Record<DeliveryChannel, string> = {
   EMAIL: 'Image embedded in the email',
   SMS: "Sent as a link (SMS can't embed images)",
   PUSH: 'Not delivered yet (channel coming soon)',
+  WHATSAPP: 'Not included - template messages are text only',
 };
 
 interface ChannelSelectorProps {
@@ -30,7 +31,16 @@ interface ChannelSelectorProps {
   onChange: (channels: DeliveryChannel[]) => void;
   /** Whether an image is currently attached, so per-channel delivery behavior can be shown. */
   hasImage?: boolean;
-  /** Controls the separate "Share to WhatsApp" panel - WhatsApp is never sent by the system. */
+  /**
+   * Whether the Meta Cloud API is configured (GET /whatsapp/status). When
+   * false, WhatsApp stays exactly as it's always been - a client-side
+   * "share this yourself" link, never a system-delivered channel. When
+   * true, WhatsApp becomes a real, selectable delivery channel alongside
+   * Email/SMS and is added to `value` like any other channel.
+   */
+  whatsAppConfigured?: boolean;
+  /** Controls the separate "Share to WhatsApp" panel. Available in both states - even once
+   * WhatsApp is a real delivered channel, the pastor may still want to post to his own groups. */
   whatsAppShareEnabled?: boolean;
   onWhatsAppShareChange?: (enabled: boolean) => void;
 }
@@ -39,6 +49,7 @@ export function ChannelSelector({
   value,
   onChange,
   hasImage = false,
+  whatsAppConfigured = false,
   whatsAppShareEnabled = false,
   onWhatsAppShareChange,
 }: ChannelSelectorProps) {
@@ -49,6 +60,8 @@ export function ChannelSelector({
       onChange([...value, channel]);
     }
   }
+
+  const isWhatsAppSelected = value.includes('WHATSAPP');
 
   return (
     <div className="w-full">
@@ -98,42 +111,94 @@ export function ChannelSelector({
           );
         })}
 
-        {/* WhatsApp is not a system-delivered channel - selecting it only reveals the
-            client-side "Share to WhatsApp" affordance below, it never touches the
-            dispatch pipeline or gets sent to the backend as a delivery channel. */}
-        <label
-          className={cn(
-            'flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all',
-            whatsAppShareEnabled ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
-          )}
-        >
+        {whatsAppConfigured ? (
+          // Configured: WhatsApp is a real delivered channel, selected/sent exactly like
+          // Email/SMS - it is added to `value` and reaches the backend's delivery pipeline.
+          <label
+            className={cn(
+              'flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all',
+              isWhatsAppSelected ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={isWhatsAppSelected}
+              onChange={() => handleToggle('WHATSAPP')}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <div
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-lg',
+                isWhatsAppSelected ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500',
+              )}
+            >
+              <MessageCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <span className={cn('text-sm font-medium', isWhatsAppSelected ? 'text-emerald-900' : 'text-slate-700')}>
+                WhatsApp
+              </span>
+              <p className="text-[11px] font-medium text-emerald-700">Delivered by the system - only to members who consented</p>
+              {hasImage && isWhatsAppSelected && (
+                <p className="text-[11px] font-medium text-emerald-700">{IMAGE_DELIVERY_NOTE.WHATSAPP}</p>
+              )}
+            </div>
+          </label>
+        ) : (
+          // Not configured: unchanged from before - selecting this only reveals the
+          // client-side "Share to WhatsApp" affordance below. It never touches the
+          // dispatch pipeline or gets sent to the backend as a delivery channel.
+          <label
+            className={cn(
+              'flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all',
+              whatsAppShareEnabled ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={whatsAppShareEnabled}
+              onChange={(e) => onWhatsAppShareChange?.(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            />
+
+            <div
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-lg',
+                whatsAppShareEnabled ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500',
+              )}
+            >
+              <Share2 className="h-5 w-5" />
+            </div>
+
+            <div>
+              <span className={cn('text-sm font-medium', whatsAppShareEnabled ? 'text-emerald-900' : 'text-slate-700')}>
+                WhatsApp
+              </span>
+              <p className="text-[11px] font-medium text-emerald-700">Share only - you send it, not the system</p>
+            </div>
+          </label>
+        )}
+      </div>
+
+      {whatsAppConfigured && (
+        <label className="mt-2 flex w-fit cursor-pointer items-center gap-2 text-xs text-slate-500 hover:text-slate-700">
           <input
             type="checkbox"
             checked={whatsAppShareEnabled}
             onChange={(e) => onWhatsAppShareChange?.(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
           />
-
-          <div
-            className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-lg',
-              whatsAppShareEnabled ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500',
-            )}
-          >
-            <Share2 className="h-5 w-5" />
-          </div>
-
-          <div>
-            <span className={cn('text-sm font-medium', whatsAppShareEnabled ? 'text-emerald-900' : 'text-slate-700')}>
-              WhatsApp
-            </span>
-            <p className="text-[11px] font-medium text-emerald-700">Share only - you send it, not the system</p>
-          </div>
+          <Share2 className="h-3.5 w-3.5" />
+          Also open a manual "Share to WhatsApp" link (post it yourself, e.g. to your own groups)
         </label>
-      </div>
+      )}
+
       <p className="mt-1.5 text-xs text-slate-400">
         In-App, Email, and SMS are delivered by the system. Push selections are recorded but skipped until that
-        integration is live. WhatsApp is never sent automatically - checking it reveals a link you share yourself.
+        integration is live.{' '}
+        {whatsAppConfigured
+          ? 'WhatsApp is connected and delivered by the system to members who have consented - see the template picker below when selected.'
+          : 'WhatsApp is never sent automatically - checking it reveals a link you share yourself.'}
       </p>
     </div>
   );

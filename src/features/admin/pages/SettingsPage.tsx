@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { Alert } from '@/components/ui/Alert';
 import { settingsApi, type AllSettings } from '../api/settings.api';
+import { WhatsAppSettingsPanel } from '@/features/whatsapp/components/WhatsAppSettingsPanel';
 import api from '@/config/api';
 
 function asString(value: unknown, fallback = ''): string {
@@ -396,17 +397,11 @@ export function SettingsPage() {
             variables on the server (SMS_PROVIDER, TWILIO_*, EMAIL_PROVIDER, RESEND_API_KEY,
             etc.) — there is no in-app credentials UI yet.
           </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-slate-200 p-4">
               <h4 className="mb-1 font-medium text-slate-900">SMS Provider</h4>
               <p className="mb-3 text-sm text-slate-500">
                 Console stub active. Set SMS_PROVIDER=twilio + credentials on the server to go live.
-              </p>
-            </div>
-            <div className="rounded-lg border border-slate-200 p-4">
-              <h4 className="mb-1 font-medium text-slate-900">WhatsApp Business</h4>
-              <p className="mb-3 text-sm text-slate-500">
-                Not yet implemented.
               </p>
             </div>
             <div className="rounded-lg border border-slate-200 p-4">
@@ -447,6 +442,10 @@ export function SettingsPage() {
               {emailTestResult.message}
             </Alert>
           )}
+
+          <div className="mt-4">
+            <WhatsAppSettingsPanel />
+          </div>
         </CardContent>
       </Card>
 
