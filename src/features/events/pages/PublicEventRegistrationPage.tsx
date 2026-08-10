@@ -13,7 +13,7 @@ import type { ApiError } from '@/types';
 import type { EventRegistrationAnswers, PublicRegistrationStatus } from '@/types/event';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { publicEventsApi } from '../api/publicEvents.api';
-import { buildRegistrationSchema, defaultRegistrationValues, publicFieldsToConfig } from '../lib/eventFields';
+import { EVENT_FIELD_DEFS, buildRegistrationSchema, defaultRegistrationValues, publicFieldsToConfig } from '../lib/eventFields';
 import type { RegistrationFormValues } from '../lib/eventFields';
 import { EventRegistrationFields } from '../components/EventRegistrationFields';
 import { formatEventDay, formatEventWhen } from '../lib/eventDate';
@@ -63,6 +63,29 @@ const CLOSED_STATE_COPY: Partial<Record<PublicRegistrationStatus, { title: strin
   },
 };
 
+/** Drops answers the registrant left blank, so `optional` fields stay optional. */
+function stripBlankAnswers(answers: EventRegistrationAnswers): EventRegistrationAnswers {
+  return Object.fromEntries(
+    Object.entries(answers).filter(([, v]) => typeof v !== 'string' || v.trim() !== ''),
+  ) as EventRegistrationAnswers;
+}
+
+/**
+ * Turns the API's field-keyed validation details into lines a registrant can
+ * act on. The keys arrive dotted and internal ("body.answers.dateOfBirth"), so
+ * they get mapped back to the same labels the form renders. Without this the
+ * page showed a bare "Validation failed" with no clue which field was wrong -
+ * on a public page where the visitor cannot ask anyone what went wrong.
+ */
+function fieldErrorLines(errors: Record<string, string[]> | undefined): string[] {
+  if (!errors) return [];
+  return Object.entries(errors).map(([path, messages]) => {
+    const key = path.split('.').pop() ?? path;
+    const label = EVENT_FIELD_DEFS.find((f) => f.key === key)?.label ?? key;
+    return `${label}: ${messages.join(', ')}`;
+  });
+}
+
 export function PublicEventRegistrationPage() {
   const { slug } = useParams<{ slug: string }>();
   const [submittedName, setSubmittedName] = useState<string | null>(null);
@@ -94,7 +117,12 @@ export function PublicEventRegistrationPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: (answers: EventRegistrationAnswers) => publicEventsApi.register(slug!, answers),
+    // An untouched optional input submits as "", which the API rejects rather
+    // than reading as "not answered" - leaving the optional Date of Birth
+    // blank used to fail the whole registration. The API tolerates blanks now
+    // too; this keeps the request honest about what was actually filled in.
+    mutationFn: (answers: EventRegistrationAnswers) =>
+      publicEventsApi.register(slug!, stripBlankAnswers(answers)),
     onSuccess: (_res, answers) => {
       setSubmittedName(answers.firstName?.trim() || null);
     },
@@ -210,12 +238,23 @@ export function PublicEventRegistrationPage() {
         onSubmit={handleSubmit((values) => mutation.mutate(values as EventRegistrationAnswers))}
         className="space-y-5 rounded-2xl bg-white p-6 shadow-lg sm:p-8"
       >
-        {mutation.isError && (
-          <Alert variant="error">
-            {(mutation.error as AxiosError<ApiError>).response?.data?.message ??
-              'We could not submit your registration. Please check the form and try again.'}
-          </Alert>
-        )}
+        {mutation.isError && (() => {
+          const data = (mutation.error as AxiosError<ApiError>).response?.data;
+          const lines = fieldErrorLines(data?.errors);
+          return (
+            <Alert variant="error">
+              {data?.message ??
+                'We could not submit your registration. Please check the form and try again.'}
+              {lines.length > 0 && (
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {lines.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              )}
+            </Alert>
+          );
+        })()}
 
         <EventRegistrationFields fields={fieldConfig} register={register} errors={errors} />
 
