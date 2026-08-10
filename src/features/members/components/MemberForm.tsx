@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +25,10 @@ const memberFormSchema = z.object({
   phonePrimary: z.string().max(30).optional().or(z.literal('')),
   phoneSecondary: z.string().max(30).optional().or(z.literal('')),
   preferredContactMethod: z.enum(['PHONE', 'SMS', 'EMAIL', 'WHATSAPP', '']).optional(),
+  // Rendered as a Select with a fixed set of options (see PREFERRED_LANGUAGE_OPTIONS),
+  // but kept as a free string here rather than a z.enum: existing records may hold a
+  // value outside that fixed set, and the form injects that value as an extra option
+  // so it round-trips instead of getting rejected or wiped.
   preferredLanguage: z.string().max(50).optional().or(z.literal('')),
   departmentId: z.string().optional().or(z.literal('')),
   fellowshipGroupId: z.string().optional().or(z.literal('')),
@@ -105,6 +110,16 @@ const bornAgainStatusOptions = [
   { label: 'Unknown', value: 'Unknown' },
 ];
 
+// The fixed set of languages the dropdown offers. Preferred language used to be free
+// text, so existing member rows may hold a value outside this list - see
+// preferredLanguageOptions below for how that's handled without data loss.
+const PREFERRED_LANGUAGE_OPTIONS = [
+  { label: 'English', value: 'English' },
+  { label: 'Spanish', value: 'Spanish' },
+  { label: 'Yoruba', value: 'Yoruba' },
+  { label: 'French', value: 'French' },
+];
+
 const visitorJourneyStageOptions = [
   { label: 'New First Timer', value: 'NEW_FIRST_TIMER' },
   { label: 'Contact Attempted', value: 'CONTACT_ATTEMPTED' },
@@ -139,6 +154,20 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
 
   const departmentOptions = (departments ?? []).map((d) => ({ label: d.name, value: d.id }));
   const fellowshipGroupOptions = (fellowshipGroups ?? []).map((g) => ({ label: g.name, value: g.id }));
+
+  // Preferred language used to be a free-text field, so an existing member may have a
+  // value that isn't one of the four options the dropdown now offers (e.g. "Igbo" or
+  // "Portuguese"). Rather than silently dropping it - which would blank the field the
+  // moment someone edits an unrelated field and saves - keep it selectable by appending
+  // it to the list. This mirrors the bornAgainStatus handling above, which exists for the
+  // same reason: rendered options must always include whatever is actually stored.
+  const storedLanguage = initialData?.preferredLanguage?.trim();
+  const preferredLanguageOptions = useMemo(() => {
+    if (storedLanguage && !PREFERRED_LANGUAGE_OPTIONS.some((o) => o.value === storedLanguage)) {
+      return [...PREFERRED_LANGUAGE_OPTIONS, { label: storedLanguage, value: storedLanguage }];
+    }
+    return PREFERRED_LANGUAGE_OPTIONS;
+  }, [storedLanguage]);
 
   const {
     register,
@@ -258,14 +287,14 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
           <Input
             label="Primary Phone"
             type="tel"
-            placeholder="+234 801 234 5678"
+            placeholder="+1 (555) 123-4567"
             error={errors.phonePrimary?.message}
             {...register('phonePrimary')}
           />
           <Input
             label="Secondary Phone"
             type="tel"
-            placeholder="+234 801 234 5678"
+            placeholder="+1 (555) 123-4567"
             error={errors.phoneSecondary?.message}
             {...register('phoneSecondary')}
           />
@@ -276,9 +305,10 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
             error={errors.preferredContactMethod?.message}
             {...register('preferredContactMethod')}
           />
-          <Input
+          <Select
             label="Preferred Language"
-            placeholder="e.g., English, Yoruba"
+            placeholder="Select language"
+            options={preferredLanguageOptions}
             error={errors.preferredLanguage?.message}
             {...register('preferredLanguage')}
           />
@@ -417,7 +447,7 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
           <Input
             label="Inviter Phone"
             type="tel"
-            placeholder="+234 801 234 5678"
+            placeholder="+1 (555) 123-4567"
             error={errors.inviterPhone?.message}
             {...register('inviterPhone')}
           />

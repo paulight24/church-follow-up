@@ -67,14 +67,14 @@ export function ProfileForm({ member, onSubmit, isSubmitting }: ProfileFormProps
         <Input
           label="Primary phone"
           type="tel"
-          placeholder="+234 801 234 5678"
+          placeholder="+1 (555) 123-4567"
           error={errors.phonePrimary?.message}
           {...register('phonePrimary')}
         />
         <Input
           label="Secondary phone"
           type="tel"
-          placeholder="+234 801 234 5678"
+          placeholder="+1 (555) 123-4567"
           error={errors.phoneSecondary?.message}
           {...register('phoneSecondary')}
         />

@@ -26,7 +26,7 @@ export const EVENT_FIELD_DEFS: EventFieldDef[] = [
   { key: 'firstName', label: 'First Name', inputType: 'text', placeholder: 'Grace' },
   { key: 'lastName', label: 'Last Name', inputType: 'text', placeholder: 'Adeyemi' },
   { key: 'email', label: 'Email', inputType: 'email', placeholder: 'grace@example.com' },
-  { key: 'phone', label: 'Phone', inputType: 'tel', placeholder: '+234...' },
+  { key: 'phone', label: 'Phone', inputType: 'tel', placeholder: '+1 (555) 123-4567' },
   { key: 'dateOfBirth', label: 'Date of Birth', inputType: 'date' },
   { key: 'weddingAnniversary', label: 'Wedding Anniversary', inputType: 'date' },
   {
