@@ -182,7 +182,7 @@ export function PublicPrayerRequestPage() {
                 value={form.guestPhone}
                 onChange={(e) => field('guestPhone', e.target.value)}
                 className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:ring-offset-0"
-                placeholder="+234..."
+                placeholder="+1 (555) 123-4567"
               />
             </div>
           </div>

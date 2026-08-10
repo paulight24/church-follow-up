@@ -163,7 +163,7 @@ export function SettingsPage() {
               label="Phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+234 800 000 0000"
+              placeholder="+1 (555) 123-4567"
             />
             <Input
               label="Email"

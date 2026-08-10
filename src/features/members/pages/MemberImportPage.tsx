@@ -124,9 +124,9 @@ function applyMapping(row: ParsedRow, mapping: Record<string, string>): ParsedRo
 }
 
 const SAMPLE_ROWS = [
-  ['John', 'Doe', '', '', '+2348012345678', '', 'john@example.com', '6/15', '', 'Male', 'Single', 'Visitor', '', '', '', 'PHONE', 'en', 'false', '', '', '', '', 'true', 'true', 'false', ''],
-  ['Jane', 'Smith', 'Ann', 'Jenny', '+2349087654321', '+2349011111111', 'jane@example.com', '3/22/1990', '8/14/2015', 'Female', 'Married', 'Member', 'Ushering', 'Zone A', '2026-07-20', 'EMAIL', 'en', 'false', '', 'YES', 'Pastor Bola', '+2349022222222', 'true', 'true', 'false', 'First-time visitor from Zone A'],
-  ['David', 'Ola', '', '', '+2347033333333', '', '', '11/5', '', 'Male', '', '', '', '', '', 'PHONE', 'en', 'true', '2026-01-15', 'YES', '', '', 'true', 'false', 'false', ''],
+  ['John', 'Doe', '', '', '+12125550101', '', 'john@example.com', '6/15', '', 'Male', 'Single', 'Visitor', '', '', '', 'PHONE', 'en', 'false', '', '', '', '', 'true', 'true', 'false', ''],
+  ['Jane', 'Smith', 'Ann', 'Jenny', '+12125550102', '+12125550103', 'jane@example.com', '3/22/1990', '8/14/2015', 'Female', 'Married', 'Member', 'Ushering', 'Zone A', '2026-07-20', 'EMAIL', 'en', 'false', '', 'YES', 'Pastor Bola', '+12125550104', 'true', 'true', 'false', 'First-time visitor from Zone A'],
+  ['David', 'Ola', '', '', '+12125550105', '', '', '11/5', '', 'Male', '', '', '', '', '', 'PHONE', 'en', 'true', '2026-01-15', 'YES', '', '', 'true', 'false', 'false', ''],
 ];
 
 function downloadSampleTemplate() {
