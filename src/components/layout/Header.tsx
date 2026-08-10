@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, Search, Settings, User, X } from 'lucide-react';
+import { Check, Church, LogOut, Menu, Search, Settings, User, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui/Avatar';
@@ -15,8 +15,28 @@ interface HeaderProps {
 }
 
 export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
-  const { user, logout, hasPermission } = useAuth();
+  const { user, logout, hasPermission, churches, switchChurch } = useAuth();
   const navigate = useNavigate();
+  const [switching, setSwitching] = useState(false);
+
+  const activeChurch = user?.activeChurch;
+
+  const handleSwitchChurch = async (churchId: string) => {
+    if (switching || churchId === activeChurch?.id) return;
+    setSwitching(true);
+    try {
+      await switchChurch(churchId);
+      navigate('/dashboard');
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  const churchMenuItems: DropdownItem[] = churches.map((church) => ({
+    label: church.name,
+    icon: church.churchId === activeChurch?.id ? <Check /> : <Church />,
+    onClick: () => void handleSwitchChurch(church.churchId),
+  }));
   const canSearchMembers = hasPermission('members.view');
   const [searchValue, setSearchValue] = useState('');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -87,8 +107,8 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
         'left-0',
       )}
     >
-      {/* Left: Mobile hamburger */}
-      <div className="flex items-center gap-3">
+      {/* Left: Mobile hamburger + active church */}
+      <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
           onClick={onMobileMenuToggle}
@@ -97,6 +117,39 @@ export function Header({ sidebarCollapsed, onMobileMenuToggle }: HeaderProps) {
         >
           <Menu className="h-5 w-5" />
         </button>
+
+        {/* Active church — always visible so nobody acts in the wrong
+            church by accident; becomes a switcher when the user belongs to
+            more than one. */}
+        {activeChurch && (
+          churches.length > 1 ? (
+            <Dropdown
+              trigger={
+                <div className="flex min-w-0 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-50">
+                  <Church className="h-4 w-4 shrink-0 text-indigo-600" />
+                  <span className="truncate text-sm font-medium text-slate-700">{activeChurch.name}</span>
+                  {activeChurch.subscriptionStatus === 'LAPSED' && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                      DATA ONLY
+                    </span>
+                  )}
+                </div>
+              }
+              items={churchMenuItems}
+              align="left"
+            />
+          ) : (
+            <div className="flex min-w-0 items-center gap-2 px-2 py-1.5">
+              <Church className="h-4 w-4 shrink-0 text-indigo-600" />
+              <span className="hidden truncate text-sm font-medium text-slate-700 sm:block">{activeChurch.name}</span>
+              {activeChurch.subscriptionStatus === 'LAPSED' && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                  DATA ONLY
+                </span>
+              )}
+            </div>
+          )
+        )}
       </div>
 
       {/* Center/Right */}

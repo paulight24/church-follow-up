@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/cn';
+import { useAuth } from '@/hooks/useAuth';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileNav } from './MobileNav';
@@ -11,6 +12,10 @@ export function AppLayout() {
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  const subscriptionLapsed = user?.activeChurch?.subscriptionStatus === 'LAPSED';
+  const churchPendingApproval =
+    user?.activeChurch != null && ['PENDING_APPROVAL', 'ONBOARDING'].includes(user.activeChurch.status);
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', String(sidebarCollapsed));
@@ -57,6 +62,22 @@ export function AppLayout() {
           'pb-20 md:pb-0',
         )}
       >
+        {subscriptionLapsed && (
+          <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 md:px-6">
+            Your church's subscription has lapsed. <strong>Your member data is safe and always yours</strong> —
+            member lists stay viewable and the full{' '}
+            <Link to="/admin/settings" className="font-semibold underline">
+              data export
+            </Link>{' '}
+            remains available. Other features are paused until the subscription is renewed.
+          </div>
+        )}
+        {churchPendingApproval && (
+          <div className="border-b border-sky-200 bg-sky-50 px-4 py-2.5 text-sm text-sky-800 md:px-6">
+            Your church registration is being reviewed. You can set things up in the meantime —
+            we'll activate everything as soon as it's approved.
+          </div>
+        )}
         <div className="p-4 md:p-6">
           <Outlet />
         </div>

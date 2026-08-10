@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import axios from 'axios';
 import type { AxiosError } from 'axios';
 import api from '@/config/api';
+import { queryClient } from '@/config/queryClient';
+import { getMyChurches, switchActiveChurch, type MyChurch } from '@/features/churches/api';
 import type { User, UserRole } from '@/types';
 import type { LoginResponse } from '@/types/auth';
 
@@ -60,6 +62,14 @@ export interface AuthContextValue {
    * just need to store it and land them signed in - no second login round trip.
    */
   setSession: (data: LoginResponse) => void;
+  /** Churches this user can work in (for the switcher; usually one). */
+  churches: MyChurch[];
+  /**
+   * Switches the active church: new tokens, X-Church-Id header source,
+   * fresh /auth/me, and a full TanStack Query cache clear — cached rows
+   * from the previous church must never bleed into the next one.
+   */
+  switchChurch: (churchId: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,9 +80,24 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [churches, setChurches] = useState<MyChurch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = user !== null;
+
+  const loadChurches = useCallback(async () => {
+    try {
+      const result = await getMyChurches();
+      setChurches(result.churches);
+      if (result.activeChurchId) {
+        localStorage.setItem('activeChurchId', result.activeChurchId);
+      }
+    } catch {
+      // Non-fatal: the switcher just won't render; the backend still
+      // resolves the primary church from the token on every request.
+      setChurches([]);
+    }
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await loginRequest(email, password);
@@ -80,7 +105,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
     setUser(data.user);
-  }, []);
+    await loadChurches();
+    // Login user payload predates church resolution — /auth/me carries the
+    // church-scoped permissions and active church snapshot.
+    try {
+      const { data: me } = await api.get<User>('/auth/me');
+      setUser(me);
+    } catch {
+      /* keep login payload user */
+    }
+  }, [loadChurches]);
 
   const setSession = useCallback((data: LoginResponse) => {
     localStorage.setItem('accessToken', data.accessToken);
@@ -91,8 +125,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('activeChurchId');
+    queryClient.clear();
     setUser(null);
     window.location.href = '/login';
+  }, []);
+
+  const switchChurch = useCallback(async (churchId: string) => {
+    const tokens = await switchActiveChurch(churchId);
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
+    localStorage.setItem('activeChurchId', churchId);
+    // Everything cached belongs to the previous church — drop it all before
+    // any component can render stale rows under the new church.
+    queryClient.clear();
+    const { data: me } = await api.get<User>('/auth/me');
+    setUser(me);
   }, []);
 
   const refreshToken = useCallback(async () => {
@@ -120,6 +168,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const hasPermission = useCallback(
     (code: string): boolean => {
       if (!user) return false;
+      // platform.* is the SaaS operator's namespace — mirroring the backend,
+      // a church-level SUPER_ADMIN does not implicitly hold it.
+      if (code.startsWith('platform.')) return user.permissions.includes(code);
       if (user.roles.some((r) => r.code === 'SUPER_ADMIN')) return true;
       return user.permissions.includes(code);
     },
@@ -145,6 +196,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const { data } = await api.get<User>('/auth/me');
         setUser(data);
+        await loadChurches();
       } catch {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -155,7 +207,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initAuth();
-  }, []);
+  }, [loadChurches]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -168,8 +220,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       hasPermission,
       hasRole,
       setSession,
+      churches,
+      switchChurch,
     }),
-    [user, isLoading, isAuthenticated, login, logout, refreshToken, hasPermission, hasRole, setSession],
+    [user, isLoading, isAuthenticated, login, logout, refreshToken, hasPermission, hasRole, setSession, churches, switchChurch],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -19,6 +19,14 @@ export interface UserProfileRole {
   scopeId: string | null;
 }
 
+export interface ActiveChurch {
+  id: string;
+  name: string;
+  status: string;
+  subscriptionTier: string;
+  subscriptionStatus: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -28,8 +36,11 @@ export interface User {
   status?: string;
   lastLoginAt?: string | null;
   roles: UserProfileRole[];
+  /** Scoped to the active church. */
   permissions: string[];
   avatarUrl?: string | null;
+  isPlatformAdmin?: boolean;
+  activeChurch?: ActiveChurch;
 }
 
 export interface PaginatedResponse<T> {

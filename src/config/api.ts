@@ -14,6 +14,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Active church hint — the backend re-validates membership on every
+    // request, so this can never widen access, only select among the
+    // churches this user actually belongs to.
+    const activeChurchId = localStorage.getItem('activeChurchId');
+    if (activeChurchId) {
+      config.headers['X-Church-Id'] = activeChurchId;
+    }
     return config;
   },
   (error) => Promise.reject(error),

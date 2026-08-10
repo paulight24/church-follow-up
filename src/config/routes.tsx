@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Spinner } from '@/components/ui/Spinner';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
@@ -14,6 +15,10 @@ const AcceptInvitePage = lazy(() => import('@/features/auth/pages/AcceptInvitePa
 const PublicEventRegistrationPage = lazy(() =>
   import('@/features/events/pages/PublicEventRegistrationPage').then(m => ({ default: m.PublicEventRegistrationPage })),
 );
+
+// Public marketing funnel: landing page + church self-registration
+const LandingPage = lazy(() => import('@/features/public/pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const RegisterChurchPage = lazy(() => import('@/features/public/pages/RegisterChurchPage').then(m => ({ default: m.RegisterChurchPage })));
 
 // Dashboard
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -91,6 +96,7 @@ const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage').th
 
 // Admin
 const UsersPage = lazy(() => import('@/features/admin/pages/UsersPage').then(m => ({ default: m.UsersPage })));
+const PlatformConsolePage = lazy(() => import('@/features/admin/pages/PlatformConsolePage').then(m => ({ default: m.PlatformConsolePage })));
 const RolesPage = lazy(() => import('@/features/admin/pages/RolesPage').then(m => ({ default: m.RolesPage })));
 const SettingsPage = lazy(() => import('@/features/admin/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const AuditLogPage = lazy(() => import('@/features/admin/pages/AuditLogPage').then(m => ({ default: m.AuditLogPage })));
@@ -106,11 +112,26 @@ function PageLoader() {
   );
 }
 
+/**
+ * The root path is the funnel entrance: signed-in users go straight to
+ * their dashboard; visitors see the public landing page.
+ */
+function RootGate() {
+  const { isLoading, isAuthenticated } = useAuth();
+  if (isLoading) return <PageLoader />;
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/welcome" replace />;
+}
+
 export function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
+        {/* Root: dashboard for members, marketing funnel for visitors */}
+        <Route path="/" element={<RootGate />} />
+
         {/* Public routes */}
+        <Route path="/welcome" element={<LandingPage />} />
+        <Route path="/register-church" element={<RegisterChurchPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -123,7 +144,7 @@ export function AppRoutes() {
           <Route element={<AppLayout />}>
             {/* Dashboard & Guide are open to every authenticated role, so no
                 extra permission gate beyond the auth check above. */}
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/guide" element={<GuidePage />} />
 
             {/* My Profile (self-service) */}
@@ -270,6 +291,11 @@ export function AppRoutes() {
             </Route>
             <Route element={<ProtectedRoute permission="audit.view" />}>
               <Route path="/admin/audit-logs" element={<AuditLogPage />} />
+            </Route>
+            {/* SaaS operator console — platform.admin is exempt from the
+                church SUPER_ADMIN bypass on both ends. */}
+            <Route element={<ProtectedRoute permission="platform.admin" />}>
+              <Route path="/admin/platform" element={<PlatformConsolePage />} />
             </Route>
           </Route>
         </Route>

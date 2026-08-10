@@ -27,7 +27,7 @@ interface MobileNavItem {
 // destinations, so a tab is never shown here if the equivalent desktop nav
 // link (and the route itself) would be hidden/forbidden for the same user.
 const mobileNavItems: MobileNavItem[] = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Guide', path: '/guide', icon: BookOpen },
   {
     label: 'Follow-Ups',

@@ -11,6 +11,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Alert } from '@/components/ui/Alert';
 import { settingsApi, type AllSettings } from '../api/settings.api';
 import { WhatsAppSettingsPanel } from '@/features/whatsapp/components/WhatsAppSettingsPanel';
+import { DataExportCard } from '../components/DataExportCard';
 import api from '@/config/api';
 
 function asString(value: unknown, fallback = ''): string {
@@ -135,6 +136,9 @@ export function SettingsPage() {
       {saveMutation.isError && (
         <Alert variant="error">Failed to save settings. Please try again.</Alert>
       )}
+
+      {/* Data ownership: full export (always available) + plan */}
+      <DataExportCard />
 
       {/* Church Profile */}
       <Card>

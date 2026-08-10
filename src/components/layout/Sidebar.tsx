@@ -29,6 +29,7 @@ import {
   UserCog,
   Users,
   UsersRound,
+  Globe2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
@@ -60,7 +61,7 @@ interface NavSection {
 
 /** Items that always sit above the collapsible sections, unaffected by permissions. */
 const topLevelItems: NavItem[] = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   // Every role including MEMBER holds announcements.view - this is one of
   // very few pages an ordinary member can see, so it sits at the top level
   // rather than inside a collapsible section a member has no reason to open.
@@ -188,6 +189,9 @@ const navSections: NavSection[] = [
         permission: 'services.manage_schedules',
       },
       { label: 'Settings', path: '/admin/settings', icon: Settings, permission: 'system.settings' },
+      // platform.admin is exempt from the church SUPER_ADMIN bypass, so this
+      // renders only for genuine SaaS operators.
+      { label: 'Platform Console', path: '/admin/platform', icon: Globe2, permission: 'platform.admin' },
     ],
   },
 ];
