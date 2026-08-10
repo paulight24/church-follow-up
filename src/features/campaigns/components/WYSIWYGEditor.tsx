@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useLayoutEffect } from 'react';
 import {
   Bold,
   Italic,
@@ -15,6 +15,7 @@ import {
   AlignRight,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface ToolbarButtonProps {
   icon: React.ReactNode;
@@ -53,6 +54,27 @@ interface WYSIWYGEditorProps {
 
 export function WYSIWYGEditor({ content, onChange, onInsertImage }: WYSIWYGEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  // Tracks the HTML string this component last wrote into (or read out of)
+  // the DOM, so the effect below can tell "content changed because the
+  // caller loaded a different draft" apart from "content changed because
+  // handleInput just echoed the caret's own edit back up". Only the former
+  // should re-sanitise and overwrite innerHTML - doing it on every keystroke
+  // would reset the caret to the start of the field on each character typed.
+  const lastKnownContent = useRef<string | null>(null);
+
+  // Seed (and re-seed, e.g. when an existing draft finishes loading) the
+  // contentEditable area with sanitised HTML. Stored campaign drafts are
+  // untrusted-ish - they may have been written by a compromised/careless
+  // staff account - so even this editor's own initial render must not
+  // trust them.
+  useLayoutEffect(() => {
+    if (!editorRef.current) return;
+    if (content === lastKnownContent.current) return;
+
+    const safeHtml = sanitizeHtml(content);
+    editorRef.current.innerHTML = safeHtml;
+    lastKnownContent.current = safeHtml;
+  }, [content]);
 
   const execCommand = useCallback((command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -61,7 +83,9 @@ export function WYSIWYGEditor({ content, onChange, onInsertImage }: WYSIWYGEdito
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      const html = editorRef.current.innerHTML;
+      lastKnownContent.current = html;
+      onChange(html);
     }
   }, [onChange]);
 
@@ -186,7 +210,6 @@ export function WYSIWYGEditor({ content, onChange, onInsertImage }: WYSIWYGEdito
         ref={editorRef}
         contentEditable
         onInput={handleInput}
-        dangerouslySetInnerHTML={{ __html: content }}
         className={cn(
           'min-h-[200px] px-4 py-3 text-sm text-slate-900',
           'focus:outline-none',
