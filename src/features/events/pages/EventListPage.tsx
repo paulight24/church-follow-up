@@ -9,7 +9,6 @@ import { Select } from '@/components/ui/Select';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatDate } from '@/lib/formatters';
 import { formatEventDay } from '../lib/eventDate';
 import { usePermission } from '@/hooks/usePermission';
 import { eventsApi } from '../api/events.api';
