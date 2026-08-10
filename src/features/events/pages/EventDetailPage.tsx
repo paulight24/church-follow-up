@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, ChevronRight, MapPin, Pencil, Send, Trash2, Users, EyeOff } from 'lucide-react';
 import { format, parse } from 'date-fns';
+import { formatEventWhen as formatEventWhenShared } from '../lib/eventDate';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -24,12 +25,7 @@ function errorMessage(err: unknown, fallback: string): string {
 
 /** Combines the calendar eventDate with the optional "HH:mm" startTime/endTime strings. */
 function formatEventWhen(event: Pick<EventRecord, 'eventDate' | 'startTime' | 'endTime'>): string {
-  const day = format(new Date(event.eventDate), 'MMM d, yyyy');
-  if (!event.startTime) return day;
-  const start = format(parse(event.startTime, 'HH:mm', new Date(event.eventDate)), 'h:mm a');
-  if (!event.endTime) return `${day} · ${start}`;
-  const end = format(parse(event.endTime, 'HH:mm', new Date(event.eventDate)), 'h:mm a');
-  return `${day} · ${start} – ${end}`;
+  return formatEventWhenShared(event.eventDate, event.startTime, event.endTime, 'MMM d, yyyy');
 }
 
 export function EventDetailPage() {

@@ -17,19 +17,7 @@ import { publicEventsApi } from '../api/publicEvents.api';
 import { buildRegistrationSchema, defaultRegistrationValues, publicFieldsToConfig } from '../lib/eventFields';
 import type { RegistrationFormValues } from '../lib/eventFields';
 import { EventRegistrationFields } from '../components/EventRegistrationFields';
-
-/** Combines the calendar eventDate with the optional "HH:mm" startTime/endTime strings. */
-function formatEventWhen(eventDate: string, startTime?: string | null, endTime?: string | null): string {
-  const day = format(new Date(eventDate), 'EEEE, MMMM d, yyyy');
-  if (!startTime) return day;
-
-  const start = parse(startTime, 'HH:mm', new Date(eventDate));
-  const startLabel = format(start, 'h:mm a');
-  if (!endTime) return `${day} · ${startLabel}`;
-
-  const end = parse(endTime, 'HH:mm', new Date(eventDate));
-  return `${day} · ${startLabel} – ${format(end, 'h:mm a')}`;
-}
+import { formatEventDay, formatEventWhen } from '../lib/eventDate';
 
 /** Shared shell for every state of this page - centered, single-column, no app chrome. */
 function PageShell({ children }: { children: ReactNode }) {
@@ -156,7 +144,7 @@ export function PublicEventRegistrationPage() {
           icon={PartyPopper}
           iconClassName="bg-emerald-100 text-emerald-600"
           title={submittedName ? `We've got you, ${submittedName}!` : "We've got you!"}
-          description={`See you ${format(new Date(event.eventDate), 'EEEE, MMMM d')}${event.location ? ` at ${event.location}` : ''}.`}
+          description={`See you ${formatEventDay(event.eventDate, 'EEEE, MMMM d')}${event.location ? ` at ${event.location}` : ''}.`}
         />
       </PageShell>
     );

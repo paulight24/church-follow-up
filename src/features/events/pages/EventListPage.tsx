@@ -10,6 +10,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatDate } from '@/lib/formatters';
+import { formatEventDay } from '../lib/eventDate';
 import { usePermission } from '@/hooks/usePermission';
 import { eventsApi } from '../api/events.api';
 import type { EventStatus } from '@/types/event';
@@ -93,7 +94,7 @@ export function EventListPage() {
                     </div>
                     <p className="flex items-center gap-1.5 text-sm text-slate-500">
                       <CalendarDays className="h-4 w-4" />
-                      {formatDate(event.eventDate)}
+                      {formatEventDay(event.eventDate, 'MMM d, yyyy')}
                     </p>
                     {event.location && (
                       <p className="flex items-center gap-1.5 text-sm text-slate-500">
