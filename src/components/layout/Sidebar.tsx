@@ -8,6 +8,7 @@ import {
   Building2,
   CalendarCheck,
   CalendarClock,
+  CalendarHeart,
   ChevronsLeft,
   ChevronsRight,
   ClipboardCheck,
@@ -134,6 +135,7 @@ const navSections: NavSection[] = [
         icon: GraduationCap,
         permission: 'foundation_school.view',
       },
+      { label: 'Events', path: '/events', icon: CalendarHeart, permission: 'events.view' },
     ],
   },
   {

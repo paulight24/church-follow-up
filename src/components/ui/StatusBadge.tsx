@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 
 type BadgeVariant = ComponentProps<typeof Badge>['variant'];
 
-type StatusType = 'followUp' | 'member' | 'escalation' | 'campaign' | 'announcement';
+type StatusType = 'followUp' | 'member' | 'escalation' | 'campaign' | 'announcement' | 'event';
 
 const statusMaps: Record<StatusType, Record<string, BadgeVariant>> = {
   followUp: {
@@ -36,6 +36,12 @@ const statusMaps: Record<StatusType, Record<string, BadgeVariant>> = {
     DRAFT: 'gray',
     PUBLISHED: 'success',
     ARCHIVED: 'gray',
+  },
+  event: {
+    DRAFT: 'gray',
+    PUBLISHED: 'success',
+    CLOSED: 'warning',
+    CANCELLED: 'danger',
   },
 };
 

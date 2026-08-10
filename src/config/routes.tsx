@@ -10,6 +10,11 @@ const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/ForgotPasswo
 const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
 const AcceptInvitePage = lazy(() => import('@/features/auth/pages/AcceptInvitePage').then(m => ({ default: m.AcceptInvitePage })));
 
+// Public event registration (no session, reached via a QR code on a printed flier)
+const PublicEventRegistrationPage = lazy(() =>
+  import('@/features/events/pages/PublicEventRegistrationPage').then(m => ({ default: m.PublicEventRegistrationPage })),
+);
+
 // Dashboard
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 
@@ -56,6 +61,12 @@ const PublicPrayerRequestPage = lazy(() => import('@/features/prayer-requests/pa
 const ServicesPage = lazy(() => import('@/features/attendance/pages/ServicesPage').then(m => ({ default: m.ServicesPage })));
 const ServiceAttendancePage = lazy(() => import('@/features/attendance/pages/ServiceAttendancePage').then(m => ({ default: m.ServiceAttendancePage })));
 const AttendanceReportsPage = lazy(() => import('@/features/attendance/pages/AttendanceReportsPage').then(m => ({ default: m.AttendanceReportsPage })));
+
+// Events
+const EventListPage = lazy(() => import('@/features/events/pages/EventListPage').then(m => ({ default: m.EventListPage })));
+const EventCreatePage = lazy(() => import('@/features/events/pages/EventCreatePage').then(m => ({ default: m.EventCreatePage })));
+const EventEditPage = lazy(() => import('@/features/events/pages/EventEditPage').then(m => ({ default: m.EventEditPage })));
+const EventDetailPage = lazy(() => import('@/features/events/pages/EventDetailPage').then(m => ({ default: m.EventDetailPage })));
 
 // Profile (self-service)
 const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
@@ -105,6 +116,7 @@ export function AppRoutes() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/accept-invite" element={<AcceptInvitePage />} />
         <Route path="/prayer" element={<PublicPrayerRequestPage />} />
+        <Route path="/e/:slug" element={<PublicEventRegistrationPage />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
@@ -193,6 +205,18 @@ export function AppRoutes() {
             </Route>
             <Route element={<ProtectedRoute permission="attendance.view_reports" />}>
               <Route path="/services/reports" element={<AttendanceReportsPage />} />
+            </Route>
+
+            {/* Events */}
+            <Route element={<ProtectedRoute permission="events.view" />}>
+              <Route path="/events" element={<EventListPage />} />
+              <Route path="/events/:id" element={<EventDetailPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="events.create" />}>
+              <Route path="/events/new" element={<EventCreatePage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="events.update" />}>
+              <Route path="/events/:id/edit" element={<EventEditPage />} />
             </Route>
 
             {/* Foundation School */}
