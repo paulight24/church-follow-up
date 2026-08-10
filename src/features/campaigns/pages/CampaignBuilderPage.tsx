@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { useToast } from '@/components/ui/Toast';
 import { usePermission } from '@/hooks/usePermission';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { WYSIWYGEditor } from '../components/WYSIWYGEditor';
 import { RecipientSelector } from '../components/RecipientSelector';
 import { MediaLibrary } from '../components/MediaLibrary';
@@ -442,7 +443,7 @@ export function CampaignBuilderPage() {
                     <h4 className="mb-2 text-sm font-semibold text-slate-900">Content Preview</h4>
                     <div
                       className="prose prose-sm max-w-none text-slate-700"
-                      dangerouslySetInnerHTML={{ __html: formData.htmlContent }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(formData.htmlContent) }}
                     />
                   </div>
                 )}

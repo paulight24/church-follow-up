@@ -12,6 +12,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 import { usePermission } from '@/hooks/usePermission';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import type { EventRecord } from '@/types/event';
 import { eventsApi } from '../api/events.api';
 import { EventQrShare } from '../components/EventQrShare';
@@ -191,7 +192,7 @@ export function EventDetailPage() {
           {event.description && (
             <div
               className="prose prose-sm max-w-none border-t border-slate-100 pt-3 text-slate-700"
-              dangerouslySetInnerHTML={{ __html: event.description }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description) }}
             />
           )}
         </CardContent>

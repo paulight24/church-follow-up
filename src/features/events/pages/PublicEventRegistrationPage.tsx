@@ -12,6 +12,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Spinner } from '@/components/ui/Spinner';
 import type { ApiError } from '@/types';
 import type { EventRegistrationAnswers, PublicRegistrationStatus } from '@/types/event';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { publicEventsApi } from '../api/publicEvents.api';
 import { buildRegistrationSchema, defaultRegistrationValues, publicFieldsToConfig } from '../lib/eventFields';
 import type { RegistrationFormValues } from '../lib/eventFields';
@@ -211,11 +212,10 @@ export function PublicEventRegistrationPage() {
       {event.description && (
         <div
           className="prose prose-sm mb-6 max-w-none rounded-2xl bg-white p-5 text-slate-700 shadow-sm [&_a]:text-indigo-600 [&_img]:rounded-lg"
-          // Same rendering approach the campaign builder's content preview uses
-          // (src/features/campaigns/pages/CampaignBuilderPage.tsx) for admin-authored HTML
-          // from the same WYSIWYG editor - see this feature's report for why no sanitiser
-          // was introduced here.
-          dangerouslySetInnerHTML={{ __html: event.description }}
+          // This page is public - anyone on the internet, logged in or not, can load
+          // it - so admin-authored HTML is run through the shared sanitizer helper
+          // before it's ever handed to dangerouslySetInnerHTML. See src/lib/sanitizeHtml.ts.
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description) }}
         />
       )}
 
