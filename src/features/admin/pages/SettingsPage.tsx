@@ -12,6 +12,7 @@ import { Alert } from '@/components/ui/Alert';
 import { settingsApi, type AllSettings } from '../api/settings.api';
 import { WhatsAppSettingsPanel } from '@/features/whatsapp/components/WhatsAppSettingsPanel';
 import { DataExportCard } from '../components/DataExportCard';
+import { IntegrationsCard } from '../components/IntegrationsCard';
 import api from '@/config/api';
 
 function asString(value: unknown, fallback = ''): string {
@@ -139,6 +140,9 @@ export function SettingsPage() {
 
       {/* Data ownership: full export (always available) + plan */}
       <DataExportCard />
+
+      {/* Per-church sender accounts (Twilio / Resend / SendGrid / Meta) */}
+      <IntegrationsCard />
 
       {/* Church Profile */}
       <Card>
