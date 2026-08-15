@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Cake, Send } from 'lucide-react';
+import { Cake, Gem } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -13,7 +13,8 @@ import { settingsApi, type AllSettings } from '../api/settings.api';
 import { WhatsAppSettingsPanel } from '@/features/whatsapp/components/WhatsAppSettingsPanel';
 import { DataExportCard } from '../components/DataExportCard';
 import { IntegrationsCard } from '../components/IntegrationsCard';
-import api from '@/config/api';
+import { EmailPreviewCard } from '../components/EmailPreviewCard';
+import { GreetingsCard } from '../components/GreetingsCard';
 
 function asString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value : fallback;
@@ -44,23 +45,34 @@ export function SettingsPage() {
   const [smsNotifs, setSmsNotifs] = useState(true);
   const [inAppNotifs, setInAppNotifs] = useState(true);
 
+  // Greeting defaults are church-neutral — {{churchName}} is substituted per
+  // church at send time, and the branded email shell supplies the headline,
+  // so the body template carries no heading of its own.
   const [birthdayEnabled, setBirthdayEnabled] = useState(false);
   const [birthdaySmsEnabled, setBirthdaySmsEnabled] = useState(true);
   const [birthdayEmailEnabled, setBirthdayEmailEnabled] = useState(true);
   const [birthdaySmsTemplate, setBirthdaySmsTemplate] = useState(
-    'Happy Birthday {{firstName}}! 🎂 Wishing you a wonderful day filled with God\'s blessings. With love from Christ Embassy LA.'
+    "Happy Birthday {{firstName}}! 🎂 Wishing you a wonderful day filled with God's blessings. With love from {{churchName}}."
   );
   const [birthdayEmailSubject, setBirthdayEmailSubject] = useState(
     'Happy Birthday {{firstName}}! 🎂'
   );
   const [birthdayEmailTemplate, setBirthdayEmailTemplate] = useState(
-    '<h2>Happy Birthday, {{firstName}}!</h2><p>On this special day, we celebrate you and thank God for your life. May this new year of your life be filled with His grace, favour, and endless blessings.</p><p>With love,<br/>Christ Embassy LA</p>'
+    '<p>On this special day, we celebrate you and thank God for your life. May this new year of your life be filled with His grace, favour and endless blessings.</p><p>With love,<br/>{{churchName}}</p>'
   );
-  const [testingBirthday, setTestingBirthday] = useState(false);
-  const [birthdayTestResult, setBirthdayTestResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const [testingEmail, setTestingEmail] = useState(false);
-  const [emailTestResult, setEmailTestResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [anniversaryEnabled, setAnniversaryEnabled] = useState(false);
+  const [anniversarySmsEnabled, setAnniversarySmsEnabled] = useState(true);
+  const [anniversaryEmailEnabled, setAnniversaryEmailEnabled] = useState(true);
+  const [anniversarySmsTemplate, setAnniversarySmsTemplate] = useState(
+    'Happy Anniversary {{firstName}}! 💍 Celebrating the covenant God established in your marriage. With love from {{churchName}}.'
+  );
+  const [anniversaryEmailSubject, setAnniversaryEmailSubject] = useState(
+    'Happy Anniversary, {{firstName}}! 💍'
+  );
+  const [anniversaryEmailTemplate, setAnniversaryEmailTemplate] = useState(
+    '<p>Today we celebrate the covenant God established in your marriage. May your love keep growing, and may your home remain filled with His peace and joy.</p><p>With love,<br/>{{churchName}}</p>'
+  );
 
   useEffect(() => {
     if (!data) return;
@@ -87,6 +99,13 @@ export function SettingsPage() {
     if (notifications.birthday_sms_template) setBirthdaySmsTemplate(asString(notifications.birthday_sms_template));
     if (notifications.birthday_email_subject) setBirthdayEmailSubject(asString(notifications.birthday_email_subject));
     if (notifications.birthday_email_template) setBirthdayEmailTemplate(asString(notifications.birthday_email_template));
+
+    setAnniversaryEnabled(asBoolean(notifications.anniversary_enabled, false));
+    setAnniversarySmsEnabled(asBoolean(notifications.anniversary_sms_enabled, true));
+    setAnniversaryEmailEnabled(asBoolean(notifications.anniversary_email_enabled, true));
+    if (notifications.anniversary_sms_template) setAnniversarySmsTemplate(asString(notifications.anniversary_sms_template));
+    if (notifications.anniversary_email_subject) setAnniversaryEmailSubject(asString(notifications.anniversary_email_subject));
+    if (notifications.anniversary_email_template) setAnniversaryEmailTemplate(asString(notifications.anniversary_email_template));
   }, [data]);
 
   const saveMutation = useMutation({
@@ -108,6 +127,12 @@ export function SettingsPage() {
           birthday_sms_template: birthdaySmsTemplate,
           birthday_email_subject: birthdayEmailSubject,
           birthday_email_template: birthdayEmailTemplate,
+          anniversary_enabled: anniversaryEnabled,
+          anniversary_sms_enabled: anniversarySmsEnabled,
+          anniversary_email_enabled: anniversaryEmailEnabled,
+          anniversary_sms_template: anniversarySmsTemplate,
+          anniversary_email_subject: anniversaryEmailSubject,
+          anniversary_email_template: anniversaryEmailTemplate,
         }),
       ]);
     },
@@ -269,191 +294,74 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* What every email looks like, rendered from this church's branding */}
+      <EmailPreviewCard />
+
       {/* Birthday Greetings */}
+      <GreetingsCard
+        title="Birthday Greetings"
+        icon={Cake}
+        iconClassName="text-pink-500"
+        description="Sends personalised greetings to members on their birthday at 8:00 AM daily"
+        testEndpoint="/settings/birthday/test"
+        testHint="Sends to every member whose birthday is today. Save settings first."
+        smsPlaceholder="Happy Birthday {{firstName}}!"
+        values={{
+          enabled: birthdayEnabled,
+          smsEnabled: birthdaySmsEnabled,
+          emailEnabled: birthdayEmailEnabled,
+          smsTemplate: birthdaySmsTemplate,
+          emailSubject: birthdayEmailSubject,
+          emailTemplate: birthdayEmailTemplate,
+        }}
+        onChange={(patch) => {
+          if (patch.enabled !== undefined) setBirthdayEnabled(patch.enabled);
+          if (patch.smsEnabled !== undefined) setBirthdaySmsEnabled(patch.smsEnabled);
+          if (patch.emailEnabled !== undefined) setBirthdayEmailEnabled(patch.emailEnabled);
+          if (patch.smsTemplate !== undefined) setBirthdaySmsTemplate(patch.smsTemplate);
+          if (patch.emailSubject !== undefined) setBirthdayEmailSubject(patch.emailSubject);
+          if (patch.emailTemplate !== undefined) setBirthdayEmailTemplate(patch.emailTemplate);
+        }}
+      />
+
+      {/* Wedding Anniversary Greetings */}
+      <GreetingsCard
+        title="Anniversary Greetings"
+        icon={Gem}
+        iconClassName="text-rose-500"
+        description="Sends greetings to members on their wedding anniversary at 8:00 AM daily"
+        testEndpoint="/settings/anniversary/test"
+        testHint="Sends to every member whose anniversary is today. Save settings first."
+        smsPlaceholder="Happy Anniversary {{firstName}}!"
+        values={{
+          enabled: anniversaryEnabled,
+          smsEnabled: anniversarySmsEnabled,
+          emailEnabled: anniversaryEmailEnabled,
+          smsTemplate: anniversarySmsTemplate,
+          emailSubject: anniversaryEmailSubject,
+          emailTemplate: anniversaryEmailTemplate,
+        }}
+        onChange={(patch) => {
+          if (patch.enabled !== undefined) setAnniversaryEnabled(patch.enabled);
+          if (patch.smsEnabled !== undefined) setAnniversarySmsEnabled(patch.smsEnabled);
+          if (patch.emailEnabled !== undefined) setAnniversaryEmailEnabled(patch.emailEnabled);
+          if (patch.smsTemplate !== undefined) setAnniversarySmsTemplate(patch.smsTemplate);
+          if (patch.emailSubject !== undefined) setAnniversaryEmailSubject(patch.emailSubject);
+          if (patch.emailTemplate !== undefined) setAnniversaryEmailTemplate(patch.emailTemplate);
+        }}
+      />
+
+      {/* WhatsApp templates (synced from Meta) */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            <span className="flex items-center gap-2">
-              <Cake className="h-5 w-5 text-pink-500" />
-              Birthday Greetings
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-900">Enable automatic birthday messages</p>
-                <p className="text-xs text-slate-500">
-                  Sends personalized greetings to members on their birthday at 8:00 AM daily
-                </p>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={birthdayEnabled}
-                onClick={() => setBirthdayEnabled(!birthdayEnabled)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${birthdayEnabled ? 'bg-indigo-600' : 'bg-slate-200'}`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform ${birthdayEnabled ? 'translate-x-5' : 'translate-x-0'}`}
-                />
-              </button>
-            </div>
-
-            {birthdayEnabled && (
-              <>
-                <div className="space-y-3 rounded-lg border border-slate-200 p-4">
-                  <p className="text-sm font-medium text-slate-700">Channels</p>
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={birthdaySmsEnabled}
-                      onChange={(e) => setBirthdaySmsEnabled(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span className="text-sm text-slate-700">SMS (requires Twilio configured)</span>
-                  </label>
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={birthdayEmailEnabled}
-                      onChange={(e) => setBirthdayEmailEnabled(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span className="text-sm text-slate-700">Email (requires email provider configured)</span>
-                  </label>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="rounded-lg bg-slate-50 px-3 py-2">
-                    <p className="text-xs font-medium text-slate-500">Available placeholders</p>
-                    <p className="mt-1 font-mono text-xs text-slate-600">
-                      {'{{firstName}} {{lastName}} {{preferredName}} {{name}}'}
-                    </p>
-                  </div>
-
-                  <Textarea
-                    label="SMS Template"
-                    value={birthdaySmsTemplate}
-                    onChange={(e) => setBirthdaySmsTemplate(e.target.value)}
-                    rows={3}
-                    placeholder="Happy Birthday {{firstName}}!"
-                  />
-
-                  <Input
-                    label="Email Subject"
-                    value={birthdayEmailSubject}
-                    onChange={(e) => setBirthdayEmailSubject(e.target.value)}
-                    placeholder="Happy Birthday {{firstName}}!"
-                  />
-
-                  <Textarea
-                    label="Email Body (HTML)"
-                    value={birthdayEmailTemplate}
-                    onChange={(e) => setBirthdayEmailTemplate(e.target.value)}
-                    rows={6}
-                    placeholder="<h2>Happy Birthday, {{firstName}}!</h2>"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 border-t border-slate-200 pt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    leftIcon={<Send className="h-4 w-4" />}
-                    onClick={async () => {
-                      setTestingBirthday(true);
-                      setBirthdayTestResult(null);
-                      try {
-                        const res = await api.post('/settings/birthday/test');
-                        setBirthdayTestResult({ type: 'success', message: res.data.message });
-                      } catch {
-                        setBirthdayTestResult({ type: 'error', message: 'Failed to run birthday test. Check server logs.' });
-                      } finally {
-                        setTestingBirthday(false);
-                      }
-                    }}
-                    disabled={testingBirthday}
-                  >
-                    {testingBirthday ? 'Running...' : 'Run Now (Test)'}
-                  </Button>
-                  <span className="text-xs text-slate-500">
-                    Sends to all members whose birthday is today. Save settings first.
-                  </span>
-                </div>
-                {birthdayTestResult && (
-                  <Alert variant={birthdayTestResult.type === 'success' ? 'success' : 'error'}>
-                    {birthdayTestResult.message}
-                  </Alert>
-                )}
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Integration Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Integration Settings</CardTitle>
+          <CardTitle>WhatsApp</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-4 text-sm text-slate-500">
-            SMS and email delivery currently run through stub providers (they log outbound
-            messages instead of sending them). Configure real credentials via environment
-            variables on the server (SMS_PROVIDER, TWILIO_*, EMAIL_PROVIDER, RESEND_API_KEY,
-            etc.) — there is no in-app credentials UI yet.
+            Credentials live in <strong>Messaging Accounts</strong> above. Templates are authored and
+            approved in Meta Business Manager, then synced here.
           </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 p-4">
-              <h4 className="mb-1 font-medium text-slate-900">SMS Provider</h4>
-              <p className="mb-3 text-sm text-slate-500">
-                Console stub active. Set SMS_PROVIDER=twilio + credentials on the server to go live.
-              </p>
-            </div>
-            <div className="rounded-lg border border-slate-200 p-4">
-              <h4 className="mb-1 font-medium text-slate-900">Email Service</h4>
-              <p className="mb-3 text-sm text-slate-500">
-                Configure EMAIL_PROVIDER + RESEND_API_KEY/SENDGRID_API_KEY on the server.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                leftIcon={<Send className="h-4 w-4" />}
-                onClick={async () => {
-                  setTestingEmail(true);
-                  setEmailTestResult(null);
-                  try {
-                    const res = await api.post('/settings/email/test');
-                    const { provider, to, result } = res.data;
-                    if (result.status === 'SENT') {
-                      setEmailTestResult({ type: 'success', message: `Sent via ${provider} to ${to}.` });
-                    } else {
-                      setEmailTestResult({ type: 'error', message: `${provider} failed: ${result.failureReason}` });
-                    }
-                  } catch {
-                    setEmailTestResult({ type: 'error', message: 'Failed to send test email. Check server logs.' });
-                  } finally {
-                    setTestingEmail(false);
-                  }
-                }}
-                disabled={testingEmail}
-              >
-                {testingEmail ? 'Sending...' : 'Send Test Email'}
-              </Button>
-              <p className="mt-2 text-xs text-slate-500">Sends only to your own account email.</p>
-            </div>
-          </div>
-          {emailTestResult && (
-            <Alert variant={emailTestResult.type === 'success' ? 'success' : 'error'} className="mt-4">
-              {emailTestResult.message}
-            </Alert>
-          )}
-
-          <div className="mt-4">
-            <WhatsAppSettingsPanel />
-          </div>
+          <WhatsAppSettingsPanel />
         </CardContent>
       </Card>
 
