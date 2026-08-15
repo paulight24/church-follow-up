@@ -92,6 +92,10 @@ const AnnouncementManagePage = lazy(() => import('@/features/announcements/pages
 // Notifications
 const NotificationsPage = lazy(() => import('@/features/notifications/pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
 
+// Live Translation (operator console + public listener page reached via QR)
+const LiveTranslationPage = lazy(() => import('@/features/live-translation/pages/LiveTranslationPage').then(m => ({ default: m.LiveTranslationPage })));
+const PublicListenerPage = lazy(() => import('@/features/live-translation/pages/PublicListenerPage').then(m => ({ default: m.PublicListenerPage })));
+
 // Reports
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 
@@ -140,6 +144,8 @@ export function AppRoutes() {
         <Route path="/accept-invite" element={<AcceptInvitePage />} />
         <Route path="/prayer" element={<PublicPrayerRequestPage />} />
         <Route path="/e/:slug" element={<PublicEventRegistrationPage />} />
+        {/* Congregation listener page (QR from the projector — no login). */}
+        <Route path="/live/:slug" element={<PublicListenerPage />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
@@ -265,6 +271,11 @@ export function AppRoutes() {
             {/* Notifications */}
             <Route element={<ProtectedRoute permission="notifications.view" />}>
               <Route path="/notifications" element={<NotificationsPage />} />
+            </Route>
+
+            {/* Live Translation (operator console) */}
+            <Route element={<ProtectedRoute permission={['live_translation.view', 'live_translation.manage']} />}>
+              <Route path="/live-translation" element={<LiveTranslationPage />} />
             </Route>
 
             {/* Reports */}

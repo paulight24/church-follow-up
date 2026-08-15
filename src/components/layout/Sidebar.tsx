@@ -17,6 +17,7 @@ import {
   GraduationCap,
   HandHeart,
   Heart,
+  Languages,
   LayoutDashboard,
   LayoutTemplate,
   Megaphone,
@@ -152,6 +153,12 @@ const navSections: NavSection[] = [
     id: 'communications',
     label: 'Communications',
     items: [
+      {
+        label: 'Live Translation',
+        path: '/live-translation',
+        icon: Languages,
+        permission: ['live_translation.view', 'live_translation.manage'],
+      },
       { label: 'Campaigns', path: '/campaigns', icon: Megaphone, permission: 'campaigns.view' },
       { label: 'Encouragements', path: '/encouragements', icon: Heart, permission: 'encouragements.view' },
       {
