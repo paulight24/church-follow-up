@@ -20,6 +20,11 @@ export interface GreetingValues {
   smsTemplate: string;
   emailSubject: string;
   emailTemplate: string;
+  /** Every word of the email is yours — blank falls back to our wording. */
+  emailHeading: string;
+  emailScripture: string;
+  emailScriptureRef: string;
+  emailFooterNote: string;
 }
 
 interface GreetingsCardProps {
@@ -140,6 +145,13 @@ export function GreetingsCard({
                   placeholder={smsPlaceholder}
                 />
 
+                <Input
+                  label="Email Headline"
+                  value={values.emailHeading}
+                  onChange={(e) => onChange({ emailHeading: e.target.value })}
+                  placeholder="Happy birthday, {{firstName}}!"
+                />
+
                 <div>
                   <Textarea
                     label="Email Body"
@@ -149,10 +161,34 @@ export function GreetingsCard({
                     placeholder="<p>Your message…</p>"
                   />
                   <p className="mt-1.5 text-xs text-slate-500">
-                    Just the message — your church header, greeting headline and footer are added
+                    Your church header, the headline above and the footer are added around this
                     automatically. See it in <strong>Email Design &amp; Previews</strong> above.
                   </p>
                 </div>
+
+                <div className="grid gap-4 md:grid-cols-[1fr_200px]">
+                  <Textarea
+                    label="Quote / scripture (optional)"
+                    value={values.emailScripture}
+                    onChange={(e) => onChange({ emailScripture: e.target.value })}
+                    rows={2}
+                    placeholder="Leave blank to remove the quote panel"
+                  />
+                  <Input
+                    label="Reference"
+                    value={values.emailScriptureRef}
+                    onChange={(e) => onChange({ emailScriptureRef: e.target.value })}
+                    placeholder="Numbers 6:24–25"
+                  />
+                </div>
+
+                <Textarea
+                  label="Closing note (small print)"
+                  value={values.emailFooterNote}
+                  onChange={(e) => onChange({ emailFooterNote: e.target.value })}
+                  rows={2}
+                  placeholder="Someone at {{churchName}} is thinking of you today."
+                />
               </div>
 
               <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">

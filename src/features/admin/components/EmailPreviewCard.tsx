@@ -11,6 +11,7 @@ import {
   Monitor,
   Send,
   Smartphone,
+  Ticket,
   UserPlus,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -36,6 +37,7 @@ const EMAIL_TYPES: EmailType[] = [
   { id: 'test', label: 'Delivery test', description: 'Confirms sending works', icon: CheckCircle2 },
   { id: 'birthday', label: 'Birthday', description: 'Your saved birthday template', icon: Cake },
   { id: 'anniversary', label: 'Anniversary', description: 'Your saved anniversary template', icon: Gem },
+  { id: 'event', label: 'Event signup', description: 'Confirmation to a registrant', icon: Ticket },
   { id: 'encouragement', label: 'Encouragement', description: 'Pastoral note to a member', icon: HeartHandshake },
   { id: 'campaign', label: 'Campaign', description: 'Bulk announcement to a segment', icon: Megaphone },
   { id: 'invite', label: 'Invitation', description: 'New user account setup', icon: UserPlus },

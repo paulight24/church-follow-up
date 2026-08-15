@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Church,
 } from 'lucide-react';
+import { ContactSection } from '../components/ContactSection';
 
 /**
  * Public marketing funnel — the front door for churches discovering the
@@ -34,6 +35,9 @@ export function LandingPage() {
           <nav className="flex items-center gap-2 sm:gap-4">
             <a href="#features" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
               Features
+            </a>
+            <a href="#contact" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
+              Contact
             </a>
             <a href="#how-it-works" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
               How it works
@@ -228,6 +232,9 @@ export function LandingPage() {
           </Link>
         </div>
       </section>
+
+      {/* ── Contact ─────────────────────────────────────────── */}
+      <ContactSection />
 
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="border-t border-slate-100 bg-white">

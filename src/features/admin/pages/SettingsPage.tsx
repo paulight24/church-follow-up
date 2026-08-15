@@ -60,6 +60,14 @@ export function SettingsPage() {
   const [birthdayEmailTemplate, setBirthdayEmailTemplate] = useState(
     '<p>On this special day, we celebrate you and thank God for your life. May this new year of your life be filled with His grace, favour and endless blessings.</p><p>With love,<br/>{{churchName}}</p>'
   );
+  const [birthdayEmailHeading, setBirthdayEmailHeading] = useState('Happy birthday, {{firstName}}!');
+  const [birthdayEmailScripture, setBirthdayEmailScripture] = useState(
+    'The Lord bless you and keep you; the Lord make his face shine on you and be gracious to you.'
+  );
+  const [birthdayEmailScriptureRef, setBirthdayEmailScriptureRef] = useState('Numbers 6:24\u201325');
+  const [birthdayEmailFooterNote, setBirthdayEmailFooterNote] = useState(
+    'Someone at {{churchName}} is thinking of you today. If you would like to update how we reach you, just reply to this email.'
+  );
 
   const [anniversaryEnabled, setAnniversaryEnabled] = useState(false);
   const [anniversarySmsEnabled, setAnniversarySmsEnabled] = useState(true);
@@ -72,6 +80,14 @@ export function SettingsPage() {
   );
   const [anniversaryEmailTemplate, setAnniversaryEmailTemplate] = useState(
     '<p>Today we celebrate the covenant God established in your marriage. May your love keep growing, and may your home remain filled with His peace and joy.</p><p>With love,<br/>{{churchName}}</p>'
+  );
+  const [anniversaryEmailHeading, setAnniversaryEmailHeading] = useState('Happy anniversary, {{firstName}}!');
+  const [anniversaryEmailScripture, setAnniversaryEmailScripture] = useState(
+    'Therefore what God has joined together, let no one separate.'
+  );
+  const [anniversaryEmailScriptureRef, setAnniversaryEmailScriptureRef] = useState('Mark 10:9');
+  const [anniversaryEmailFooterNote, setAnniversaryEmailFooterNote] = useState(
+    'With love from your family at {{churchName}}.'
   );
 
   useEffect(() => {
@@ -99,6 +115,10 @@ export function SettingsPage() {
     if (notifications.birthday_sms_template) setBirthdaySmsTemplate(asString(notifications.birthday_sms_template));
     if (notifications.birthday_email_subject) setBirthdayEmailSubject(asString(notifications.birthday_email_subject));
     if (notifications.birthday_email_template) setBirthdayEmailTemplate(asString(notifications.birthday_email_template));
+    if (notifications.birthday_email_heading !== undefined) setBirthdayEmailHeading(asString(notifications.birthday_email_heading));
+    if (notifications.birthday_email_scripture !== undefined) setBirthdayEmailScripture(asString(notifications.birthday_email_scripture));
+    if (notifications.birthday_email_scripture_ref !== undefined) setBirthdayEmailScriptureRef(asString(notifications.birthday_email_scripture_ref));
+    if (notifications.birthday_email_footer_note !== undefined) setBirthdayEmailFooterNote(asString(notifications.birthday_email_footer_note));
 
     setAnniversaryEnabled(asBoolean(notifications.anniversary_enabled, false));
     setAnniversarySmsEnabled(asBoolean(notifications.anniversary_sms_enabled, true));
@@ -106,6 +126,10 @@ export function SettingsPage() {
     if (notifications.anniversary_sms_template) setAnniversarySmsTemplate(asString(notifications.anniversary_sms_template));
     if (notifications.anniversary_email_subject) setAnniversaryEmailSubject(asString(notifications.anniversary_email_subject));
     if (notifications.anniversary_email_template) setAnniversaryEmailTemplate(asString(notifications.anniversary_email_template));
+    if (notifications.anniversary_email_heading !== undefined) setAnniversaryEmailHeading(asString(notifications.anniversary_email_heading));
+    if (notifications.anniversary_email_scripture !== undefined) setAnniversaryEmailScripture(asString(notifications.anniversary_email_scripture));
+    if (notifications.anniversary_email_scripture_ref !== undefined) setAnniversaryEmailScriptureRef(asString(notifications.anniversary_email_scripture_ref));
+    if (notifications.anniversary_email_footer_note !== undefined) setAnniversaryEmailFooterNote(asString(notifications.anniversary_email_footer_note));
   }, [data]);
 
   const saveMutation = useMutation({
@@ -127,12 +151,20 @@ export function SettingsPage() {
           birthday_sms_template: birthdaySmsTemplate,
           birthday_email_subject: birthdayEmailSubject,
           birthday_email_template: birthdayEmailTemplate,
+          birthday_email_heading: birthdayEmailHeading,
+          birthday_email_scripture: birthdayEmailScripture,
+          birthday_email_scripture_ref: birthdayEmailScriptureRef,
+          birthday_email_footer_note: birthdayEmailFooterNote,
           anniversary_enabled: anniversaryEnabled,
           anniversary_sms_enabled: anniversarySmsEnabled,
           anniversary_email_enabled: anniversaryEmailEnabled,
           anniversary_sms_template: anniversarySmsTemplate,
           anniversary_email_subject: anniversaryEmailSubject,
           anniversary_email_template: anniversaryEmailTemplate,
+          anniversary_email_heading: anniversaryEmailHeading,
+          anniversary_email_scripture: anniversaryEmailScripture,
+          anniversary_email_scripture_ref: anniversaryEmailScriptureRef,
+          anniversary_email_footer_note: anniversaryEmailFooterNote,
         }),
       ]);
     },
@@ -313,6 +345,10 @@ export function SettingsPage() {
           smsTemplate: birthdaySmsTemplate,
           emailSubject: birthdayEmailSubject,
           emailTemplate: birthdayEmailTemplate,
+          emailHeading: birthdayEmailHeading,
+          emailScripture: birthdayEmailScripture,
+          emailScriptureRef: birthdayEmailScriptureRef,
+          emailFooterNote: birthdayEmailFooterNote,
         }}
         onChange={(patch) => {
           if (patch.enabled !== undefined) setBirthdayEnabled(patch.enabled);
@@ -321,6 +357,10 @@ export function SettingsPage() {
           if (patch.smsTemplate !== undefined) setBirthdaySmsTemplate(patch.smsTemplate);
           if (patch.emailSubject !== undefined) setBirthdayEmailSubject(patch.emailSubject);
           if (patch.emailTemplate !== undefined) setBirthdayEmailTemplate(patch.emailTemplate);
+          if (patch.emailHeading !== undefined) setBirthdayEmailHeading(patch.emailHeading);
+          if (patch.emailScripture !== undefined) setBirthdayEmailScripture(patch.emailScripture);
+          if (patch.emailScriptureRef !== undefined) setBirthdayEmailScriptureRef(patch.emailScriptureRef);
+          if (patch.emailFooterNote !== undefined) setBirthdayEmailFooterNote(patch.emailFooterNote);
         }}
       />
 
@@ -340,6 +380,10 @@ export function SettingsPage() {
           smsTemplate: anniversarySmsTemplate,
           emailSubject: anniversaryEmailSubject,
           emailTemplate: anniversaryEmailTemplate,
+          emailHeading: anniversaryEmailHeading,
+          emailScripture: anniversaryEmailScripture,
+          emailScriptureRef: anniversaryEmailScriptureRef,
+          emailFooterNote: anniversaryEmailFooterNote,
         }}
         onChange={(patch) => {
           if (patch.enabled !== undefined) setAnniversaryEnabled(patch.enabled);
@@ -348,6 +392,10 @@ export function SettingsPage() {
           if (patch.smsTemplate !== undefined) setAnniversarySmsTemplate(patch.smsTemplate);
           if (patch.emailSubject !== undefined) setAnniversaryEmailSubject(patch.emailSubject);
           if (patch.emailTemplate !== undefined) setAnniversaryEmailTemplate(patch.emailTemplate);
+          if (patch.emailHeading !== undefined) setAnniversaryEmailHeading(patch.emailHeading);
+          if (patch.emailScripture !== undefined) setAnniversaryEmailScripture(patch.emailScripture);
+          if (patch.emailScriptureRef !== undefined) setAnniversaryEmailScriptureRef(patch.emailScriptureRef);
+          if (patch.emailFooterNote !== undefined) setAnniversaryEmailFooterNote(patch.emailFooterNote);
         }}
       />
 

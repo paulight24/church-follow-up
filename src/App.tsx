@@ -4,6 +4,7 @@ import { queryClient } from '@/config/queryClient';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AppRoutes } from '@/config/routes';
+import { AnalyticsListener } from '@/components/AnalyticsListener';
 
 export function App() {
   return (
@@ -11,6 +12,7 @@ export function App() {
       <AuthProvider>
         <BrowserRouter>
           <ToastProvider>
+            <AnalyticsListener />
             <AppRoutes />
           </ToastProvider>
         </BrowserRouter>
