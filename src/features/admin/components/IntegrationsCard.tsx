@@ -7,6 +7,7 @@ import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { settingsApi } from '../api/settings.api';
+import { MessagingStatusPanel } from './MessagingStatusPanel';
 
 /**
  * Per-church sender accounts. Everything here is optional: a church that
@@ -85,6 +86,10 @@ export function IntegrationsCard() {
         <CardTitle>Messaging Accounts (Your Church's Own)</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Whether each channel can actually deliver right now, and a real
+            test send — the loop you watch while pasting credentials in. */}
+        <MessagingStatusPanel />
+
         <p className="mb-6 text-sm text-slate-500">
           Optional. Leave anything blank to send through the platform's shared accounts.
           Add your church's own Twilio / email / WhatsApp credentials to send from your own
