@@ -128,6 +128,9 @@ export interface EventRegistrationMemberRef {
   lastName: string;
   email?: string | null;
   phonePrimary?: string | null;
+  /** Distinguishes a brand-new guest from a member who already attends. */
+  isFirstTimer?: boolean;
+  visitorJourneyStage?: string | null;
 }
 
 /**

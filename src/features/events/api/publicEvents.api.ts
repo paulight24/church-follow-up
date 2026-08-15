@@ -5,6 +5,8 @@ import type { EventRegistrationAnswers, PublicEvent } from '@/types/event';
 interface RegisterResult {
   registrationId: string;
   status: string;
+  /** True when this submission updated a registration already on file. */
+  alreadyRegistered?: boolean;
 }
 
 /**

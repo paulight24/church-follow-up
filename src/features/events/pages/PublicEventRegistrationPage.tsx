@@ -96,6 +96,10 @@ function fieldErrorLines(errors: Record<string, string[]> | undefined): string[]
 export function PublicEventRegistrationPage() {
   const { slug } = useParams<{ slug: string }>();
   const [submittedName, setSubmittedName] = useState<string | null>(null);
+  // True when the submitter was already on the list and we updated their
+  // answers instead of adding them twice — worth saying plainly, otherwise a
+  // member who re-submits assumes they now have two places.
+  const [wasAlreadyRegistered, setWasAlreadyRegistered] = useState(false);
 
   const {
     data: event,
@@ -139,6 +143,7 @@ export function PublicEventRegistrationPage() {
       publicEventsApi.register(slug!, stripBlankAnswers(answers)),
     onSuccess: (_res, answers) => {
       setSubmittedName(answers.firstName?.trim() || null);
+      setWasAlreadyRegistered(Boolean(_res.data.alreadyRegistered));
     },
   });
 
@@ -184,8 +189,18 @@ export function PublicEventRegistrationPage() {
         <CenteredMessageCard
           icon={PartyPopper}
           iconClassName="bg-emerald-100 text-emerald-600"
-          title={submittedName ? `We've got you, ${submittedName}!` : "We've got you!"}
-          description={`See you ${formatEventDay(event.eventDate, 'EEEE, MMMM d')}${event.location ? ` at ${event.location}` : ''}.`}
+          title={
+            wasAlreadyRegistered
+              ? submittedName
+                ? `You're already on the list, ${submittedName}!`
+                : "You're already on the list!"
+              : submittedName
+                ? `We've got you, ${submittedName}!`
+                : "We've got you!"
+          }
+          description={`${
+            wasAlreadyRegistered ? 'We updated your details rather than registering you twice. ' : ''
+          }See you ${formatEventDay(event.eventDate, 'EEEE, MMMM d')}${event.location ? ` at ${event.location}` : ''}.`}
         />
       </PageShell>
     );

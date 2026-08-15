@@ -141,6 +141,7 @@ export function EventRegistrationsPanel({ event }: EventRegistrationsPanelProps)
                   {customFields.map((field) => (
                     <TableHead key={field.key}>{field.label}</TableHead>
                   ))}
+                  <TableHead>Who</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Registered</TableHead>
                 </TableRow>
@@ -156,6 +157,14 @@ export function EventRegistrationsPanel({ event }: EventRegistrationsPanelProps)
                         {registration.answers.custom?.[field.key] || '—'}
                       </TableCell>
                     ))}
+                    <TableCell>
+                      {/* Existing members and brand-new guests both land in
+                          this list; the follow-up team needs to see which is
+                          which without opening every profile. */}
+                      <Badge variant={registration.member?.isFirstTimer ? 'warning' : 'gray'} size="sm">
+                        {registration.member?.isFirstTimer ? 'First-timer' : 'Member'}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={registration.status === 'CONFIRMED' ? 'success' : 'gray'} size="sm">
                         {registration.status}
