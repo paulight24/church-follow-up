@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   Church,
 } from 'lucide-react';
-import { ContactSection } from '../components/ContactSection';
 
 /**
  * Public marketing funnel — the front door for churches discovering the
@@ -36,9 +35,9 @@ export function LandingPage() {
             <a href="#features" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
               Features
             </a>
-            <a href="#contact" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
+            <Link to="/contacts" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
               Contact
-            </a>
+            </Link>
             <a href="#how-it-works" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
               How it works
             </a>
@@ -233,9 +232,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Contact ─────────────────────────────────────────── */}
-      <ContactSection />
-
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="border-t border-slate-100 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6 lg:px-8">
@@ -245,9 +241,14 @@ export function LandingPage() {
             </div>
             <span className="text-sm font-semibold text-slate-700">Member Care</span>
           </div>
-          <p className="text-sm text-slate-500">
-            &copy; {new Date().getFullYear()} Member Care. Built for churches that care.
-          </p>
+          <div className="flex items-center gap-6">
+            <Link to="/contacts" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Contact us
+            </Link>
+            <p className="text-sm text-slate-500">
+              &copy; {new Date().getFullYear()} Member Care. Built for churches that care.
+            </p>
+          </div>
         </div>
       </footer>
     </div>

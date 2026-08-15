@@ -19,6 +19,7 @@ const PublicEventRegistrationPage = lazy(() =>
 // Public marketing funnel: landing page + church self-registration
 const LandingPage = lazy(() => import('@/features/public/pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const RegisterChurchPage = lazy(() => import('@/features/public/pages/RegisterChurchPage').then(m => ({ default: m.RegisterChurchPage })));
+const ContactPage = lazy(() => import('@/features/public/pages/ContactPage').then(m => ({ default: m.ContactPage })));
 
 // Dashboard
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -132,6 +133,7 @@ export function AppRoutes() {
         {/* Public routes */}
         <Route path="/welcome" element={<LandingPage />} />
         <Route path="/register-church" element={<RegisterChurchPage />} />
+        <Route path="/contacts" element={<ContactPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
