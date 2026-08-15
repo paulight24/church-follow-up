@@ -187,6 +187,8 @@ export interface PublicEvent {
   registrationOpensAt?: string | null;
   registrationClosesAt?: string | null;
   registrationStatus: PublicRegistrationStatus;
+  /** Hosting church, named in the SMS consent disclosure. */
+  churchName?: string | null;
   fields: Array<{ key: EventFieldKey; required: boolean }>;
   customFields?: EventCustomField[];
 }

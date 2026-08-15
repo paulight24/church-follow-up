@@ -303,8 +303,8 @@ export function PublicEventRegistrationPage() {
         {fieldConfig.phone?.enabled && (
           <p className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500">
             By giving your phone number you agree to receive text messages from{' '}
-            <strong className="font-semibold text-slate-600">{event.name}</strong>'s church about
-            this event, service reminders and pastoral messages. Message frequency varies. Message
+            <strong className="font-semibold text-slate-600">{event.churchName ?? 'this church'}</strong>{' '}
+            about this event, service reminders and pastoral messages. Message frequency varies. Message
             and data rates may apply. Reply <strong className="font-semibold text-slate-600">STOP</strong>{' '}
             to unsubscribe or <strong className="font-semibold text-slate-600">HELP</strong> for help.
             Consent is not a condition of attending.
