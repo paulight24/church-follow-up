@@ -5,10 +5,11 @@ import { useToast } from '@/components/ui/Toast';
 import { usePermission } from '@/hooks/usePermission';
 import { mediaAssetsApi, mediaAssetUrl } from '../api/encouragements.api';
 import type { MediaAssetSummary } from '@/types/encouragement';
+import { downscaleImage } from '@/lib/imageDownscale';
 
-// Mirrors backend media-assets.upload.ts's ALLOWED_MIME_TYPES / 10MB limit.
+// Mirrors backend media-assets.upload.ts's ALLOWED_MIME_TYPES / MAX_UPLOAD_BYTES.
 const ACCEPTED_TYPES = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml,application/pdf';
-const MAX_SIZE_MB = 10;
+const MAX_SIZE_MB = 20;
 
 interface ImageAttachmentPickerProps {
   value: MediaAssetSummary | null;
@@ -30,12 +31,17 @@ export function ImageAttachmentPicker({ value, onChange, disabled }: ImageAttach
   const canUpload = usePermission('media_assets.upload');
 
   const uploadMutation = useMutation({
-    mutationFn: (file: File) => mediaAssetsApi.uploadMediaAsset(file),
+    // Photos and print-resolution fliers are resized in the browser first —
+    // see lib/imageDownscale.ts. Anything it cannot resize passes through.
+    mutationFn: async (file: File) => mediaAssetsApi.uploadMediaAsset(await downscaleImage(file)),
     onSuccess: (res) => onChange(res.data),
     onError: (error: any) => {
       toast({
         title: 'Could not upload image',
-        description: error?.response?.data?.message ?? 'Please try a different file.',
+        description:
+          error?.response?.data?.error?.message ??
+          error?.response?.data?.message ??
+          'Please try a different file.',
         variant: 'error',
       });
     },
@@ -76,7 +82,7 @@ export function ImageAttachmentPicker({ value, onChange, disabled }: ImageAttach
         <FileUpload
           accept={ACCEPTED_TYPES}
           maxSizeMB={MAX_SIZE_MB}
-          helpText={`PNG, JPEG, GIF, WEBP, SVG, or PDF up to ${MAX_SIZE_MB}MB${uploadMutation.isPending ? ' - uploading...' : ''}`}
+          helpText={`PNG, JPEG, GIF, WEBP, SVG or PDF up to ${MAX_SIZE_MB}MB — large images are resized automatically${uploadMutation.isPending ? ' · uploading…' : ''}`}
           onFileSelect={(file) => uploadMutation.mutate(file)}
         />
       ) : (
