@@ -56,8 +56,14 @@ export function initAnalytics(): void {
   document.head.appendChild(script);
 
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer!.push(args);
+  // Must push the `arguments` object itself, not a rest-parameter array.
+  // gtag.js only processes entries that arrive as `arguments`; a plain array
+  // is accepted by dataLayer.push and then silently ignored, so every hit
+  // looks fine client-side and nothing ever reaches Google. Hence the
+  // function expression rather than an arrow.
+  window.gtag = function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer!.push(arguments);
   };
   window.gtag('js', new Date());
   window.gtag('config', MEASUREMENT_ID, {
