@@ -63,11 +63,18 @@ const CLOSED_STATE_COPY: Partial<Record<PublicRegistrationStatus, { title: strin
   },
 };
 
-/** Drops answers the registrant left blank, so `optional` fields stay optional. */
+/**
+ * Drops answers the registrant left blank, so `optional` fields stay
+ * optional — including inside the `custom` bag, which is one level deeper.
+ */
 function stripBlankAnswers(answers: EventRegistrationAnswers): EventRegistrationAnswers {
-  return Object.fromEntries(
-    Object.entries(answers).filter(([, v]) => typeof v !== 'string' || v.trim() !== ''),
+  const custom = Object.fromEntries(
+    Object.entries(answers.custom ?? {}).filter(([, v]) => typeof v === 'string' && v.trim() !== ''),
+  );
+  const flat = Object.fromEntries(
+    Object.entries(answers).filter(([k, v]) => k !== 'custom' && !(typeof v === 'string' && v.trim() === '')),
   ) as EventRegistrationAnswers;
+  return Object.keys(custom).length > 0 ? { ...flat, custom } : flat;
 }
 
 /**
@@ -105,7 +112,14 @@ export function PublicEventRegistrationPage() {
   const notFound = (loadError as AxiosError | undefined)?.response?.status === 404;
 
   const fieldConfig = useMemo(() => (event ? publicFieldsToConfig(event.fields) : null), [event]);
-  const schema = useMemo(() => (fieldConfig ? buildRegistrationSchema(fieldConfig) : null), [fieldConfig]);
+  const customFields = event?.customFields ?? [];
+  const schema = useMemo(
+    () => (fieldConfig ? buildRegistrationSchema(fieldConfig, customFields) : null),
+    // customFields comes from the same fetched event as fieldConfig, so it
+    // changes with it; serialised to keep the dependency by value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fieldConfig, JSON.stringify(customFields)]
+  );
 
   const {
     register,
@@ -113,7 +127,7 @@ export function PublicEventRegistrationPage() {
     formState: { errors },
   } = useForm<RegistrationFormValues>({
     resolver: schema ? zodResolver(schema) : undefined,
-    defaultValues: fieldConfig ? defaultRegistrationValues(fieldConfig) : {},
+    defaultValues: fieldConfig ? defaultRegistrationValues(fieldConfig, customFields) : {},
   });
 
   const mutation = useMutation({
@@ -256,7 +270,12 @@ export function PublicEventRegistrationPage() {
           );
         })()}
 
-        <EventRegistrationFields fields={fieldConfig} register={register} errors={errors} />
+        <EventRegistrationFields
+          fields={fieldConfig}
+          customFields={customFields}
+          register={register}
+          errors={errors}
+        />
 
         <Button
           type="submit"

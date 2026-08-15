@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   EVENT_FIELD_KEYS,
+  type EventCustomField,
   type EventFieldConfig,
   type EventFieldKey,
   type EventFieldToggle,
@@ -74,10 +75,38 @@ function fieldValidator(def: EventFieldDef, toggle: EventFieldToggle): z.ZodType
  * would drift the moment a church toggles a field, producing confusing client-side rejections
  * that don't match what the server actually requires.
  */
-export type RegistrationFormValues = Record<string, string>;
+/**
+ * Catalogue answers are flat string keys; this event's own questions live
+ * under `custom`, matching the payload the backend expects. React Hook Form
+ * builds that nesting itself from dotted field names (`custom.adults`), so
+ * no assembly step is needed on submit.
+ */
+export type RegistrationFormValues = Record<string, string | Record<string, string>>;
+
+/** Zod rule for one custom question, by answer type. */
+function customFieldValidator(field: EventCustomField): z.ZodTypeAny {
+  const base = z.string().trim();
+  const required = field.required
+    ? base.min(1, `${field.label} is required`)
+    : base.optional().default('');
+
+  if (field.type === 'number') {
+    return required.refine((v) => !v || /^-?\d+(\.\d+)?$/.test(v), {
+      message: `${field.label} must be a number`,
+    });
+  }
+  if (field.type === 'select') {
+    const options = field.options ?? [];
+    return required.refine((v) => !v || options.includes(v), {
+      message: `Choose one of the listed options`,
+    });
+  }
+  return required;
+}
 
 export function buildRegistrationSchema(
   fields: EventFieldConfig,
+  customFields: EventCustomField[] = [],
 ): z.ZodType<RegistrationFormValues, RegistrationFormValues> {
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const def of EVENT_FIELD_DEFS) {
@@ -86,6 +115,11 @@ export function buildRegistrationSchema(
       shape[def.key] = fieldValidator(def, toggle);
     }
   }
+  if (customFields.length > 0) {
+    shape.custom = z.object(
+      Object.fromEntries(customFields.map((field) => [field.key, customFieldValidator(field)])),
+    );
+  }
   // z.object's inferred output type for a dynamically-keyed shape widens to Record<string,
   // unknown>; every branch of fieldValidator always yields a string (required or
   // default('')), so this cast just tells TS what's already true at runtime.
@@ -93,12 +127,18 @@ export function buildRegistrationSchema(
 }
 
 /** Default form values for the enabled fields only - keeps every registered field a controlled input. */
-export function defaultRegistrationValues(fields: EventFieldConfig): RegistrationFormValues {
+export function defaultRegistrationValues(
+  fields: EventFieldConfig,
+  customFields: EventCustomField[] = [],
+): RegistrationFormValues {
   const values: RegistrationFormValues = {};
   for (const def of EVENT_FIELD_DEFS) {
     if (fields[def.key]?.enabled) {
       values[def.key] = '';
     }
+  }
+  if (customFields.length > 0) {
+    values.custom = Object.fromEntries(customFields.map((field) => [field.key, '']));
   }
   return values;
 }

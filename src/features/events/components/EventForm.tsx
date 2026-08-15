@@ -8,7 +8,8 @@ import { Alert } from '@/components/ui/Alert';
 import { ImageAttachmentPicker } from '@/features/encouragements/components/ImageAttachmentPicker';
 import { WYSIWYGEditor } from '@/features/campaigns/components/WYSIWYGEditor';
 import type { MediaAssetSummary } from '@/types/encouragement';
-import type { EventFieldConfig } from '@/types/event';
+import { CustomFieldBuilder } from './CustomFieldBuilder';
+import type { EventCustomField, EventFieldConfig } from '@/types/event';
 import { defaultEventFieldConfig, hasAnyEnabledField } from '../lib/eventFields';
 import { EventFieldConfigEditor } from './EventFieldConfigEditor';
 import { EventFormPreview } from './EventFormPreview';
@@ -73,6 +74,7 @@ export interface EventFormValues {
   registrationOpensAt: string;
   registrationClosesAt: string;
   fields: EventFieldConfig;
+  customFields: EventCustomField[];
 }
 
 interface EventFormProps {
@@ -94,6 +96,7 @@ export function EventForm({ initialValues, onSubmit, isSubmitting, onCancel, sub
   const [description, setDescription] = useState(initialValues?.description ?? '');
   const [heroImageAsset, setHeroImageAsset] = useState<MediaAssetSummary | null>(initialValues?.heroImageAsset ?? null);
   const [fields, setFields] = useState<EventFieldConfig>(initialValues?.fields ?? defaultEventFieldConfig());
+  const [customFields, setCustomFields] = useState<EventCustomField[]>(initialValues?.customFields ?? []);
   const [fieldsError, setFieldsError] = useState<string | null>(null);
   // Once the admin edits the slug directly, stop auto-deriving it from the name - otherwise
   // a deliberate custom slug would keep getting silently overwritten while they keep typing.
@@ -128,8 +131,31 @@ export function EventForm({ initialValues, onSubmit, isSubmitting, onCancel, sub
       setFieldsError('Turn on at least one field so people have something to fill in.');
       return;
     }
+    // Caught here rather than at save so the organiser sees which question
+    // is incomplete while looking at it.
+    const unlabelled = customFields.findIndex((field) => !field.label.trim());
+    if (unlabelled !== -1) {
+      setFieldsError(`Question ${unlabelled + 1} needs a label, or remove it.`);
+      return;
+    }
+    const emptyChoice = customFields.find(
+      (field) => field.type === 'select' && !(field.options ?? []).some((option) => option.trim())
+    );
+    if (emptyChoice) {
+      setFieldsError(`"${emptyChoice.label}" is a choice question — add at least one choice.`);
+      return;
+    }
     setFieldsError(null);
-    onSubmit({ ...values, description, heroImageAsset, fields });
+    onSubmit({
+      ...values,
+      description,
+      heroImageAsset,
+      fields,
+      customFields: customFields.map((field) => ({
+        ...field,
+        options: field.type === 'select' ? (field.options ?? []).map((o) => o.trim()).filter(Boolean) : undefined,
+      })),
+    });
   }
 
   return (
@@ -221,7 +247,11 @@ export function EventForm({ initialValues, onSubmit, isSubmitting, onCancel, sub
         )}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <EventFieldConfigEditor value={fields} onChange={setFields} disabled={isSubmitting} />
-          <EventFormPreview eventName={nameValue} fields={fields} />
+          <EventFormPreview eventName={nameValue} fields={fields} customFields={customFields} />
+        </div>
+
+        <div className="mt-8 border-t border-slate-200 pt-6">
+          <CustomFieldBuilder value={customFields} onChange={setCustomFields} disabled={isSubmitting} />
         </div>
       </section>
 

@@ -20,6 +20,7 @@ function toCreateEventRequest(values: EventFormValues): CreateEventRequest {
     // a calendar date - midnight local time, same convention ServicesPage uses for serviceDate.
     eventDate: new Date(`${values.eventDate}T00:00:00`).toISOString(),
     fields: values.fields,
+    customFields: values.customFields,
   };
 
   if (values.startTime) payload.startTime = values.startTime;

@@ -67,6 +67,8 @@ export function EventRegistrationsPanel({ event }: EventRegistrationsPanelProps)
   const [isExporting, setIsExporting] = useState(false);
 
   const enabledDefs = EVENT_FIELD_DEFS.filter((def) => event.fields[def.key]?.enabled);
+  // This event's own questions get their own columns, after the built-in ones.
+  const customFields = event.customFields ?? [];
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['event-registrations', event.id, page],
@@ -136,6 +138,9 @@ export function EventRegistrationsPanel({ event }: EventRegistrationsPanelProps)
                   {enabledDefs.map((def) => (
                     <TableHead key={def.key}>{def.label}</TableHead>
                   ))}
+                  {customFields.map((field) => (
+                    <TableHead key={field.key}>{field.label}</TableHead>
+                  ))}
                   <TableHead>Status</TableHead>
                   <TableHead>Registered</TableHead>
                 </TableRow>
@@ -145,6 +150,11 @@ export function EventRegistrationsPanel({ event }: EventRegistrationsPanelProps)
                   <TableRow key={registration.id}>
                     {enabledDefs.map((def) => (
                       <TableCell key={def.key}>{fieldValue(registration, def.key) || '—'}</TableCell>
+                    ))}
+                    {customFields.map((field) => (
+                      <TableCell key={field.key}>
+                        {registration.answers.custom?.[field.key] || '—'}
+                      </TableCell>
                     ))}
                     <TableCell>
                       <Badge variant={registration.status === 'CONFIRMED' ? 'success' : 'gray'} size="sm">

@@ -26,6 +26,7 @@ function toUpdateEventRequest(values: EventFormValues): UpdateEventRequest {
     registrationClosesAt: values.registrationClosesAt ? new Date(values.registrationClosesAt).toISOString() : null,
     heroImageAssetId: values.heroImageAsset ? values.heroImageAsset.id : null,
     fields: values.fields,
+    customFields: values.customFields,
   };
 }
 
@@ -92,6 +93,7 @@ export function EventEditPage() {
                 registrationOpensAt: event.registrationOpensAt ?? '',
                 registrationClosesAt: event.registrationClosesAt ?? '',
                 fields: event.fields,
+                customFields: event.customFields ?? [],
               }}
               onSubmit={(values) => updateMutation.mutate(toUpdateEventRequest(values))}
               isSubmitting={updateMutation.isPending}

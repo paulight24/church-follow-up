@@ -27,6 +27,26 @@ export interface EventFieldToggle {
 /** One toggle+required pair per catalogue field - this is the "field configuration" the church edits. */
 export type EventFieldConfig = Record<EventFieldKey, EventFieldToggle>;
 
+/**
+ * Questions that belong to one event only ("Number of adults attending",
+ * "Backpack requested"). Unlike the catalogue above, these never feed the
+ * follow-up pipeline - they are recorded against the registration, shown in
+ * the admin list and included in the CSV export.
+ */
+export const EVENT_CUSTOM_FIELD_TYPES = ['text', 'textarea', 'number', 'select', 'checkbox'] as const;
+export type EventCustomFieldType = (typeof EVENT_CUSTOM_FIELD_TYPES)[number];
+
+export interface EventCustomField {
+  /** Answer key; the backend derives it from the label when left blank. */
+  key: string;
+  label: string;
+  type: EventCustomFieldType;
+  required: boolean;
+  /** `select` only. */
+  options?: string[];
+  helpText?: string;
+}
+
 export interface EventUserRef {
   id: string;
   firstName: string;
@@ -53,6 +73,7 @@ export interface EventRecord {
   registrationOpensAt?: string | null;
   registrationClosesAt?: string | null;
   fields: EventFieldConfig;
+  customFields?: EventCustomField[];
   registrationCount?: number;
   createdById?: string | null;
   createdBy?: EventUserRef | null;
@@ -73,6 +94,7 @@ export interface CreateEventRequest {
   registrationOpensAt?: string;
   registrationClosesAt?: string;
   fields: EventFieldConfig;
+  customFields?: EventCustomField[];
 }
 
 export interface UpdateEventRequest {
@@ -88,6 +110,7 @@ export interface UpdateEventRequest {
   registrationOpensAt?: string | null;
   registrationClosesAt?: string | null;
   fields?: EventFieldConfig;
+  customFields?: EventCustomField[];
 }
 
 export interface EventListFilters {
@@ -118,7 +141,10 @@ export interface EventRegistration {
   status: EventRegistrationStatus;
   submittedAt: string;
   member: EventRegistrationMemberRef | null;
-  answers: Partial<Record<EventFieldKey, string>>;
+  answers: Partial<Record<EventFieldKey, string>> & {
+    /** Answers to this event's own questions, keyed by custom field key. */
+    custom?: Record<string, string>;
+  };
 }
 
 /** One flattened row from GET /events/:id/registrations/export - already CSV-ready. */
@@ -159,10 +185,14 @@ export interface PublicEvent {
   registrationClosesAt?: string | null;
   registrationStatus: PublicRegistrationStatus;
   fields: Array<{ key: EventFieldKey; required: boolean }>;
+  customFields?: EventCustomField[];
 }
 
 /** Public submission payload - only ever contains keys for fields the event has enabled. */
-export type EventRegistrationAnswers = Partial<Record<EventFieldKey, string>>;
+export type EventRegistrationAnswers = Partial<Record<EventFieldKey, string>> & {
+  /** Answers to this event's own questions, keyed by custom field key. */
+  custom?: Record<string, string>;
+};
 
 /** POST /public/events/:slug/register body - the backend wraps answers in this envelope. */
 export interface PublicRegisterRequest {
