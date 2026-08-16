@@ -73,6 +73,35 @@ export interface SessionSummary {
   perLanguage: Array<{ targetLanguage: string; activeSeconds: number; peakListeners: number }>;
 }
 
+export interface SessionListItem {
+  id: string;
+  title: string;
+  status: LiveSessionStatus;
+  startedAt: string | null;
+  endedAt: string | null;
+  endReason: string | null;
+  peakListeners: number;
+  sourceLanguage: string;
+  createdAt: string;
+}
+
+export interface TranscriptSegment {
+  sequence: number;
+  sourceText: string;
+  sourceLanguage: string;
+  startedAtMs: number | null;
+  createdAt: string;
+}
+
+export interface UsageReport {
+  from: string;
+  to: string;
+  totalSeconds: number;
+  totalMinutes: number;
+  byLanguage: Record<string, number>;
+  sessions: number;
+}
+
 export interface CreateSessionRequest {
   title?: string;
   sourceLanguage?: string;
@@ -132,6 +161,15 @@ export const liveTranslationApi = {
   },
   getSummary(id: string): Promise<AxiosResponse<SessionSummary>> {
     return api.get(`/live-translation/sessions/${id}/summary`);
+  },
+  listSessions(limit = 20): Promise<AxiosResponse<SessionListItem[]>> {
+    return api.get('/live-translation/sessions', { params: { limit: String(limit) } });
+  },
+  getTranscript(id: string): Promise<AxiosResponse<TranscriptSegment[]>> {
+    return api.get(`/live-translation/sessions/${id}/transcript`);
+  },
+  getUsage(params?: { from?: string; to?: string }): Promise<AxiosResponse<UsageReport>> {
+    return api.get('/live-translation/usage', { params });
   },
   getWsTicket(): Promise<AxiosResponse<{ ticket: string; expiresInSeconds: number }>> {
     return api.post('/live-translation/ws-ticket');

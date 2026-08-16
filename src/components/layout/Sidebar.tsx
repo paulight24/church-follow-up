@@ -158,6 +158,11 @@ const navSections: NavSection[] = [
         path: '/live-translation',
         icon: Languages,
         permission: ['live_translation.view', 'live_translation.manage'],
+        children: [
+          { label: 'Run a service', path: '/live-translation', permission: ['live_translation.view', 'live_translation.manage'] },
+          { label: 'Past services', path: '/live-translation/history', permission: ['live_translation.view', 'live_translation.manage'] },
+          { label: 'Settings', path: '/live-translation/settings', permission: ['live_translation.configure', 'live_translation.manage'] },
+        ],
       },
       { label: 'Campaigns', path: '/campaigns', icon: Megaphone, permission: 'campaigns.view' },
       { label: 'Encouragements', path: '/encouragements', icon: Heart, permission: 'encouragements.view' },

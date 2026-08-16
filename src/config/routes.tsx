@@ -98,6 +98,8 @@ const NotificationsPage = lazy(() => import('@/features/notifications/pages/Noti
 // Live Translation (operator console + public listener page reached via QR)
 const LiveTranslationPage = lazy(() => import('@/features/live-translation/pages/LiveTranslationPage').then(m => ({ default: m.LiveTranslationPage })));
 const PublicListenerPage = lazy(() => import('@/features/live-translation/pages/PublicListenerPage').then(m => ({ default: m.PublicListenerPage })));
+const LiveTranslationHistoryPage = lazy(() => import('@/features/live-translation/pages/LiveTranslationHistoryPage').then(m => ({ default: m.LiveTranslationHistoryPage })));
+const LiveTranslationSettingsPage = lazy(() => import('@/features/live-translation/pages/LiveTranslationSettingsPage').then(m => ({ default: m.LiveTranslationSettingsPage })));
 
 // Reports
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
@@ -294,6 +296,10 @@ export function AppRoutes() {
             {/* Live Translation (operator console) */}
             <Route element={<ProtectedRoute permission={['live_translation.view', 'live_translation.manage']} />}>
               <Route path="/live-translation" element={<LiveTranslationPage />} />
+              <Route path="/live-translation/history" element={<LiveTranslationHistoryPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission={['live_translation.configure', 'live_translation.manage']} />}>
+              <Route path="/live-translation/settings" element={<LiveTranslationSettingsPage />} />
             </Route>
 
             {/* Reports */}
