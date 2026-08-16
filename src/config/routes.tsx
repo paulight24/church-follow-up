@@ -115,6 +115,11 @@ const DepartmentsPage = lazy(() => import('@/features/admin/pages/DepartmentsPag
 const FellowshipGroupsPage = lazy(() => import('@/features/admin/pages/FellowshipGroupsPage').then(m => ({ default: m.FellowshipGroupsPage })));
 const ServiceSchedulesPage = lazy(() => import('@/features/admin/pages/ServiceSchedulesPage').then(m => ({ default: m.ServiceSchedulesPage })));
 
+// Creative & Print
+const CreativeStudioPage = lazy(() => import('@/features/creative-print/pages/CreativeStudioPage').then(m => ({ default: m.CreativeStudioPage })));
+const FlyerCreatePage = lazy(() => import('@/features/creative-print/pages/FlyerCreatePage').then(m => ({ default: m.FlyerCreatePage })));
+const FlyerDetailPage = lazy(() => import('@/features/creative-print/pages/FlyerDetailPage').then(m => ({ default: m.FlyerDetailPage })));
+
 function PageLoader() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
@@ -258,6 +263,16 @@ export function AppRoutes() {
             </Route>
             <Route element={<ProtectedRoute permission="attendance.view_reports" />}>
               <Route path="/services/reports" element={<AttendanceReportsPage />} />
+            </Route>
+
+            {/* Creative & Print. `/creative/new` is registered before
+                `/creative/:id` so "new" is never read as a flyer id. */}
+            <Route element={<ProtectedRoute permission="creative.create" />}>
+              <Route path="/creative/new" element={<FlyerCreatePage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="creative.view" />}>
+              <Route path="/creative" element={<CreativeStudioPage />} />
+              <Route path="/creative/:id" element={<FlyerDetailPage />} />
             </Route>
 
             {/* Events */}
