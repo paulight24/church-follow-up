@@ -41,6 +41,15 @@ const zh: Translations = {
   'listen.notFoundBody': '请与教会的媒体团队核对链接。',
   'listen.header': '实时翻译',
 
+  // Sermon notes shown to members on the public listener page.
+  'notes.heading': '本次信息笔记',
+  'notes.keyPoints': '要点',
+  'notes.scriptures': '经文',
+  'notes.declarations': '宣告',
+  'notes.prayerPoints': '祷告事项',
+  'notes.actionPoints': '行动要点',
+  'notes.disclaimer': '本笔记由信息内容自动生成，请与您自己的笔记一同参阅。',
+
   'event.register': '报名',
   'event.notFoundTitle': '未找到该活动',
   'event.notFoundBody': '此链接可能已过期，或活动尚未发布。请向教会办公室索取最新链接。',
