@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { useLogin } from '../hooks/useLogin';
+import { useTranslation } from '@/i18n';
 
 export function LoginForm() {
+  const { t } = useTranslation();
   const { register, errors, isSubmitting, onSubmit, error, clearError } = useLogin();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -19,7 +21,7 @@ export function LoginForm() {
       )}
 
       <Input
-        label="Email address"
+        label={t('auth.email')}
         type="email"
         placeholder="you@church.org"
         autoComplete="email"
@@ -30,9 +32,9 @@ export function LoginForm() {
 
       <div>
         <Input
-          label="Password"
+          label={t('auth.password')}
           type={showPassword ? 'text' : 'password'}
-          placeholder="Enter your password"
+          placeholder={t('auth.passwordPlaceholder')}
           autoComplete="current-password"
           leftIcon={<Lock className="h-4 w-4" />}
           rightIcon={
@@ -41,7 +43,7 @@ export function LoginForm() {
               onClick={() => setShowPassword((prev) => !prev)}
               className="pointer-events-auto cursor-pointer text-slate-400 hover:text-slate-600"
               tabIndex={-1}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -61,13 +63,13 @@ export function LoginForm() {
             type="checkbox"
             className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
           />
-          Remember me
+          {t('auth.rememberMe')}
         </label>
         <Link
           to="/forgot-password"
           className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
         >
-          Forgot password?
+          {t('auth.forgotPassword')}
         </Link>
       </div>
 
@@ -77,7 +79,7 @@ export function LoginForm() {
         className="w-full"
         size="lg"
       >
-        Sign in
+        {t('auth.signIn')}
       </Button>
     </form>
   );

@@ -11,9 +11,12 @@ Two groups of pages are localised:
   event registration. Read by people who may not speak the language the
   service is advertised in. A church can print a Spanish flier and an English
   flier pointing at **the same link**, and each reader gets their own language.
-- **The marketing funnel** — landing page and church sign-up. Localised as one
-  unit on purpose: a Spanish visitor who lands on a Spanish page and clicks
-  through to an English sign-up form would be worse than translating neither.
+- **The marketing funnel** — landing page, church sign-up, and sign-in.
+  Localised as one unit on purpose: a Spanish visitor who lands on a Spanish
+  page and clicks through to an English sign-up form would be worse served than
+  one who saw English throughout. Sign-in is included because being unable to
+  get *in* is a hard blocker, and password errors are stressful in a second
+  language — even though what waits on the other side is English.
 
 The admin application is not translated. Half-translating it would be worse
 than leaving it alone, and stamping `lang="es"` on English screens is an
@@ -67,8 +70,22 @@ for — the exact case `?lang=` exists to serve.
 
 A visible `<LanguageSwitcher />` sits on every localised page, because
 auto-detection cannot know that the English-set family phone is being carried
-by a Spanish speaker. It renders each option in its own language, so someone
-who cannot read the current page can still find their way out of it.
+by a Spanish speaker.
+
+It is a **dropdown collapsed to a globe + two-character code**, not a row of
+language buttons. Language is a once-per-visitor decision, and a permanent row
+competes for header space with the actions people actually came to take —
+enough, at tablet width, to wrap the nav onto two lines. The header uses the
+compact variant; the footer uses `variant="full"` (globe + full name), which is
+where most enterprise sites put the control precisely because it is rarely
+needed twice.
+
+The menu lists each language in **its own language, never translated into the
+current one** — "Chinese" is useless to a reader who only reads 中文 — with a
+check on the active one. It is built on the shared `Dropdown` primitive so
+click-outside, Escape and the menu/menuitem roles match every other menu in the
+product, and the trigger's accessible name stays "Language: <current>" in
+English so assistive tech announces it consistently.
 
 ## What is and isn't translated
 

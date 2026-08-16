@@ -183,6 +183,27 @@ const es: Translations = {
   'signup.successBody':
     'Tu iglesia está registrada y pendiente de una breve revisión. Puedes iniciar sesión ahora mismo para importar miembros y configurar todo — la activaremos en breve.',
   'signup.successCta': 'Inicia sesión para comenzar',
+
+  // ── sign in (doorway to the English application) ──
+  'auth.tagline': 'Sistema de seguimiento y cuidado de miembros',
+  'auth.welcomeBack': 'Bienvenido de nuevo',
+  'auth.welcomeSub': 'Inicia sesión en tu cuenta para continuar',
+  'auth.signIn': 'Iniciar sesión',
+  'auth.email': 'Correo electrónico',
+  'auth.password': 'Contraseña',
+  'auth.passwordPlaceholder': 'Escribe tu contraseña',
+  'auth.showPassword': 'Mostrar contraseña',
+  'auth.hidePassword': 'Ocultar contraseña',
+  'auth.rememberMe': 'Recordarme',
+  'auth.forgotPassword': '¿Olvidaste tu contraseña?',
+  'auth.featTeams': 'Gestión de equipos',
+  'auth.featTeamsSub': 'Organiza equipos de seguimiento',
+  'auth.featAlerts': 'Alertas inteligentes',
+  'auth.featAlertsSub': 'Nunca pierdas un seguimiento',
+  'auth.featSecure': 'Seguro y privado',
+  'auth.featSecureSub': 'Acceso según el rol de cada persona',
+  'auth.featCare': 'Cuidado de miembros',
+  'auth.featCareSub': 'Seguimiento del acompañamiento pastoral',
 };
 
 export default es;

@@ -177,6 +177,27 @@ const zh: Translations = {
   'signup.successBody':
     '您的教会已注册，正在等待简短审核。您现在就可以登录导入成员并进行设置——我们会尽快全面启用。',
   'signup.successCta': '登录并开始使用',
+
+  // ── sign in (doorway to the English application) ──
+  'auth.tagline': '教会跟进与关怀管理系统',
+  'auth.welcomeBack': '欢迎回来',
+  'auth.welcomeSub': '登录您的账号以继续',
+  'auth.signIn': '登录',
+  'auth.email': '电子邮箱',
+  'auth.password': '密码',
+  'auth.passwordPlaceholder': '请输入密码',
+  'auth.showPassword': '显示密码',
+  'auth.hidePassword': '隐藏密码',
+  'auth.rememberMe': '记住我',
+  'auth.forgotPassword': '忘记密码？',
+  'auth.featTeams': '团队管理',
+  'auth.featTeamsSub': '组织跟进团队',
+  'auth.featAlerts': '智能提醒',
+  'auth.featAlertsSub': '不错过任何一次跟进',
+  'auth.featSecure': '安全与隐私',
+  'auth.featSecureSub': '基于角色的访问控制',
+  'auth.featCare': '成员关怀',
+  'auth.featCareSub': '牧养关怀记录',
 };
 
 export default zh;

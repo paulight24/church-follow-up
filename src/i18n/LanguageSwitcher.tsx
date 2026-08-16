@@ -1,40 +1,69 @@
-import { Globe } from 'lucide-react';
+import { Check, ChevronDown, Globe } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { Dropdown } from '@/components/ui/Dropdown';
 import { useTranslation } from './useTranslation';
 import { LOCALES, LOCALE_LABELS } from './types';
 
 /**
- * Language override for the public pages. Auto-detection is right most of the
- * time, but a shared family phone set to English carried by a Spanish speaker
- * is common enough that the escape hatch has to be visible — and it has to
- * read in the language being switched TO, so someone who cannot read the
- * current page can still find their way out of it.
+ * Language switcher.
+ *
+ * Collapsed to a single globe + 2-character trigger rather than a row of
+ * buttons: language is a once-per-visitor decision, and a permanent row of
+ * every language competes for header space with the actions people actually
+ * came to take — enough to wrap the nav onto two lines on a tablet.
+ *
+ * The menu lists each language in ITS OWN language, never translated into the
+ * current one. Someone who cannot read this page has to be able to find their
+ * way out of it, and "Chinese" is useless to a reader who only reads 中文.
+ *
+ * Built on the shared Dropdown primitive so click-outside, Escape and the
+ * menu/menuitem roles behave exactly like every other menu in the product.
  */
-export function LanguageSwitcher({ className }: { className?: string }) {
+export function LanguageSwitcher({
+  className,
+  variant = 'compact',
+}: {
+  className?: string;
+  /** `compact` for headers (globe + code); `full` for footers (globe + name). */
+  variant?: 'compact' | 'full';
+}) {
   const { locale, setLocale } = useTranslation();
+  const current = LOCALE_LABELS[locale];
 
   return (
-    <div className={cn('flex items-center gap-1', className)}>
-      <Globe className="h-3.5 w-3.5 text-slate-400" aria-hidden />
-      <div className="flex items-center gap-0.5" role="group" aria-label="Language">
-        {LOCALES.map((code) => (
-          <button
-            key={code}
-            type="button"
-            onClick={() => setLocale(code)}
-            aria-current={locale === code ? 'true' : undefined}
-            lang={code}
-            className={cn(
-              'rounded-md px-2 py-1 text-xs font-medium transition-colors',
-              locale === code
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
-            )}
-          >
-            {LOCALE_LABELS[code].native}
-          </button>
-        ))}
-      </div>
-    </div>
+    <Dropdown
+      className={className}
+      align="right"
+      items={LOCALES.map((code) => {
+        const label = LOCALE_LABELS[code];
+        const isCurrent = code === locale;
+        return {
+          label: label.native === label.english ? label.native : `${label.native} · ${label.english}`,
+          onClick: () => setLocale(code),
+          icon: isCurrent ? (
+            <Check className="h-4 w-4 text-indigo-600" />
+          ) : (
+            <span className="inline-block h-4 w-4" aria-hidden />
+          ),
+        };
+      })}
+      trigger={
+        <span
+          className={cn(
+            'flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900',
+            className
+          )}
+          // The control is the language chooser regardless of which language
+          // is showing, so the accessible name stays stable and untranslated.
+          aria-label={`Language: ${current.english}`}
+        >
+          <Globe className="h-4 w-4 shrink-0" aria-hidden />
+          <span className="whitespace-nowrap">
+            {variant === 'full' ? current.native : current.short}
+          </span>
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
+        </span>
+      }
+    />
   );
 }

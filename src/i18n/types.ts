@@ -10,10 +10,15 @@ import type en from './locales/en';
 export const LOCALES = ['en', 'es', 'zh'] as const;
 export type Locale = (typeof LOCALES)[number];
 
-export const LOCALE_LABELS: Record<Locale, { native: string; english: string; flag: string }> = {
-  en: { native: 'English', english: 'English', flag: '🇺🇸' },
-  es: { native: 'Español', english: 'Spanish', flag: '🇪🇸' },
-  zh: { native: '中文', english: 'Chinese', flag: '🇨🇳' },
+/** `short` is the collapsed trigger label — kept to 2 characters so the
+ *  switcher never widens the header enough to wrap the nav. */
+export const LOCALE_LABELS: Record<
+  Locale,
+  { native: string; english: string; short: string; flag: string }
+> = {
+  en: { native: 'English', english: 'English', short: 'EN', flag: '🇺🇸' },
+  es: { native: 'Español', english: 'Spanish', short: 'ES', flag: '🇪🇸' },
+  zh: { native: '中文', english: 'Chinese', short: '中文', flag: '🇨🇳' },
 };
 
 /**

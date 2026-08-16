@@ -186,6 +186,27 @@ const en = {
   'signup.successBody':
     "Your church is registered and pending a quick review. You can sign in right now to import members and set things up — we'll activate everything shortly.",
   'signup.successCta': 'Sign in to get started',
+
+  // ── sign in (doorway to the English application) ──
+  'auth.tagline': 'Church Follow-Up Management System',
+  'auth.welcomeBack': 'Welcome back',
+  'auth.welcomeSub': 'Sign in to your account to continue',
+  'auth.signIn': 'Sign in',
+  'auth.email': 'Email address',
+  'auth.password': 'Password',
+  'auth.passwordPlaceholder': 'Enter your password',
+  'auth.showPassword': 'Show password',
+  'auth.hidePassword': 'Hide password',
+  'auth.rememberMe': 'Remember me',
+  'auth.forgotPassword': 'Forgot password?',
+  'auth.featTeams': 'Team Management',
+  'auth.featTeamsSub': 'Organize follow-up teams',
+  'auth.featAlerts': 'Smart Alerts',
+  'auth.featAlertsSub': 'Never miss a follow-up',
+  'auth.featSecure': 'Secure & Private',
+  'auth.featSecureSub': 'Role-based access control',
+  'auth.featCare': 'Member Care',
+  'auth.featCareSub': 'Pastoral support tracking',
 } as const;
 
 export default en;

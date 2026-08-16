@@ -142,9 +142,12 @@ export function AppRoutes() {
         <Route element={<I18nProvider />}>
           <Route path="/welcome" element={<LandingPage />} />
           <Route path="/register-church" element={<RegisterChurchPage />} />
+          {/* Sign-in is the doorway to the English application. It is
+              translated because being unable to get IN is a hard blocker,
+              even though what waits on the other side is English. */}
+          <Route path="/login" element={<LoginPage />} />
         </Route>
         <Route path="/contacts" element={<ContactPage />} />
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/accept-invite" element={<AcceptInvitePage />} />

@@ -4,8 +4,15 @@ import { Heart, Users, Shield, Bell } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Spinner } from '@/components/ui/Spinner';
 import { LoginForm } from '../components/LoginForm';
+import { LanguageSwitcher, useTranslation } from '@/i18n';
+import { useSeo } from '@/lib/seo';
 
 export function LoginPage() {
+  const { t } = useTranslation();
+  // Without this the tab keeps whatever title the previous page set (the
+  // landing page, after a client-side nav). robots.txt already excludes
+  // /login; noIndex keeps that true if the file is ever removed.
+  useSeo({ title: t('auth.signIn'), description: t('auth.welcomeSub'), noIndex: true });
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -52,23 +59,23 @@ export function LoginPage() {
           <div className="grid max-w-md grid-cols-2 gap-4">
             <FeatureItem
               icon={<Users className="h-5 w-5" />}
-              title="Team Management"
-              description="Organize follow-up teams"
+              title={t('auth.featTeams')}
+              description={t('auth.featTeamsSub')}
             />
             <FeatureItem
               icon={<Bell className="h-5 w-5" />}
-              title="Smart Alerts"
-              description="Never miss a follow-up"
+              title={t('auth.featAlerts')}
+              description={t('auth.featAlertsSub')}
             />
             <FeatureItem
               icon={<Shield className="h-5 w-5" />}
-              title="Secure & Private"
-              description="Role-based access control"
+              title={t('auth.featSecure')}
+              description={t('auth.featSecureSub')}
             />
             <FeatureItem
               icon={<Heart className="h-5 w-5" />}
-              title="Member Care"
-              description="Pastoral support tracking"
+              title={t('auth.featCare')}
+              description={t('auth.featCareSub')}
             />
           </div>
         </div>
@@ -87,20 +94,25 @@ export function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Member Care</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Church Follow-Up Management System
+            {t('auth.tagline')}
           </p>
         </div>
 
         <div className="w-full max-w-md">
+          {/* Sign-in is the last translated step before the (English)
+              application, so the switcher stays reachable here. */}
+          <div className="mb-2 flex justify-end">
+            <LanguageSwitcher />
+          </div>
           <div className="rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-sm">
             <div className="mb-8 hidden lg:block">
-              <h2 className="text-2xl font-bold text-slate-900">Welcome back</h2>
+              <h2 className="text-2xl font-bold text-slate-900">{t('auth.welcomeBack')}</h2>
               <p className="mt-1 text-sm text-slate-500">
-                Sign in to your account to continue
+                {t('auth.welcomeSub')}
               </p>
             </div>
             <div className="mb-8 lg:hidden">
-              <h2 className="text-xl font-semibold text-slate-900">Sign in</h2>
+              <h2 className="text-xl font-semibold text-slate-900">{t('auth.signIn')}</h2>
             </div>
 
             <LoginForm />

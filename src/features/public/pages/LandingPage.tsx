@@ -57,28 +57,28 @@ export function LandingPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700">
               <Heart className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-slate-900">Member Care</span>
+            <span className="whitespace-nowrap text-lg font-bold text-slate-900">Member Care</span>
           </div>
           <nav className="flex items-center gap-2 sm:gap-4">
-            <a href="#features" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
+            <a href="#features" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 md:block">
               {t('landing.nav.features')}
             </a>
-            <Link to="/contacts" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
+            <Link to="/contacts" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 md:block">
               {t('landing.nav.contact')}
             </Link>
-            <a href="#how-it-works" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
+            <a href="#how-it-works" className="hidden whitespace-nowrap text-sm font-medium text-slate-600 hover:text-slate-900 md:block">
               {t('landing.nav.howItWorks')}
             </a>
-            <LanguageSwitcher className="hidden sm:flex" />
+            <LanguageSwitcher />
             <Link
               to="/login"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
               {t('landing.nav.signIn')}
             </Link>
             <Link
               to="/register-church"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+              className="whitespace-nowrap rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
             >
               {t('landing.nav.getStarted')}
             </Link>
@@ -352,7 +352,8 @@ export function LandingPage() {
             </div>
             <span className="text-sm font-semibold text-slate-700">Member Care</span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <LanguageSwitcher variant="full" />
             <Link to="/contacts" className="text-sm font-medium text-slate-600 hover:text-slate-900">
               {t('landing.footer.contact')}
             </Link>
