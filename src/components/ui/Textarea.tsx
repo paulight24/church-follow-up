@@ -25,7 +25,12 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     },
     ref,
   ) => {
-    const textareaId = id ?? React.useId();
+    // useId is called unconditionally: `id ?? React.useId()` short-circuits,
+    // so the hook ran only for fields WITHOUT an explicit id. A form that
+    // mixes both kinds changes its hook count between renders, which is
+    // what React forbids. Generating an unused id costs nothing.
+    const generatedId = React.useId();
+    const textareaId = id ?? generatedId;
     const [charCount, setCharCount] = React.useState(
       typeof value === 'string' ? value.length : 0,
     );

@@ -23,7 +23,15 @@ export function EscalationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const escalationId = id!;
   const queryClient = useQueryClient();
-  const canUpdate = usePermission('escalations.update') || usePermission('escalations.assign') || usePermission('escalations.resolve');
+  // Each hook is called unconditionally before combining. Written as
+  // `a() || b() || c()` the || short-circuits, so the second and third hooks
+  // ran only when the first returned false — a hook count that changes
+  // between renders, which is what React forbids: on the render where the
+  // count shrinks, remaining hooks read each other's state.
+  const canUpdateEscalation = usePermission('escalations.update');
+  const canAssignEscalation = usePermission('escalations.assign');
+  const canResolveEscalation = usePermission('escalations.resolve');
+  const canUpdate = canUpdateEscalation || canAssignEscalation || canResolveEscalation;
   const [showAssignModal, setShowAssignModal] = useState(false);
 
   const { data: escalation, isLoading, isError } = useQuery({

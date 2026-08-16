@@ -19,7 +19,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     { label, error, helpText, options, placeholder, className, id, ...props },
     ref,
   ) => {
-    const selectId = id ?? React.useId();
+    // useId is called unconditionally: `id ?? React.useId()` short-circuits,
+    // so the hook ran only for fields WITHOUT an explicit id. A form that
+    // mixes both kinds changes its hook count between renders, which is
+    // what React forbids. Generating an unused id costs nothing.
+    const generatedId = React.useId();
+    const selectId = id ?? generatedId;
 
     return (
       <div className="w-full">
