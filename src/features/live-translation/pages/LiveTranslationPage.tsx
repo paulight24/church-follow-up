@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
+  AlertTriangle,
   Clock,
   Headphones,
   Languages as LanguagesIcon,
@@ -428,6 +429,27 @@ export function LiveTranslationPage() {
           <Badge variant="gray">Ready</Badge>
         )}
       </div>
+
+      {/* Demo-mode warning. This is the failure that costs a real service:
+          the mock provider echoes the pastor's own voice back and emits
+          scripted captions, so everything LOOKS like it is working. It must
+          be impossible to miss, and it must not be dismissable. */}
+      {settings?.effectiveProvider === 'mock' && (
+        <div className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3">
+          <p className="flex items-center gap-2 text-sm font-bold text-amber-900">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            Demo mode — this is NOT real translation
+          </p>
+          <p className="mt-1 text-sm text-amber-900">
+            Listeners will hear the speaker&apos;s own voice played back, and the
+            transcript shows sample sentences, not what is actually being said.
+            Nothing here is translated. To go live for a real service, your
+            technical team must set <code className="rounded bg-amber-100 px-1">GEMINI_API_KEY</code>{' '}
+            and <code className="rounded bg-amber-100 px-1">LIVE_TRANSLATION_PROVIDER=gemini</code>{' '}
+            on the server and restart it.
+          </p>
+        </div>
+      )}
 
       {/* time warning */}
       {isLive && warningMinutes !== null && (

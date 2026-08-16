@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, ShieldOff, Settings2, X, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { UserPlus, ShieldOff, Settings2, X, RefreshCw, Users} from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -67,6 +68,7 @@ export function UsersPage() {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Backend: POST /users and POST /users/:id/resend-invite both require
   // users.create; POST/DELETE /users/:id/roles require users.manage_roles;
@@ -135,12 +137,37 @@ export function UsersPage() {
         description="Manage system users and their role assignments"
         actions={
           canCreateUsers ? (
-            <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>
-              Add User
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {/* Granting an existing member access is the common case, and it
+                  belongs on the member record — inviting from there links the
+                  login to the person and lets them set their own password,
+                  instead of creating a second, duplicate record of someone the
+                  church already knows. Admins look for it here, so point at it
+                  rather than building a rival flow. */}
+              <Button
+                variant="outline"
+                leftIcon={<Users className="h-4 w-4" />}
+                onClick={() => navigate('/members')}
+              >
+                Give a member access
+              </Button>
+              <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>
+                Add staff user
+              </Button>
+            </div>
           ) : undefined
         }
       />
+
+      {canCreateUsers && (
+        <p className="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <strong className="font-semibold text-slate-800">Someone already in your member list?</strong>{' '}
+          Open <button type="button" className="font-semibold text-indigo-600 hover:text-indigo-700" onClick={() => navigate('/members')}>Members</button>,
+          find them, and choose <em>Invite</em> — they get an email to set their own password, and their
+          login stays linked to their member record. Use <em>Add staff user</em> only for someone who is
+          not a member (for example an external administrator).
+        </p>
+      )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <SearchInput
