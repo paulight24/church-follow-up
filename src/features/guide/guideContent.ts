@@ -9,6 +9,7 @@ import {
   GraduationCap,
   HandHeart,
   Heart,
+  Languages,
   LayoutDashboard,
   Megaphone,
   Phone,
@@ -245,6 +246,92 @@ export const guideGroups: GuideGroup[] = [
   {
     header: 'Communications',
     features: [
+      {
+        icon: Languages,
+        title: 'Live Translation',
+        path: '/live-translation',
+        description:
+          'Members hear the sermon in their own language, live, on their own phones. Your media desk feeds the Pastor\'s microphone into this page; the congregation scans a QR code on the screen, picks a language, and listens through their own earphones — with captions if they prefer to read. No app to install and no receivers to buy, charge or collect at the door. It translates the spoken message only: the app\'s own screens stay in English.',
+        steps: [
+          'BEFORE THE SERVICE (do this once, the night before if you can) — open Live Translation and pick your Audio source. The best source is a clean feed of the Pastor\'s microphone from your mixer or OBS; the laptop microphone works but picks up the whole room and translates worse. Watch the Input level bar move while someone talks — if it never moves, the wrong device is selected.',
+          'Press Test translation, choose one language, and speak for a few seconds. You should hear the interpretation on the laptop. This is the single check that proves the whole chain works. It stops itself after 45 seconds.',
+          'Set the service name, confirm Pastor speaks (the language being preached in), and tick the languages you want to offer today.',
+          'Set Stop automatically after — 2 hours is the default. This is a safety net so a forgotten session cannot keep running (and keep costing) all week. You can extend it live at any time.',
+          'Put the QR on the screen — press Full screen on the "Listen to Live Translation" card and leave it on the projector before service and during announcements. It reads "Hear today\'s service in your language."',
+          'WHEN THE PASTOR STARTS — press START LIVE TRANSLATION and confirm. The header turns red and shows LIVE with the time remaining.',
+          'DURING WORSHIP/MUSIC — press Pause (worship) so the interpreter voice does not sing over the band, then Resume for the message.',
+          'WATCH TWO THINGS ONLY — the Input level moves when the Pastor speaks, and the Health card reads Audio: Excellent / Translation: Connected. Everything else is detail.',
+          'IF TIME RUNS SHORT — a banner appears about 15 minutes before the automatic stop. Press +30 min or +60 min.',
+          'AT THE END — press END TRANSLATION, then End Service. Every listener sees "The live service has ended." and all translation stops immediately. You then get a summary: duration, languages, peak listeners and translation minutes used.',
+        ],
+        tip: 'A language only starts costing anything when the first person actually listens to it, and it shuts down again a few minutes after the last person leaves. So it is safe to offer Spanish, Chinese and French every week even if only one of them gets used — you are not charged for empty languages. Fifty people listening in Spanish is still only one translation running, not fifty.',
+        whoCanDoThis: [ROLE_SUPER_ADMIN, ROLE_PASTOR, ROLE_ADMIN, ROLE_COMMS_MANAGER],
+        prerequisites: [
+          'An audio source the laptop can see: a mixer/OBS/USB feed of the Pastor\'s microphone is strongly preferred over the built-in laptop microphone.',
+          'The browser must be allowed to use the microphone. If it was blocked once, click the padlock in the address bar, allow it, and reload.',
+          'The laptop needs internet throughout the service, and should be on mains power with sleep disabled.',
+          'FOR THE TECHNICAL UNIT: the server needs GEMINI_API_KEY set and LIVE_TRANSLATION_PROVIDER=gemini. Without the key, live translation cannot start.',
+        ],
+        commonQuestions: [
+          {
+            q: 'Do members need to download an app?',
+            a: 'No. They scan the QR code with the normal phone camera, choose a language, and press Listen. It works in the phone\'s browser. They should use their own earphones — AirPods, wired, anything — so the translation does not disturb the person next to them.',
+          },
+          {
+            q: 'Does this translate the whole website into Spanish too?',
+            a: 'No. Live Translation translates the spoken sermon into audio and captions. The app\'s own screens and forms are a separate thing.',
+          },
+          {
+            q: 'What happens if I close the laptop or the browser crashes mid-service?',
+            a: 'The service keeps running on the server — it does not depend on your browser staying open. Reopen Live Translation on any machine and it reconnects to the session in progress. The automatic stop time is enforced by the server too, so nothing can be left running by accident.',
+          },
+          {
+            q: 'How many languages can we run at once?',
+            a: 'Five by default. Each language runs as one shared translation no matter how many people are listening to it.',
+          },
+          {
+            q: 'Can we keep a transcript of the message?',
+            a: 'Yes — it is on by default. The transcript of what was preached is saved with the session and can be opened afterwards by anyone with permission to view transcripts. This is also the groundwork for automatic sermon notes later.',
+          },
+          {
+            q: 'Someone joined late — do they hear the beginning?',
+            a: 'No. This is live interpretation, not a recording. They join wherever the message currently is.',
+          },
+        ],
+        troubleshooting: [
+          {
+            symptom: 'The Input level bar never moves.',
+            fix: 'The wrong audio device is selected, or the browser blocked the microphone. Pick a different Audio source from the dropdown; if the page says microphone access was blocked, click the padlock in the browser address bar, allow the microphone, and reload the page.',
+          },
+          {
+            symptom: 'A language shows "Unavailable" but the others are fine.',
+            fix: 'That one translation lost its connection and could not recover. The other languages are unaffected and keep running. Listeners on that language are told it is temporarily unavailable; it will retry when someone rejoins. If it persists, end and restart the service.',
+          },
+          {
+            symptom: 'Listeners say the audio is choppy or far behind.',
+            fix: 'Almost always the venue Wi-Fi. Put the media laptop on the most reliable connection you have (wired or a dedicated access point). Listeners on poor signal automatically skip forward to catch up rather than falling further behind.',
+          },
+          {
+            symptom: 'The translated voice keeps talking over the worship band.',
+            fix: 'Press Pause (worship) during music and Resume for the message. Better still, feed only the Pastor\'s microphone channel rather than the full house mix.',
+          },
+          {
+            symptom: 'Nothing happens when a member scans the QR.',
+            fix: 'Check that you actually pressed START LIVE TRANSLATION — before that, the page tells them the service has not started yet and waits. Also confirm their phone has internet; the church Wi-Fi password on the screen helps.',
+          },
+          {
+            symptom: 'Everyone hears the Pastor\'s own voice in English instead of a translation.',
+            fix: 'The server is running in demo/mock mode. Tell the technical unit to set LIVE_TRANSLATION_PROVIDER=gemini and GEMINI_API_KEY on the server and restart.',
+          },
+        ],
+        relatedPages: [{ label: 'Events', path: '/events' }],
+        keywords: [
+          'translation', 'translate', 'interpreter', 'interpretation', 'language', 'languages',
+          'spanish', 'chinese', 'french', 'igbo', 'yoruba', 'hausa', 'multilingual',
+          'sermon', 'live', 'qr', 'captions', 'subtitles', 'headphones', 'earphones',
+          'deaf', 'hard of hearing', 'visitors', 'gemini',
+        ],
+      },
       {
         icon: Megaphone,
         title: 'Campaigns',
