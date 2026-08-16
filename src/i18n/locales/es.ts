@@ -75,6 +75,114 @@ const es: Translations = {
   'field.weddingAnniversary': 'Aniversario de bodas',
   'field.prayerRequest': 'Cuéntanos cómo podemos orar por ti',
   'field.optional': 'opcional',
+  // ── landing page (public marketing funnel) ──
+  'landing.seoTitle': 'Software de cuidado de miembros para iglesias — Seguimiento, asistencia y traducción del mensaje en vivo',
+  'landing.seoDescription':
+    'Software gratuito de gestión para iglesias: seguimiento de miembros, atención a los que visitan por primera vez, asistencia, células, eventos y traducción del mensaje en vivo a cualquier idioma. Cada miembro conocido, cada alma acompañada.',
+  'landing.nav.features': 'Funciones',
+  'landing.nav.contact': 'Contacto',
+  'landing.nav.howItWorks': 'Cómo funciona',
+  'landing.nav.signIn': 'Iniciar sesión',
+  'landing.nav.getStarted': 'Comenzar',
+  'landing.hero.badge': 'Hecho para iglesias que aman a su gente',
+  'landing.hero.titleLine1': 'Cada miembro conocido.',
+  'landing.hero.titleLine2': 'Cada alma acompañada.',
+  'landing.hero.subtitle':
+    'Member Care ayuda a tu iglesia a recordar cumpleaños, dar seguimiento a los que visitan por primera vez, animar a los miembros y organizar equipos de cuidado — para que las personas sean amadas, alimentadas y se queden.',
+  'landing.hero.ctaRegister': 'Registra tu iglesia',
+  'landing.hero.ctaSignIn': 'Inicia sesión en tu iglesia',
+  'landing.hero.trust': 'Gratis para empezar · Sin tarjeta · Tus datos siempre son tuyos',
+  'landing.proof.multiChurch': 'Lista para varias iglesias',
+  'landing.proof.roles': 'Acceso por roles',
+  'landing.proof.encrypted': 'Notas pastorales cifradas',
+  'landing.proof.export': 'Exporta todos tus datos con un clic',
+  'landing.features.heading': 'Cuidado que hace crecer a tu iglesia',
+  'landing.features.subheading':
+    'Las personas se quedan donde son amadas. Member Care convierte las buenas intenciones en un sistema que todo tu equipo puede seguir.',
+  'landing.features.birthdays.title': 'Recordatorios de cumpleaños y aniversarios',
+  'landing.features.birthdays.body':
+    'Saludos automáticos por SMS y correo el mismo día. Una iglesia que recuerda tu cumpleaños es una iglesia en la que te quedas.',
+  'landing.features.followUp.title': 'Seguimiento de nuevos visitantes',
+  'landing.features.followUp.body':
+    'Ciclos de seguimiento estructurados con guías de llamada, asignación de tareas y escalamiento a los pastores — ningún visitante se pierde.',
+  'landing.features.encouragement.title': 'Mensajes de ánimo',
+  'landing.features.encouragement.body':
+    'Palabra y ánimo a los miembros correctos por el canal correcto — en la app, correo, SMS o WhatsApp.',
+  'landing.features.teams.title': 'Equipos y departamentos',
+  'landing.features.teams.body':
+    'Células, ujieres, equipos de seguimiento — organizados con responsabilidades claras y disponibilidad de cada obrero.',
+  'landing.features.foundation.title': 'Seguimiento de la Escuela de Fundamentos',
+  'landing.features.foundation.body':
+    'De la inscripción a la graduación: el camino de cada nuevo convertido, clase por clase y grupo por grupo.',
+  'landing.features.services.title': 'Servicios, eventos y asistencia',
+  'landing.features.services.body':
+    'Servicios recurrentes, registro de eventos con códigos QR, estadísticas de asistencia y captura de fotos de invitados.',
+  'landing.lt.badge': 'Traducción del mensaje en vivo',
+  'landing.lt.heading': 'Todos escuchan el mensaje en su propio idioma',
+  'landing.lt.body':
+    'Tu equipo de medios envía el micrófono del pastor a Member Care. Los miembros escanean un código QR en la pantalla, eligen su idioma y escuchan el mensaje interpretado en vivo con sus propios audífonos — con subtítulos si prefieren leer.',
+  'landing.lt.point1Strong': 'Sin instalar ninguna app.',
+  'landing.lt.point1': 'Escanear, elegir idioma, escuchar. Funciona en cualquier teléfono.',
+  'landing.lt.point2Strong': 'Sin equipo especial.',
+  'landing.lt.point2':
+    'Sin receptores que comprar, cargar o recoger en la puerta — cada persona usa sus propios audífonos.',
+  'landing.lt.point3Strong': 'Español, chino, francés, portugués, igbo, yoruba, hausa',
+  'landing.lt.point3': 'y más — varios idiomas a la vez.',
+  'landing.lt.cta': 'Llévalo a tu iglesia',
+  'landing.lt.mockService': 'Servicio dominical',
+  'landing.lt.mockChoose': 'Elige tu idioma',
+  'landing.lt.mockHint': 'Usa tus propios audífonos — cualquiera funciona',
+  'landing.how.heading': 'Funcionando en un solo día',
+  'landing.how.step1Title': 'Registra tu iglesia',
+  'landing.how.step1Body':
+    'Dos minutos: nombre de la iglesia, ciudad y tu cuenta de administrador. Revisamos y aprobamos las nuevas iglesias rápidamente.',
+  'landing.how.step2Title': 'Ingresa a tus miembros',
+  'landing.how.step2Body':
+    'Importa desde una hoja de cálculo o agrégalos sobre la marcha. Departamentos, estados y categorías de oración vienen preconfigurados.',
+  'landing.how.step3Title': 'Que comience el cuidado',
+  'landing.how.step3Body':
+    'Asigna equipos de seguimiento, programa mensajes de ánimo y observa cómo crece la participación semana tras semana.',
+  'landing.security.badge': 'Seguridad y propiedad de los datos',
+  'landing.security.heading': 'La confianza de tus miembros, protegida',
+  'landing.security.subheading': 'La información pastoral es delicada. La tratamos como tal.',
+  'landing.security.point1': 'Los datos de cada iglesia están totalmente aislados — ninguna otra iglesia puede verlos',
+  'landing.security.point2': 'Las notas pastorales y las peticiones de oración se cifran con claves propias de cada iglesia',
+  'landing.security.point3': 'Permisos por rol: cada obrero ve solo lo que su función necesita',
+  'landing.security.point4': 'Exporta todo lo que tu iglesia posee en un ZIP, cuando quieras, con un clic',
+  'landing.security.quote': '«Apacienta mis corderos… Cuida de mis ovejas.»',
+  'landing.security.quoteRef': 'Juan 21:15–17',
+  'landing.security.quoteBody':
+    'Pastorear a muchos requiere más que memoria. Member Care es la herramienta que hace posible un seguimiento fiel para cada persona que entra por tus puertas.',
+  'landing.cta.heading': '¿Listo para amar mejor a tus miembros?',
+  'landing.cta.subheading': 'Registra tu iglesia hoy y comienza a cuidar en minutos.',
+  'landing.footer.contact': 'Contáctanos',
+  'landing.footer.copyright': '© {year} Member Care. Hecho para iglesias que cuidan.',
+
+  // ── church sign-up ──
+  'signup.seoTitle': 'Registra tu iglesia — Software gratuito de gestión para iglesias',
+  'signup.seoDescription':
+    'Crea una cuenta gratuita de Member Care para tu iglesia en dos minutos. Seguimiento de miembros, atención a nuevos visitantes, asistencia, eventos y traducción del mensaje en vivo — sin tarjeta.',
+  'signup.back': 'Volver',
+  'signup.heading': 'Registra tu iglesia',
+  'signup.subheading': 'Gratis para empezar. Tu iglesia tendrá su propio espacio privado y seguro.',
+  'signup.sectionChurch': 'Tu iglesia',
+  'signup.sectionAdmin': 'Tu cuenta de administrador',
+  'signup.churchName': 'Nombre de la iglesia',
+  'signup.city': 'Ciudad',
+  'signup.state': 'Estado / Provincia',
+  'signup.firstName': 'Nombre',
+  'signup.lastName': 'Apellido',
+  'signup.email': 'Correo electrónico',
+  'signup.phone': 'Teléfono (opcional)',
+  'signup.password': 'Contraseña',
+  'signup.confirmPassword': 'Confirmar contraseña',
+  'signup.submit': 'Registrar iglesia',
+  'signup.alreadyUsing': '¿Ya usas Member Care?',
+  'signup.signIn': 'Iniciar sesión',
+  'signup.successTitle': '¡Bienvenido, {name}!',
+  'signup.successBody':
+    'Tu iglesia está registrada y pendiente de una breve revisión. Puedes iniciar sesión ahora mismo para importar miembros y configurar todo — la activaremos en breve.',
+  'signup.successCta': 'Inicia sesión para comenzar',
 };
 
 export default es;

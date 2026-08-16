@@ -5,10 +5,15 @@ application stays English.
 
 ## Why the scope stops where it does
 
-The pages a member reaches by QR code — the live-translation listener page and
-event registration — are read by people who may not speak the language the
-service is advertised in. A church can print a Spanish flier and an English
-flier pointing at **the same link**, and each reader gets their own language.
+Two groups of pages are localised:
+
+- **QR-reached congregation pages** — the live-translation listener page and
+  event registration. Read by people who may not speak the language the
+  service is advertised in. A church can print a Spanish flier and an English
+  flier pointing at **the same link**, and each reader gets their own language.
+- **The marketing funnel** — landing page and church sign-up. Localised as one
+  unit on purpose: a Spanish visitor who lands on a Spanish page and clicks
+  through to an English sign-up form would be worse than translating neither.
 
 The admin application is not translated. Half-translating it would be worse
 than leaving it alone, and stamping `lang="es"` on English screens is an
@@ -22,12 +27,14 @@ unmount.
 |---|---|
 | No runtime i18n dependency | The whole runtime is ~120 lines. A library would add more weight than the translations themselves. |
 | English statically imported | The common case has no extra request and no loading flash. |
-| `es` / `zh` via `import()` | Vite emits one chunk per locale (~1.5 kB gzipped each), fetched only by the visitor who needs it. |
+| `es` / `zh` via `import()` | Vite emits one chunk per locale (~4 kB gzipped each), fetched only by the visitor who needs it. |
 | Renders English while a chunk loads | A service is starting. A spinner is worse than a beat of English. |
 | Flat dot-namespaced keys | Keeps the key type a plain string union and makes `t('event.register')` greppable. |
 
-Measured on the production build: main bundle +5.6 kB for the runtime plus the
-English dictionary; `es` 3.55 kB raw / 1.53 kB gzipped; `zh` 3.03 kB / 1.52 kB.
+Measured on the production build: main bundle +12 kB total for the runtime
+plus the English dictionary (English marketing copy is the bulk of it);
+`es` 10.78 kB raw / 3.99 kB gzipped; `zh` 9.40 kB / 4.10 kB. A visitor who
+needs neither downloads neither.
 
 ## Type safety
 
@@ -51,10 +58,17 @@ Most explicit wins (`src/i18n/detect.ts`):
 4. **English.**
 
 Region subtags collapse to the base language: `es-419`, `es-US` → `es`;
-`zh-Hans`, `zh-TW` → `zh`. A visible `<LanguageSwitcher />` sits on both pages
-because auto-detection cannot know that the English-set family phone is being
-carried by a Spanish speaker. It renders each option in its own language so
-someone who cannot read the current page can still escape it.
+`zh-Hans`, `zh-TW` → `zh`.
+
+An arrival via `?lang=` is **persisted** as an explicit choice. Client-side
+navigation drops the query string, so without this a refresh one page into the
+funnel would fall back to the phone's language and undo what the flier asked
+for — the exact case `?lang=` exists to serve.
+
+A visible `<LanguageSwitcher />` sits on every localised page, because
+auto-detection cannot know that the English-set family phone is being carried
+by a Spanish speaker. It renders each option in its own language, so someone
+who cannot read the current page can still find their way out of it.
 
 ## What is and isn't translated
 
@@ -69,6 +83,23 @@ and often wrong. Dates format from the same source string in every locale.
 The SMS consent paragraph *is* translated, but keeps the carrier-required
 elements (brand, message types, frequency, rates, STOP/HELP) in every locale —
 those are a compliance requirement, not copy.
+
+## SEO for the localised marketing pages
+
+The QR pages are `noindex`, so language variants there are invisible to search
+and need nothing. The landing page is the opposite — it is the SEO asset — so
+each variant:
+
+- **self-canonicalises** (`/welcome?lang=es` points at itself). Canonicalising
+  the Spanish page to the English one would collapse them into a single result
+  and the Spanish copy would never rank.
+- **declares every alternate**, including a self-reference and `x-default`,
+  via `<link rel="alternate" hreflang>` emitted by `useSeo`, and mirrored in
+  `public/sitemap.xml` with `xhtml:link`.
+
+`useSeo` rebuilds the alternate set wholesale on each render, so stale variants
+cannot linger when a visitor navigates from a localised page to a
+single-language one.
 
 ## Adding a locale
 

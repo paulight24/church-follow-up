@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { registerChurch } from '@/features/churches/api';
 import { useSeo } from '@/lib/seo';
+import { LanguageSwitcher, useTranslation } from '@/i18n';
 
 const schema = z
   .object({
@@ -36,10 +37,10 @@ const schema = z
 type FormValues = z.infer<typeof schema>;
 
 export function RegisterChurchPage() {
+  const { t } = useTranslation();
   useSeo({
-    title: 'Register Your Church — Free Church Management Software',
-    description:
-      'Create a free Member Care account for your church in two minutes. Member follow-up, first-timer care, attendance, events and live sermon translation — no card required.',
+    title: t('signup.seoTitle'),
+    description: t('signup.seoDescription'),
     path: '/register-church',
   });
 
@@ -82,16 +83,15 @@ export function RegisterChurchPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
-          <h1 className="mt-5 text-2xl font-bold text-slate-900">Welcome, {registered.name}!</h1>
+          <h1 className="mt-5 text-2xl font-bold text-slate-900">{t('signup.successTitle', { name: registered.name })}</h1>
           <p className="mt-3 text-slate-600">
-            Your church is registered and <strong>pending a quick review</strong>. You can sign in
-            right now to import members and set things up — we'll activate everything shortly.
+            {t('signup.successBody')}
           </p>
           <Link
             to="/login"
             className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-indigo-700"
           >
-            Sign in to get started
+            {t('signup.successCta')}
           </Link>
         </div>
       </PublicShell>
@@ -103,22 +103,22 @@ export function RegisterChurchPage() {
       <div className="mx-auto w-full max-w-xl">
         <Link to="/welcome" className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t('signup.back')}
         </Link>
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-sm">
-          <h1 className="text-2xl font-bold text-slate-900">Register your church</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{t('signup.heading')}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Free to get started. Your church gets its own private, secure space.
+            {t('signup.subheading')}
           </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-5">
             {serverError && <Alert variant="error">{serverError}</Alert>}
 
             <div className="border-b border-slate-100 pb-5">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Your church</h2>
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">{t('signup.sectionChurch')}</h2>
               <div className="space-y-4">
                 <Input
-                  label="Church name"
+                  label={t('signup.churchName')}
                   placeholder="e.g. Christ Embassy Houston"
                   leftIcon={<Church className="h-4 w-4" />}
                   error={errors.churchName?.message}
@@ -126,14 +126,14 @@ export function RegisterChurchPage() {
                 />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input
-                    label="City"
+                    label={t('signup.city')}
                     placeholder="Houston"
                     leftIcon={<MapPin className="h-4 w-4" />}
                     error={errors.city?.message}
                     {...register('city')}
                   />
                   <Input
-                    label="State / Province"
+                    label={t('signup.state')}
                     placeholder="TX"
                     error={errors.stateOrProvince?.message}
                     {...register('stateOrProvince')}
@@ -143,23 +143,23 @@ export function RegisterChurchPage() {
             </div>
 
             <div>
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">Your admin account</h2>
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">{t('signup.sectionAdmin')}</h2>
               <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input
-                    label="First name"
+                    label={t('signup.firstName')}
                     leftIcon={<User className="h-4 w-4" />}
                     error={errors.adminFirstName?.message}
                     {...register('adminFirstName')}
                   />
                   <Input
-                    label="Last name"
+                    label={t('signup.lastName')}
                     error={errors.adminLastName?.message}
                     {...register('adminLastName')}
                   />
                 </div>
                 <Input
-                  label="Email address"
+                  label={t('signup.email')}
                   type="email"
                   placeholder="you@church.org"
                   autoComplete="email"
@@ -168,7 +168,7 @@ export function RegisterChurchPage() {
                   {...register('adminEmail')}
                 />
                 <Input
-                  label="Phone (optional)"
+                  label={t('signup.phone')}
                   type="tel"
                   placeholder="(555) 123-4567"
                   leftIcon={<Phone className="h-4 w-4" />}
@@ -177,7 +177,7 @@ export function RegisterChurchPage() {
                 />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input
-                    label="Password"
+                    label={t('signup.password')}
                     type="password"
                     autoComplete="new-password"
                     leftIcon={<Lock className="h-4 w-4" />}
@@ -185,7 +185,7 @@ export function RegisterChurchPage() {
                     {...register('adminPassword')}
                   />
                   <Input
-                    label="Confirm password"
+                    label={t('signup.confirmPassword')}
                     type="password"
                     autoComplete="new-password"
                     leftIcon={<Lock className="h-4 w-4" />}
@@ -197,13 +197,13 @@ export function RegisterChurchPage() {
             </div>
 
             <Button type="submit" className="w-full" size="lg" isLoading={isSubmitting}>
-              Register church
+              {t('signup.submit')}
             </Button>
 
             <p className="text-center text-sm text-slate-500">
-              Already using Member Care?{' '}
+              {t('signup.alreadyUsing')}{' '}
               <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-700">
-                Sign in
+                {t('signup.signIn')}
               </Link>
             </p>
           </form>
@@ -217,13 +217,14 @@ function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="border-b border-slate-100 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/welcome" className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700">
               <Heart className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-bold text-slate-900">Member Care</span>
           </Link>
+          <LanguageSwitcher />
         </div>
       </header>
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">{children}</main>

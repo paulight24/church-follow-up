@@ -70,6 +70,113 @@ const zh: Translations = {
   'field.weddingAnniversary': '结婚纪念日',
   'field.prayerRequest': '请告诉我们如何为您代祷',
   'field.optional': '选填',
+  // ── landing page (public marketing funnel) ──
+  'landing.seoTitle': '教会成员关怀软件——跟进、出席与实时讲道翻译',
+  'landing.seoDescription':
+    '免费的教会管理软件：成员跟进、初次到访者关怀、出席记录、小组、活动，以及将讲道实时翻译成任何语言。认识每一位成员，跟进每一个灵魂。',
+  'landing.nav.features': '功能',
+  'landing.nav.contact': '联系我们',
+  'landing.nav.howItWorks': '如何使用',
+  'landing.nav.signIn': '登录',
+  'landing.nav.getStarted': '开始使用',
+  'landing.hero.badge': '为爱护会众的教会而建',
+  'landing.hero.titleLine1': '认识每一位成员。',
+  'landing.hero.titleLine2': '跟进每一个灵魂。',
+  'landing.hero.subtitle':
+    'Member Care 帮助您的教会记住生日、跟进初次到访者、鼓励成员并组织关怀团队——让每个人都被爱、被喂养，并愿意留下。',
+  'landing.hero.ctaRegister': '注册您的教会',
+  'landing.hero.ctaSignIn': '登录您的教会',
+  'landing.hero.trust': '免费开始 · 无需银行卡 · 数据永远属于您',
+  'landing.proof.multiChurch': '支持多间教会',
+  'landing.proof.roles': '基于角色的权限',
+  'landing.proof.encrypted': '牧养记录加密保存',
+  'landing.proof.export': '一键导出全部数据',
+  'landing.features.heading': '让教会成长的关怀',
+  'landing.features.subheading':
+    '人们会留在被爱的地方。Member Care 把美好的心意变成整个团队都能执行的流程。',
+  'landing.features.birthdays.title': '生日与纪念日提醒',
+  'landing.features.birthdays.body':
+    '当天自动发送短信和邮件祝福。记得您生日的教会，才是您愿意留下的教会。',
+  'landing.features.followUp.title': '初次到访者跟进',
+  'landing.features.followUp.body':
+    '结构化的跟进流程，配有通话指引、任务分派和牧师升级处理——没有一位访客会被遗漏。',
+  'landing.features.encouragement.title': '鼓励信息',
+  'landing.features.encouragement.body':
+    '通过合适的渠道把经文与勉励送到合适的成员手中——应用内、邮件、短信或 WhatsApp。',
+  'landing.features.teams.title': '团队与部门',
+  'landing.features.teams.body':
+    '小组、招待、跟进团队——职责清晰，并可查看每位同工的服事时间。',
+  'landing.features.foundation.title': '根基课程跟踪',
+  'landing.features.foundation.body':
+    '从报名到毕业：逐堂课、逐期班记录每位新信徒的成长历程。',
+  'landing.features.services.title': '聚会、活动与出席',
+  'landing.features.services.body':
+    '固定聚会、带二维码的活动报名、出席分析以及来宾照片记录。',
+  'landing.lt.badge': '实时讲道翻译',
+  'landing.lt.heading': '让每个人都用自己的语言听见信息',
+  'landing.lt.body':
+    '媒体同工把牧师的麦克风接入 Member Care。会众扫描屏幕上的二维码，选择语言，就能用自己的耳机实时听到翻译——也可以选择显示字幕。',
+  'landing.lt.point1Strong': '无需安装任何应用。',
+  'landing.lt.point1': '扫码、选语言、收听。任何手机都可以。',
+  'landing.lt.point2Strong': '无需专用设备。',
+  'landing.lt.point2': '不必购买、充电或在门口回收接收器——大家使用自己的耳机。',
+  'landing.lt.point3Strong': '西班牙语、中文、法语、葡萄牙语、伊博语、约鲁巴语、豪萨语',
+  'landing.lt.point3': '等多种语言——可同时进行。',
+  'landing.lt.cta': '带到您的教会',
+  'landing.lt.mockService': '主日聚会',
+  'landing.lt.mockChoose': '选择您的语言',
+  'landing.lt.mockHint': '请使用您自己的耳机——任何一种都可以',
+  'landing.how.heading': '一天之内即可启用',
+  'landing.how.step1Title': '注册您的教会',
+  'landing.how.step1Body':
+    '两分钟即可完成：教会名称、所在城市和您的管理员账号。我们会尽快审核并通过新教会的申请。',
+  'landing.how.step2Title': '导入您的成员',
+  'landing.how.step2Body':
+    '从表格导入，或随时逐个添加。部门、成员状态和代祷分类均已预先配置。',
+  'landing.how.step3Title': '开始关怀',
+  'landing.how.step3Body':
+    '分派跟进团队、安排鼓励信息，看着参与度一周比一周增长。',
+  'landing.security.badge': '安全与数据归属',
+  'landing.security.heading': '守护会众对您的信任',
+  'landing.security.subheading': '牧养信息十分敏感，我们也如此对待。',
+  'landing.security.point1': '每间教会的数据完全隔离——其他教会绝无法查看',
+  'landing.security.point2': '牧养记录与代祷事项使用各教会专属密钥加密',
+  'landing.security.point3': '基于角色的权限：同工只能看到其职责所需的内容',
+  'landing.security.point4': '随时一键将教会的全部数据导出为 ZIP 文件',
+  'landing.security.quote': '「你喂养我的小羊……你牧养我的羊。」',
+  'landing.security.quoteRef': '约翰福音 21:15–17',
+  'landing.security.quoteBody':
+    '牧养众多会众，仅靠记忆远远不够。Member Care 让您能忠心地跟进每一位走进教会大门的人。',
+  'landing.cta.heading': '预备好更好地爱您的会众了吗？',
+  'landing.cta.subheading': '今天就注册您的教会，几分钟内开始关怀。',
+  'landing.footer.contact': '联系我们',
+  'landing.footer.copyright': '© {year} Member Care。为用心关怀的教会而建。',
+
+  // ── church sign-up ──
+  'signup.seoTitle': '注册您的教会——免费的教会管理软件',
+  'signup.seoDescription':
+    '两分钟为您的教会创建免费的 Member Care 账号。成员跟进、初次到访者关怀、出席、活动以及实时讲道翻译——无需银行卡。',
+  'signup.back': '返回',
+  'signup.heading': '注册您的教会',
+  'signup.subheading': '免费开始使用。您的教会将拥有独立、私密且安全的空间。',
+  'signup.sectionChurch': '您的教会',
+  'signup.sectionAdmin': '您的管理员账号',
+  'signup.churchName': '教会名称',
+  'signup.city': '城市',
+  'signup.state': '州 / 省',
+  'signup.firstName': '名字',
+  'signup.lastName': '姓氏',
+  'signup.email': '电子邮箱',
+  'signup.phone': '电话（选填）',
+  'signup.password': '密码',
+  'signup.confirmPassword': '确认密码',
+  'signup.submit': '注册教会',
+  'signup.alreadyUsing': '已经在使用 Member Care？',
+  'signup.signIn': '登录',
+  'signup.successTitle': '欢迎您，{name}！',
+  'signup.successBody':
+    '您的教会已注册，正在等待简短审核。您现在就可以登录导入成员并进行设置——我们会尽快全面启用。',
+  'signup.successCta': '登录并开始使用',
 };
 
 export default zh;

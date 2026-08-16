@@ -3,20 +3,53 @@
   Only genuinely public, indexable pages belong here. Per-church links
   (/live/:slug, /e/:slug) are deliberately excluded: they are private QR
   destinations for one service, not search results.
+
+  The marketing funnel renders in English, Spanish and Chinese from the same
+  URL plus a ?lang= variant. Each variant is listed with the full set of
+  xhtml:link alternates (including a self-reference, which Google requires)
+  so the translated pages rank in their own language instead of being folded
+  into the English one as duplicates.
 -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://churchmembercare.com/</loc>
     <lastmod>2026-08-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
   <url>
     <loc>https://churchmembercare.com/welcome</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://churchmembercare.com/welcome"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://churchmembercare.com/welcome?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://churchmembercare.com/welcome?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://churchmembercare.com/welcome"/>
     <lastmod>2026-08-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://churchmembercare.com/welcome?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://churchmembercare.com/welcome"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://churchmembercare.com/welcome?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://churchmembercare.com/welcome?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://churchmembercare.com/welcome"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://churchmembercare.com/welcome?lang=zh</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://churchmembercare.com/welcome"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://churchmembercare.com/welcome?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://churchmembercare.com/welcome?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://churchmembercare.com/welcome"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <url>
     <loc>https://churchmembercare.com/register-church</loc>
     <lastmod>2026-08-16</lastmod>

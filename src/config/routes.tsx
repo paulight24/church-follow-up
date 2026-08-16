@@ -136,8 +136,13 @@ export function AppRoutes() {
         <Route path="/" element={<RootGate />} />
 
         {/* Public routes */}
-        <Route path="/welcome" element={<LandingPage />} />
-        <Route path="/register-church" element={<RegisterChurchPage />} />
+        {/* The marketing funnel is localised as one unit: a Spanish visitor
+            who lands on a Spanish page and clicks through to an English
+            sign-up form would be worse than not translating either. */}
+        <Route element={<I18nProvider />}>
+          <Route path="/welcome" element={<LandingPage />} />
+          <Route path="/register-church" element={<RegisterChurchPage />} />
+        </Route>
         <Route path="/contacts" element={<ContactPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

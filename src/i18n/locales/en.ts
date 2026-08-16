@@ -78,6 +78,114 @@ const en = {
   'field.weddingAnniversary': 'Wedding Anniversary',
   'field.prayerRequest': 'Tell us how we can pray for you',
   'field.optional': 'optional',
+  // ── landing page (public marketing funnel) ──
+  'landing.seoTitle': 'Church Member Care Software — Follow-Up, Attendance & Live Sermon Translation',
+  'landing.seoDescription':
+    'Free church management software for member follow-up, first-timer care, attendance, cell groups, events and live sermon translation into any language. Every member known, every soul followed up.',
+  'landing.nav.features': 'Features',
+  'landing.nav.contact': 'Contact',
+  'landing.nav.howItWorks': 'How it works',
+  'landing.nav.signIn': 'Sign in',
+  'landing.nav.getStarted': 'Get started',
+  'landing.hero.badge': 'Built for churches that love their people',
+  'landing.hero.titleLine1': 'Every member known.',
+  'landing.hero.titleLine2': 'Every soul followed up.',
+  'landing.hero.subtitle':
+    'Member Care helps your church remember birthdays, follow up first-timers, encourage members, and organise care teams — so people are loved, fed, and they stay.',
+  'landing.hero.ctaRegister': 'Register your church',
+  'landing.hero.ctaSignIn': 'Sign in to your church',
+  'landing.hero.trust': 'Free to get started · No card required · Your data stays yours, always',
+  'landing.proof.multiChurch': 'Multi-church ready',
+  'landing.proof.roles': 'Role-based access',
+  'landing.proof.encrypted': 'Encrypted pastoral notes',
+  'landing.proof.export': 'One-click full data export',
+  'landing.features.heading': 'Care that grows your church',
+  'landing.features.subheading':
+    'People stay where they are loved. Member Care turns good intentions into a system your whole team can run.',
+  'landing.features.birthdays.title': 'Birthday & anniversary reminders',
+  'landing.features.birthdays.body':
+    'Automatic greetings by SMS and email on the day. A church that remembers your birthday is a church you stay in.',
+  'landing.features.followUp.title': 'First-timer follow-up',
+  'landing.features.followUp.body':
+    'Structured follow-up cycles with call guides, task assignments and escalation to pastors — no visitor falls through the cracks.',
+  'landing.features.encouragement.title': 'Encouragement messaging',
+  'landing.features.encouragement.body':
+    'Scripture and encouragement to the right members on the right channel — in-app, email, SMS or WhatsApp.',
+  'landing.features.teams.title': 'Teams & departments',
+  'landing.features.teams.body':
+    'Fellowship groups, ushering, follow-up teams — organised with clear responsibilities and worker availability.',
+  'landing.features.foundation.title': 'Foundation School tracking',
+  'landing.features.foundation.body':
+    "Enrolment to graduation: every new convert's journey tracked class by class, cohort by cohort.",
+  'landing.features.services.title': 'Services, events & attendance',
+  'landing.features.services.body':
+    'Recurring services, event registration with QR codes, attendance insights and guest photo capture.',
+  'landing.lt.badge': 'Live sermon translation',
+  'landing.lt.heading': 'Everyone hears the message in their own language',
+  'landing.lt.body':
+    "Your media team sends the pastor's microphone into Member Care. Members scan a QR code on the screen, choose their language, and hear the message interpreted live through their own earphones — with captions if they prefer to read.",
+  'landing.lt.point1Strong': 'No app to install.',
+  'landing.lt.point1': 'Scan, choose a language, listen. It works on any phone.',
+  'landing.lt.point2Strong': 'No special hardware.',
+  'landing.lt.point2':
+    'No receivers to buy, charge or collect at the door — members use their own earbuds.',
+  'landing.lt.point3Strong': 'Spanish, Chinese, French, Portuguese, Igbo, Yoruba, Hausa',
+  'landing.lt.point3': 'and more — run several at once.',
+  'landing.lt.cta': 'Bring it to your church',
+  'landing.lt.mockService': 'Sunday Service',
+  'landing.lt.mockChoose': 'Choose your language',
+  'landing.lt.mockHint': 'Use your own earphones — anything works',
+  'landing.how.heading': 'Up and running in a day',
+  'landing.how.step1Title': 'Register your church',
+  'landing.how.step1Body':
+    'Two minutes: church name, city, and your admin account. We review and approve new churches quickly.',
+  'landing.how.step2Title': 'Bring your members in',
+  'landing.how.step2Body':
+    'Import from a spreadsheet or add as you go. Departments, statuses and prayer categories come pre-configured.',
+  'landing.how.step3Title': 'Let the caring begin',
+  'landing.how.step3Body':
+    'Assign follow-up teams, schedule encouragements, and watch engagement grow week after week.',
+  'landing.security.badge': 'Security & data ownership',
+  'landing.security.heading': "Your members' trust, protected",
+  'landing.security.subheading': 'Pastoral information is sensitive. We treat it that way.',
+  'landing.security.point1': "Each church's data is fully isolated — no other church can ever see it",
+  'landing.security.point2': 'Pastoral notes and prayer requests are encrypted with per-church keys',
+  'landing.security.point3': 'Role-based permissions: workers see only what their role needs',
+  'landing.security.point4': 'Export everything your church owns as a ZIP, any time, with one click',
+  'landing.security.quote': '“Feed my lambs… Take care of my sheep.”',
+  'landing.security.quoteRef': 'John 21:15–17',
+  'landing.security.quoteBody':
+    'Shepherding at scale needs more than memory. Member Care is the tool that makes faithful follow-up possible for every single person who walks through your doors.',
+  'landing.cta.heading': 'Ready to love your members better?',
+  'landing.cta.subheading': 'Register your church today and start caring in minutes.',
+  'landing.footer.contact': 'Contact us',
+  'landing.footer.copyright': '© {year} Member Care. Built for churches that care.',
+
+  // ── church sign-up (the landing page's conversion path) ──
+  'signup.seoTitle': 'Register Your Church — Free Church Management Software',
+  'signup.seoDescription':
+    'Create a free Member Care account for your church in two minutes. Member follow-up, first-timer care, attendance, events and live sermon translation — no card required.',
+  'signup.back': 'Back',
+  'signup.heading': 'Register your church',
+  'signup.subheading': 'Free to get started. Your church gets its own private, secure space.',
+  'signup.sectionChurch': 'Your church',
+  'signup.sectionAdmin': 'Your admin account',
+  'signup.churchName': 'Church name',
+  'signup.city': 'City',
+  'signup.state': 'State / Province',
+  'signup.firstName': 'First name',
+  'signup.lastName': 'Last name',
+  'signup.email': 'Email address',
+  'signup.phone': 'Phone (optional)',
+  'signup.password': 'Password',
+  'signup.confirmPassword': 'Confirm password',
+  'signup.submit': 'Register church',
+  'signup.alreadyUsing': 'Already using Member Care?',
+  'signup.signIn': 'Sign in',
+  'signup.successTitle': 'Welcome, {name}!',
+  'signup.successBody':
+    "Your church is registered and pending a quick review. You can sign in right now to import members and set things up — we'll activate everything shortly.",
+  'signup.successCta': 'Sign in to get started',
 } as const;
 
 export default en;

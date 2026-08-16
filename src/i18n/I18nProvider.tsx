@@ -46,6 +46,19 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
   const [locale, setLocaleState] = useState<Locale>(() => initialLocale ?? detectLocale());
   const [dict, setDict] = useState<Translations>(en);
 
+  // A ?lang= arrival is an explicit choice — it came off a Spanish flier —
+  // so persist it. Client-side navigation drops the query string, and
+  // without this a refresh on the very next page would fall back to the
+  // phone's language and undo what the flier asked for.
+  useEffect(() => {
+    if (initialLocale) return;
+    if (new URLSearchParams(window.location.search).has('lang')) {
+      rememberLocale(locale);
+    }
+    // Mount only: later changes come through setLocale, which already persists.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 

@@ -15,6 +15,12 @@ import { useEffect } from 'react';
 export const SITE_NAME = 'Member Care';
 export const SITE_URL = 'https://churchmembercare.com';
 
+export interface SeoAlternate {
+  /** "es", "zh", or "x-default". */
+  hreflang: string;
+  href: string;
+}
+
 export interface SeoOptions {
   title: string;
   description: string;
@@ -23,6 +29,19 @@ export interface SeoOptions {
   /** Keep private/QR-reached pages out of search results. */
   noIndex?: boolean;
   image?: string;
+  /**
+   * Language variants of THIS page. Only meaningful on indexable pages that
+   * render in more than one language: it tells Google the Spanish and English
+   * versions are the same page rather than duplicates competing with each
+   * other, and lets it serve the right one per searcher.
+   */
+  alternates?: SeoAlternate[];
+  /**
+   * Canonical override. A localised page must self-canonicalise (…/welcome?lang=es
+   * points at itself, not at the English original) or the translated variants
+   * collapse into the English one and never rank.
+   */
+  canonical?: string;
 }
 
 function upsertMeta(selector: string, attr: 'name' | 'property', key: string, content: string) {
@@ -45,11 +64,42 @@ function upsertCanonical(href: string) {
   el.href = href;
 }
 
-export function useSeo({ title, description, path, noIndex, image }: SeoOptions): void {
+/** Alternates are re-rendered wholesale, so stale variants can't linger when
+ *  the visitor navigates from a localised page to a single-language one. */
+const ALTERNATE_ATTR = 'data-seo-alternate';
+
+function syncAlternates(alternates: SeoAlternate[]): void {
+  document.head
+    .querySelectorAll(`link[${ALTERNATE_ATTR}]`)
+    .forEach((el) => el.remove());
+  for (const { hreflang, href } of alternates) {
+    const link = document.createElement('link');
+    link.rel = 'alternate';
+    link.hreflang = hreflang;
+    link.href = href;
+    link.setAttribute(ALTERNATE_ATTR, '');
+    document.head.appendChild(link);
+  }
+}
+
+export function useSeo({
+  title,
+  description,
+  path,
+  noIndex,
+  image,
+  alternates,
+  canonical,
+}: SeoOptions): void {
+  // Arrays are usually rebuilt each render; comparing by value keeps the
+  // effect from thrashing the <head> on every parent re-render.
+  const alternatesKey = alternates ? JSON.stringify(alternates) : '';
+
   useEffect(() => {
     const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
-    const url = `${SITE_URL}${path ?? window.location.pathname}`;
+    const url = canonical ?? `${SITE_URL}${path ?? window.location.pathname}`;
     const ogImage = image ?? `${SITE_URL}/og-image.svg`;
+    syncAlternates(alternates ?? []);
 
     document.title = fullTitle;
     upsertMeta('meta[name="description"]', 'name', 'description', description);
@@ -68,5 +118,7 @@ export function useSeo({ title, description, path, noIndex, image }: SeoOptions)
     upsertMeta('meta[name="twitter:title"]', 'name', 'twitter:title', fullTitle);
     upsertMeta('meta[name="twitter:description"]', 'name', 'twitter:description', description);
     upsertMeta('meta[name="twitter:image"]', 'name', 'twitter:image', ogImage);
-  }, [title, description, path, noIndex, image]);
+    // alternatesKey stands in for the `alternates` array by value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, description, path, noIndex, image, canonical, alternatesKey]);
 }

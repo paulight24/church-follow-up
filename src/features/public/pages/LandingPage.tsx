@@ -16,7 +16,8 @@ import {
   QrCode,
   Headphones,
 } from 'lucide-react';
-import { useSeo } from '@/lib/seo';
+import { useSeo, SITE_URL } from '@/lib/seo';
+import { LanguageSwitcher, LOCALES, useTranslation } from '@/i18n';
 
 /**
  * Public marketing funnel — the front door for churches discovering the
@@ -28,11 +29,23 @@ import { useSeo } from '@/lib/seo';
  * translation") rather than internal product language.
  */
 export function LandingPage() {
+  const { t, locale } = useTranslation();
+
+  // Each language variant self-canonicalises and declares the others, so the
+  // Spanish page can rank for Spanish queries instead of being folded into
+  // the English one as a duplicate.
+  const canonical = locale === 'en' ? `${SITE_URL}/welcome` : `${SITE_URL}/welcome?lang=${locale}`;
   useSeo({
-    title: 'Church Member Care Software — Follow-Up, Attendance & Live Sermon Translation',
-    description:
-      'Free church management software for member follow-up, first-timer care, attendance, cell groups, events and live sermon translation into any language. Every member known, every soul followed up.',
-    path: '/',
+    title: t('landing.seoTitle'),
+    description: t('landing.seoDescription'),
+    canonical,
+    alternates: [
+      ...LOCALES.map((code) => ({
+        hreflang: code,
+        href: code === 'en' ? `${SITE_URL}/welcome` : `${SITE_URL}/welcome?lang=${code}`,
+      })),
+      { hreflang: 'x-default', href: `${SITE_URL}/welcome` },
+    ],
   });
 
   return (
@@ -48,25 +61,26 @@ export function LandingPage() {
           </div>
           <nav className="flex items-center gap-2 sm:gap-4">
             <a href="#features" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
-              Features
+              {t('landing.nav.features')}
             </a>
             <Link to="/contacts" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
-              Contact
+              {t('landing.nav.contact')}
             </Link>
             <a href="#how-it-works" className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
-              How it works
+              {t('landing.nav.howItWorks')}
             </a>
+            <LanguageSwitcher className="hidden sm:flex" />
             <Link
               to="/login"
               className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              Sign in
+              {t('landing.nav.signIn')}
             </Link>
             <Link
               to="/register-church"
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
             >
-              Get started
+              {t('landing.nav.getStarted')}
             </Link>
           </nav>
         </div>
@@ -78,34 +92,33 @@ export function LandingPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-indigo-100 backdrop-blur">
               <Church className="h-3.5 w-3.5" />
-              Built for churches that love their people
+              {t('landing.hero.badge')}
             </span>
             <h1 className="mt-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-              Every member known.
+              {t('landing.hero.titleLine1')}
               <br />
-              Every soul followed up.
+              {t('landing.hero.titleLine2')}
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-indigo-100">
-              Member Care helps your church remember birthdays, follow up first-timers, encourage
-              members, and organise care teams — so people are loved, fed, and they stay.
+              {t('landing.hero.subtitle')}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 to="/register-church"
                 className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-base font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
               >
-                Register your church
+                {t('landing.hero.ctaRegister')}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 to="/login"
                 className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:bg-white/20"
               >
-                Sign in to your church
+                {t('landing.hero.ctaSignIn')}
               </Link>
             </div>
             <p className="mt-6 text-sm text-indigo-200">
-              Free to get started · No card required · Your data stays yours, always
+              {t('landing.hero.trust')}
             </p>
           </div>
         </div>
@@ -114,10 +127,10 @@ export function LandingPage() {
       {/* ── Social proof strip ──────────────────────────────── */}
       <section className="border-b border-slate-100 bg-slate-50">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-6 text-sm text-slate-500 sm:px-6 lg:px-8">
-          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Multi-church ready</span>
-          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Role-based access</span>
-          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Encrypted pastoral notes</span>
-          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> One-click full data export</span>
+          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {t('landing.proof.multiChurch')}</span>
+          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {t('landing.proof.roles')}</span>
+          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {t('landing.proof.encrypted')}</span>
+          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {t('landing.proof.export')}</span>
         </div>
       </section>
 
@@ -125,44 +138,43 @@ export function LandingPage() {
       <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Care that grows your church
+            {t('landing.features.heading')}
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            People stay where they are loved. Member Care turns good intentions into a system
-            your whole team can run.
+            {t('landing.features.subheading')}
           </p>
         </div>
 
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <FeatureCard
             icon={<Cake className="h-6 w-6" />}
-            title="Birthday & anniversary reminders"
-            description="Automatic greetings by SMS and email on the day. A church that remembers your birthday is a church you stay in."
+            title={t('landing.features.birthdays.title')}
+            description={t('landing.features.birthdays.body')}
           />
           <FeatureCard
             icon={<PhoneCall className="h-6 w-6" />}
-            title="First-timer follow-up"
-            description="Structured follow-up cycles with call guides, task assignments and escalation to pastors — no visitor falls through the cracks."
+            title={t('landing.features.followUp.title')}
+            description={t('landing.features.followUp.body')}
           />
           <FeatureCard
             icon={<MessagesSquare className="h-6 w-6" />}
-            title="Encouragement messaging"
-            description="Scripture and encouragement to the right members on the right channel — in-app, email, SMS or WhatsApp."
+            title={t('landing.features.encouragement.title')}
+            description={t('landing.features.encouragement.body')}
           />
           <FeatureCard
             icon={<Users className="h-6 w-6" />}
-            title="Teams & departments"
-            description="Fellowship groups, ushering, follow-up teams — organised with clear responsibilities and worker availability."
+            title={t('landing.features.teams.title')}
+            description={t('landing.features.teams.body')}
           />
           <FeatureCard
             icon={<GraduationCap className="h-6 w-6" />}
-            title="Foundation School tracking"
-            description="Enrolment to graduation: every new convert's journey tracked class by class, cohort by cohort."
+            title={t('landing.features.foundation.title')}
+            description={t('landing.features.foundation.body')}
           />
           <FeatureCard
             icon={<CalendarCheck className="h-6 w-6" />}
-            title="Services, events & attendance"
-            description="Recurring services, event registration with QR codes, attendance insights and guest photo capture."
+            title={t('landing.features.services.title')}
+            description={t('landing.features.services.body')}
           />
         </div>
       </section>
@@ -174,36 +186,34 @@ export function LandingPage() {
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-200">
                 <Languages className="h-3.5 w-3.5" />
-                Live sermon translation
+                {t('landing.lt.badge')}
               </span>
               <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
-                Everyone hears the message in their own language
+                {t('landing.lt.heading')}
               </h2>
               <p className="mt-4 text-lg text-indigo-100">
-                Your media team sends the pastor&apos;s microphone into Member Care. Members scan a
-                QR code on the screen, choose their language, and hear the message interpreted
-                live through their own earphones — with captions if they prefer to read.
+                {t('landing.lt.body')}
               </p>
               <ul className="mt-8 space-y-4">
                 <li className="flex gap-3 text-indigo-50">
                   <QrCode className="mt-0.5 h-5 w-5 flex-none text-indigo-300" />
                   <span>
-                    <strong className="font-semibold text-white">No app to install.</strong> Scan,
-                    choose a language, listen. It works on any phone.
+                    <strong className="font-semibold text-white">{t('landing.lt.point1Strong')}</strong>{' '}
+                    {t('landing.lt.point1')}
                   </span>
                 </li>
                 <li className="flex gap-3 text-indigo-50">
                   <Headphones className="mt-0.5 h-5 w-5 flex-none text-indigo-300" />
                   <span>
-                    <strong className="font-semibold text-white">No special hardware.</strong> No
-                    receivers to buy, charge or collect at the door — members use their own earbuds.
+                    <strong className="font-semibold text-white">{t('landing.lt.point2Strong')}</strong>{' '}
+                    {t('landing.lt.point2')}
                   </span>
                 </li>
                 <li className="flex gap-3 text-indigo-50">
                   <Languages className="mt-0.5 h-5 w-5 flex-none text-indigo-300" />
                   <span>
-                    <strong className="font-semibold text-white">Spanish, Chinese, French,
-                    Portuguese, Igbo, Yoruba, Hausa</strong> and more — run several at once.
+                    <strong className="font-semibold text-white">{t('landing.lt.point3Strong')}</strong>{' '}
+                    {t('landing.lt.point3')}
                   </span>
                 </li>
               </ul>
@@ -211,7 +221,7 @@ export function LandingPage() {
                 to="/register-church"
                 className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-semibold text-indigo-800 shadow-lg transition hover:bg-indigo-50"
               >
-                Bring it to your church
+                {t('landing.lt.cta')}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -220,13 +230,13 @@ export function LandingPage() {
             <div className="flex justify-center">
               <div className="w-full max-w-xs rounded-3xl border border-white/10 bg-white p-5 shadow-2xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-900">Sunday Service</span>
+                  <span className="text-sm font-semibold text-slate-900">{t('landing.lt.mockService')}</span>
                   <span className="flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
                     LIVE
                   </span>
                 </div>
-                <p className="mt-4 text-xs font-medium text-slate-500">Choose your language</p>
+                <p className="mt-4 text-xs font-medium text-slate-500">{t('landing.lt.mockChoose')}</p>
                 <div className="mt-2 space-y-2">
                   {[
                     { native: '中文', english: 'Chinese' },
@@ -246,7 +256,7 @@ export function LandingPage() {
                   ))}
                 </div>
                 <p className="mt-4 text-center text-[11px] text-slate-400">
-                  Use your own earphones — anything works
+                  {t('landing.lt.mockHint')}
                 </p>
               </div>
             </div>
@@ -258,7 +268,7 @@ export function LandingPage() {
       <section id="how-it-works" className="bg-slate-50 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">Up and running in a day</h2>
+            <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">{t('landing.how.heading')}</h2>
           </div>
           <div className="mx-auto mt-12 grid max-w-4xl gap-8 sm:grid-cols-3">
             <StepCard
@@ -286,30 +296,29 @@ export function LandingPage() {
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
               <Shield className="h-3.5 w-3.5" />
-              Security & data ownership
+              {t('landing.security.badge')}
             </span>
             <h2 className="mt-4 text-3xl font-bold text-slate-900">
-              Your members' trust, protected
+              {t('landing.security.heading')}
             </h2>
             <p className="mt-4 text-lg text-slate-600">
-              Pastoral information is sensitive. We treat it that way.
+              {t('landing.security.subheading')}
             </p>
             <ul className="mt-6 space-y-3">
-              <SecurityPoint text="Each church's data is fully isolated — no other church can ever see it" />
-              <SecurityPoint text="Pastoral notes and prayer requests are encrypted with per-church keys" />
-              <SecurityPoint text="Role-based permissions: workers see only what their role needs" />
-              <SecurityPoint text="Export everything your church owns as a ZIP, any time, with one click" />
+              <SecurityPoint text={t('landing.security.point1')} />
+              <SecurityPoint text={t('landing.security.point2')} />
+              <SecurityPoint text={t('landing.security.point3')} />
+              <SecurityPoint text={t('landing.security.point4')} />
             </ul>
           </div>
           <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-10 text-white shadow-xl">
             <Bell className="h-8 w-8 text-indigo-200" />
             <blockquote className="mt-6 text-xl font-medium leading-relaxed">
-              “Feed my lambs… Take care of my sheep.”
+              {t('landing.security.quote')}
             </blockquote>
-            <p className="mt-3 text-sm text-indigo-200">John 21:15–17</p>
+            <p className="mt-3 text-sm text-indigo-200">{t('landing.security.quoteRef')}</p>
             <p className="mt-8 text-indigo-100">
-              Shepherding at scale needs more than memory. Member Care is the tool that makes
-              faithful follow-up possible for every single person who walks through your doors.
+              {t('landing.security.quoteBody')}
             </p>
           </div>
         </div>
@@ -319,16 +328,16 @@ export function LandingPage() {
       <section className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700">
         <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-white sm:text-4xl">
-            Ready to love your members better?
+            {t('landing.cta.heading')}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-indigo-100">
-            Register your church today and start caring in minutes.
+            {t('landing.cta.subheading')}
           </p>
           <Link
             to="/register-church"
             className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
           >
-            Register your church
+            {t('landing.hero.ctaRegister')}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -345,10 +354,10 @@ export function LandingPage() {
           </div>
           <div className="flex items-center gap-6">
             <Link to="/contacts" className="text-sm font-medium text-slate-600 hover:text-slate-900">
-              Contact us
+              {t('landing.footer.contact')}
             </Link>
             <p className="text-sm text-slate-500">
-              &copy; {new Date().getFullYear()} Member Care. Built for churches that care.
+              {t('landing.footer.copyright', { year: new Date().getFullYear() })}
             </p>
           </div>
         </div>
