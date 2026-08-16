@@ -25,6 +25,7 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import { TeamMemberList } from '../components/TeamMemberList';
 import { AssignmentModal } from '../components/AssignmentModal';
+import { MemberAssignmentModal } from '../components/MemberAssignmentModal';
 import { teamsApi } from '../api/teams.api';
 import { memberAssignmentsApi } from '../api/member-assignments.api';
 import type { TeamUser } from '@/types/team';
@@ -36,6 +37,7 @@ export function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [showMemberAssignModal, setShowMemberAssignModal] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<TeamUser | null>(null);
   // Backend: POST /teams/:id/users and DELETE /teams/:id/users/:userId both
   // require teams.manage_members. Gating both add + remove on the same code.
@@ -109,9 +111,20 @@ export function TeamDetailPage() {
         title={team.name}
         actions={
           canManageMembers ? (
-            <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setShowAssignmentModal(true)}>
-              Add Worker
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {/* Two different things, deliberately labelled apart: workers are
+                  staff who log in; members are the congregation they follow up. */}
+              <Button
+                variant="outline"
+                leftIcon={<UserCheck className="h-4 w-4" />}
+                onClick={() => setShowMemberAssignModal(true)}
+              >
+                Assign Members
+              </Button>
+              <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setShowAssignmentModal(true)}>
+                Add Worker
+              </Button>
+            </div>
           ) : undefined
         }
       />
@@ -240,6 +253,14 @@ export function TeamDetailPage() {
       </div>
 
       {/* Assignment Modal */}
+      <MemberAssignmentModal
+        isOpen={showMemberAssignModal}
+        onClose={() => setShowMemberAssignModal(false)}
+        teamId={id!}
+        workers={workers}
+        assignedMemberIds={(assignments ?? []).map((a) => a.memberId)}
+      />
+
       <AssignmentModal
         isOpen={showAssignmentModal}
         onClose={() => setShowAssignmentModal(false)}
