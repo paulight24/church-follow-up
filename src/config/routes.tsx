@@ -37,6 +37,7 @@ const MemberEditPage = lazy(() => import('@/features/members/pages/MemberEditPag
 const MemberProfilePage = lazy(() => import('@/features/members/pages/MemberProfilePage').then(m => ({ default: m.MemberProfilePage })));
 const MemberImportPage = lazy(() => import('@/features/members/pages/MemberImportPage').then(m => ({ default: m.MemberImportPage })));
 const DuplicateReviewPage = lazy(() => import('@/features/members/pages/DuplicateReviewPage').then(m => ({ default: m.DuplicateReviewPage })));
+const RepliesInboxPage = lazy(() => import('@/features/members/pages/RepliesInboxPage').then(m => ({ default: m.RepliesInboxPage })));
 
 // Teams
 const TeamListPage = lazy(() => import('@/features/teams/pages/TeamListPage').then(m => ({ default: m.TeamListPage })));
@@ -183,6 +184,9 @@ export function AppRoutes() {
             {/* Members */}
             <Route element={<ProtectedRoute permission="members.view" />}>
               <Route path="/members" element={<MemberListPage />} />
+              {/* Static segment out-ranks /members/:id in the router's own
+                  scoring, same as /new and /import above it. */}
+              <Route path="/members/replies" element={<RepliesInboxPage />} />
               <Route path="/members/:id" element={<MemberProfilePage />} />
             </Route>
             <Route element={<ProtectedRoute permission="members.create" />}>

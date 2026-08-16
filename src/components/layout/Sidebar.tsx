@@ -17,6 +17,7 @@ import {
   GraduationCap,
   HandHeart,
   Heart,
+  Inbox,
   Languages,
   LayoutDashboard,
   LayoutTemplate,
@@ -166,6 +167,9 @@ const navSections: NavSection[] = [
       },
       { label: 'Campaigns', path: '/campaigns', icon: Megaphone, permission: 'campaigns.view' },
       { label: 'Encouragements', path: '/encouragements', icon: Heart, permission: 'encouragements.view' },
+      // The inbound half of messaging. Gated on members.view because that is
+      // what the endpoint behind it is gated on — a reply is a member's.
+      { label: 'Replies', path: '/members/replies', icon: Inbox, permission: 'members.view' },
       {
         label: 'Card Templates',
         path: '/encouragements/cards/manage',

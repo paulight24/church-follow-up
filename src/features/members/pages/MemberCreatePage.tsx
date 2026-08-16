@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { ChevronRight } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -55,6 +55,11 @@ function toCreateRequest(values: MemberFormValues): CreateMemberRequest {
 
 export function MemberCreatePage() {
   const navigate = useNavigate();
+  // ?phone= lets another screen hand over a number it already knows — the
+  // replies inbox links here when someone not on file has texted in, and
+  // retyping the number they just texted from would be silly.
+  const [searchParams] = useSearchParams();
+  const prefilledPhone = searchParams.get('phone')?.trim();
 
   const createMutation = useMutation({
     mutationFn: (data: CreateMemberRequest) => membersApi.createMember(data),
@@ -92,6 +97,7 @@ export function MemberCreatePage() {
       <Card>
         <CardContent>
           <MemberForm
+            initialData={prefilledPhone ? { phonePrimary: prefilledPhone } : undefined}
             onSubmit={handleSubmit}
             isSubmitting={createMutation.isPending}
             onCancel={() => navigate('/members')}

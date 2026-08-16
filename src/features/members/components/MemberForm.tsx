@@ -67,7 +67,12 @@ const memberFormSchema = z.object({
 export type MemberFormValues = z.infer<typeof memberFormSchema>;
 
 interface MemberFormProps {
-  initialData?: Member | null;
+  /**
+   * Partial rather than a whole Member so a caller can seed just the field
+   * it knows — the replies inbox opens this with the number someone has
+   * just texted from, and nothing else.
+   */
+  initialData?: Partial<Member> | null;
   onSubmit: (data: MemberFormValues) => void;
   isSubmitting: boolean;
   onCancel?: () => void;
