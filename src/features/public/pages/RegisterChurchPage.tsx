@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { registerChurch } from '@/features/churches/api';
+import { useSeo } from '@/lib/seo';
 
 const schema = z
   .object({
@@ -35,6 +36,13 @@ const schema = z
 type FormValues = z.infer<typeof schema>;
 
 export function RegisterChurchPage() {
+  useSeo({
+    title: 'Register Your Church — Free Church Management Software',
+    description:
+      'Create a free Member Care account for your church in two minutes. Member follow-up, first-timer care, attendance, events and live sermon translation — no card required.',
+    path: '/register-church',
+  });
+
   const [serverError, setServerError] = useState<string | null>(null);
   const [registered, setRegistered] = useState<{ name: string } | null>(null);
 

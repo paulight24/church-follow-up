@@ -1,0 +1,44 @@
+# churchmembercare.com
+# Public marketing + church-facing pages are crawlable; anything behind a
+# login (or reached by a private link such as a QR code) is not, so member
+# data and live-service links never surface in search results.
+
+User-agent: *
+Allow: /$
+Allow: /welcome
+Allow: /register-church
+Allow: /contacts
+
+# Signed-in application surface — never index.
+Disallow: /dashboard
+Disallow: /members
+Disallow: /teams
+Disallow: /follow-ups
+Disallow: /escalations
+Disallow: /campaigns
+Disallow: /encouragements
+Disallow: /prayer-requests
+Disallow: /services
+Disallow: /events
+Disallow: /foundation-school
+Disallow: /call-guides
+Disallow: /announcements
+Disallow: /notifications
+Disallow: /reports
+Disallow: /admin
+Disallow: /profile
+Disallow: /live-translation
+
+# Private per-church links (QR codes for a specific service or event).
+# These are meant for the people in the room, not for search results.
+Disallow: /live/
+Disallow: /e/
+Disallow: /prayer
+
+# Auth flows carry one-time tokens.
+Disallow: /login
+Disallow: /reset-password
+Disallow: /accept-invite
+Disallow: /forgot-password
+
+Sitemap: https://churchmembercare.com/sitemap.xml

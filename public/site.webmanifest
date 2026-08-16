@@ -1,0 +1,18 @@
+{
+  "name": "Member Care — Church Follow-Up & Live Translation",
+  "short_name": "Member Care",
+  "description": "Church software for member follow-up, attendance, events and live sermon translation.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

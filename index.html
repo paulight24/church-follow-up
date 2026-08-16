@@ -2,9 +2,133 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Member Care</title>
+
+    <!-- Primary meta. Per-route overrides happen at runtime via src/lib/seo.ts;
+         these static values are what a crawler sees before JS executes, so they
+         describe the landing page (the page every organic visitor lands on). -->
+    <title>Church Member Care Software — Follow-Up, Attendance &amp; Live Sermon Translation</title>
+    <meta
+      name="description"
+      content="Free church management software for member follow-up, first-timer care, attendance, cell groups, events and live sermon translation into any language. Every member known, every soul followed up."
+    />
+    <link rel="canonical" href="https://churchmembercare.com/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="author" content="Member Care" />
+    <meta name="theme-color" content="#4f46e5" />
+
+    <!-- Open Graph (WhatsApp/Facebook link previews — how churches actually share) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Member Care" />
+    <meta property="og:title" content="Church Member Care — Every member known. Every soul followed up." />
+    <meta
+      property="og:description"
+      content="Follow up first-timers, remember birthdays, organise care teams, track attendance, and translate the sermon live into your members' languages. Free for churches."
+    />
+    <meta property="og:url" content="https://churchmembercare.com/" />
+    <meta property="og:image" content="https://churchmembercare.com/og-image.svg" />
+    <meta property="og:image:alt" content="Member Care — church follow-up and member care software" />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Church Member Care — Every member known. Every soul followed up." />
+    <meta
+      name="twitter:description"
+      content="Church software for follow-up, member care, attendance and live sermon translation. Free for churches."
+    />
+    <meta name="twitter:image" content="https://churchmembercare.com/og-image.svg" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Structured data: lets Google show this as a product/organisation result
+         rather than a bare blue link. Keep in sync with the landing page copy. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://churchmembercare.com/#organization",
+            "name": "Member Care",
+            "url": "https://churchmembercare.com/",
+            "logo": "https://churchmembercare.com/favicon.svg",
+            "description": "Church member care and follow-up software with live sermon translation."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://churchmembercare.com/#website",
+            "url": "https://churchmembercare.com/",
+            "name": "Member Care",
+            "publisher": { "@id": "https://churchmembercare.com/#organization" },
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "Member Care",
+            "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "Church Management Software",
+            "operatingSystem": "Web browser, iOS, Android",
+            "url": "https://churchmembercare.com/",
+            "description": "Church management software for member follow-up, first-timer care, attendance tracking, cell groups, events, encouragement messaging and live sermon translation into any language.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "description": "Free for churches during launch."
+            },
+            "featureList": [
+              "First-timer and member follow-up cycles",
+              "Live sermon translation into any language",
+              "Attendance tracking and QR check-in",
+              "Cell group and department management",
+              "Birthday and anniversary reminders",
+              "Encouragement messages by SMS, WhatsApp and email",
+              "Event registration pages",
+              "Pastoral escalations and prayer requests"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is Member Care free for churches?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Member Care is free for churches during launch, including member follow-up, attendance, events and live sermon translation."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does live sermon translation work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Your media team feeds the pastor's microphone audio into Member Care from the mixer, OBS or a laptop. Members scan a QR code on the screen, choose their language, and hear the message interpreted in real time through their own earphones, with optional captions. No app install and no special hardware are required."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Which languages can the sermon be translated into?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Spanish, Chinese, French, Portuguese, German, Italian, Korean, Japanese, Arabic, Hindi, Russian, Vietnamese, Igbo, Yoruba and Hausa, with more added over time."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can our church follow up first-time visitors automatically?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Member Care creates follow-up cycles for first-timers, assigns them to care workers or cell leaders, provides call guides, and escalates to a pastor when someone needs attention."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

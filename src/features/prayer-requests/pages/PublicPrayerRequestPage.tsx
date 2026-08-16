@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSeo } from '@/lib/seo';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -9,6 +10,13 @@ interface PrayerCategory {
 }
 
 export function PublicPrayerRequestPage() {
+  // Private intake link — must never appear in search results.
+  useSeo({
+    title: 'Submit a Prayer Request',
+    description: 'Share a prayer request with the pastoral team.',
+    noIndex: true,
+  });
+
   const [categories, setCategories] = useState<PrayerCategory[]>([]);
   const [form, setForm] = useState({
     guestFirstName: '',

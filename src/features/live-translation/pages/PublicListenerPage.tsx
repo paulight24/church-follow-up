@@ -13,6 +13,7 @@ import { useParams } from 'react-router-dom';
 import { Captions, ChevronLeft, Headphones, Pause } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/cn';
+import { useSeo } from '@/lib/seo';
 import { Spinner } from '@/components/ui/Spinner';
 import { getPublicLiveInfo } from '../api/liveTranslation.api';
 import { PcmPlayer } from '../lib/pcmPlayer';
@@ -31,6 +32,14 @@ type ListenState =
 
 export function PublicListenerPage() {
   const { slug = '' } = useParams();
+
+  // A live link for the people in the room, not a search result — and it
+  // should never outlive the service in an index.
+  useSeo({
+    title: 'Listen in your language',
+    description: 'Hear today’s service translated live in your own language.',
+    noIndex: true,
+  });
 
   const infoQuery = useQuery({
     queryKey: ['public-live', slug],

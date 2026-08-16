@@ -12,14 +12,29 @@ import {
   ArrowRight,
   CheckCircle2,
   Church,
+  Languages,
+  QrCode,
+  Headphones,
 } from 'lucide-react';
+import { useSeo } from '@/lib/seo';
 
 /**
  * Public marketing funnel — the front door for churches discovering the
  * platform. Deliberately shows NO pricing anywhere: the product is free
  * during launch and monetisation decisions are not surfaced in UI.
+ *
+ * This is the page organic search lands on, so headings carry the terms
+ * churches actually search for ("church follow-up software", "live sermon
+ * translation") rather than internal product language.
  */
 export function LandingPage() {
+  useSeo({
+    title: 'Church Member Care Software — Follow-Up, Attendance & Live Sermon Translation',
+    description:
+      'Free church management software for member follow-up, first-timer care, attendance, cell groups, events and live sermon translation into any language. Every member known, every soul followed up.',
+    path: '/',
+  });
+
   return (
     <div className="min-h-screen bg-white">
       {/* ── Nav ─────────────────────────────────────────────── */}
@@ -149,6 +164,93 @@ export function LandingPage() {
             title="Services, events & attendance"
             description="Recurring services, event registration with QR codes, attendance insights and guest photo capture."
           />
+        </div>
+      </section>
+
+      {/* ── Live Translation ────────────────────────────────── */}
+      <section id="live-translation" className="bg-gradient-to-br from-slate-900 to-indigo-950 py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-200">
+                <Languages className="h-3.5 w-3.5" />
+                Live sermon translation
+              </span>
+              <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
+                Everyone hears the message in their own language
+              </h2>
+              <p className="mt-4 text-lg text-indigo-100">
+                Your media team sends the pastor&apos;s microphone into Member Care. Members scan a
+                QR code on the screen, choose their language, and hear the message interpreted
+                live through their own earphones — with captions if they prefer to read.
+              </p>
+              <ul className="mt-8 space-y-4">
+                <li className="flex gap-3 text-indigo-50">
+                  <QrCode className="mt-0.5 h-5 w-5 flex-none text-indigo-300" />
+                  <span>
+                    <strong className="font-semibold text-white">No app to install.</strong> Scan,
+                    choose a language, listen. It works on any phone.
+                  </span>
+                </li>
+                <li className="flex gap-3 text-indigo-50">
+                  <Headphones className="mt-0.5 h-5 w-5 flex-none text-indigo-300" />
+                  <span>
+                    <strong className="font-semibold text-white">No special hardware.</strong> No
+                    receivers to buy, charge or collect at the door — members use their own earbuds.
+                  </span>
+                </li>
+                <li className="flex gap-3 text-indigo-50">
+                  <Languages className="mt-0.5 h-5 w-5 flex-none text-indigo-300" />
+                  <span>
+                    <strong className="font-semibold text-white">Spanish, Chinese, French,
+                    Portuguese, Igbo, Yoruba, Hausa</strong> and more — run several at once.
+                  </span>
+                </li>
+              </ul>
+              <Link
+                to="/register-church"
+                className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-semibold text-indigo-800 shadow-lg transition hover:bg-indigo-50"
+              >
+                Bring it to your church
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* Listener phone mock — shows the member experience at a glance. */}
+            <div className="flex justify-center">
+              <div className="w-full max-w-xs rounded-3xl border border-white/10 bg-white p-5 shadow-2xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-900">Sunday Service</span>
+                  <span className="flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
+                    LIVE
+                  </span>
+                </div>
+                <p className="mt-4 text-xs font-medium text-slate-500">Choose your language</p>
+                <div className="mt-2 space-y-2">
+                  {[
+                    { native: '中文', english: 'Chinese' },
+                    { native: 'Español', english: 'Spanish' },
+                    { native: 'Français', english: 'French' },
+                  ].map((lang) => (
+                    <div
+                      key={lang.english}
+                      className="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5"
+                    >
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-900">{lang.native}</span>
+                        <span className="block text-[11px] text-slate-500">{lang.english}</span>
+                      </span>
+                      <Headphones className="h-4 w-4 text-indigo-500" />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-4 text-center text-[11px] text-slate-400">
+                  Use your own earphones — anything works
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

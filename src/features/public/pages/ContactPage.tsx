@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Heart, ArrowLeft } from 'lucide-react';
 import { ContactSection } from '../components/ContactSection';
+import { useSeo } from '@/lib/seo';
 
 /**
  * Public contact page at /contacts — kept off the landing page so the
@@ -8,6 +9,13 @@ import { ContactSection } from '../components/ContactSection';
  * contact form has a link people can be sent directly.
  */
 export function ContactPage() {
+  useSeo({
+    title: 'Contact Us — Church Member Care',
+    description:
+      'Questions about Member Care for your church? Talk to us about follow-up, member care and live sermon translation.',
+    path: '/contacts',
+  });
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="border-b border-slate-100 bg-white">

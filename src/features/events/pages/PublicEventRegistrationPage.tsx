@@ -17,6 +17,7 @@ import { EVENT_FIELD_DEFS, buildRegistrationSchema, defaultRegistrationValues, p
 import type { RegistrationFormValues } from '../lib/eventFields';
 import { EventRegistrationFields } from '../components/EventRegistrationFields';
 import { formatEventDay, formatEventWhen } from '../lib/eventDate';
+import { useSeo } from '@/lib/seo';
 
 /** Shared shell for every state of this page - centered, single-column, no app chrome. */
 function PageShell({ children }: { children: ReactNode }) {
@@ -94,6 +95,13 @@ function fieldErrorLines(errors: Record<string, string[]> | undefined): string[]
 }
 
 export function PublicEventRegistrationPage() {
+  // Reached by QR/flier for one church's event — not a search result.
+  useSeo({
+    title: 'Event Registration',
+    description: 'Register for this church event.',
+    noIndex: true,
+  });
+
   const { slug } = useParams<{ slug: string }>();
   const [submittedName, setSubmittedName] = useState<string | null>(null);
   // True when the submitter was already on the list and we updated their

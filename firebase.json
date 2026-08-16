@@ -11,9 +11,29 @@
     ],
     "headers": [
       {
-        "source": "**/*.@(js|css|woff2|woff|svg|png|jpg|jpeg|webp)",
+        "source": "**/*.@(js|css|woff2|woff|png|jpg|jpeg|webp)",
         "headers": [
           { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "comment": "SVGs include /og-image.svg and /favicon.svg, which are referenced by fixed (unhashed) URLs in meta tags — a year-long immutable cache would freeze a rebranded share image in every crawler and chat app.",
+        "source": "**/*.svg",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=86400" }
+        ]
+      },
+      {
+        "comment": "The SPA shell carries the SEO meta and the hashed asset references. Caching it hard would serve a stale index.html pointing at deleted bundles after a deploy.",
+        "source": "/index.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, max-age=0, must-revalidate" }
+        ]
+      },
+      {
+        "source": "/@(robots.txt|sitemap.xml|site.webmanifest)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=3600" }
         ]
       }
     ]
