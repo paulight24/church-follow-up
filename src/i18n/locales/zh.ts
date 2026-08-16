@@ -198,6 +198,12 @@ const zh: Translations = {
   'auth.featSecureSub': '基于角色的访问控制',
   'auth.featCare': '成员关怀',
   'auth.featCareSub': '牧养关怀记录',
+  'auth.forgotTitle': '忘记密码？',
+  'auth.forgotBody': '请输入您的电子邮箱，我们会发送重置密码的链接给您。',
+  'auth.sendResetLink': '发送重置链接',
+  'auth.backToSignIn': '返回登录',
+  'auth.checkEmailTitle': '请查收邮件',
+  'auth.checkEmailBody': '如果该邮箱已注册，我们已发送重置密码的说明。请查看您的收件箱和垃圾邮件文件夹。',
 };
 
 export default zh;

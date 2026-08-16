@@ -146,9 +146,9 @@ export function AppRoutes() {
               translated because being unable to get IN is a hard blocker,
               even though what waits on the other side is English. */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
         <Route path="/contacts" element={<ContactPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/accept-invite" element={<AcceptInvitePage />} />
         <Route path="/prayer" element={<PublicPrayerRequestPage />} />

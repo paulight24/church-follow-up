@@ -204,6 +204,12 @@ const es: Translations = {
   'auth.featSecureSub': 'Acceso según el rol de cada persona',
   'auth.featCare': 'Cuidado de miembros',
   'auth.featCareSub': 'Seguimiento del acompañamiento pastoral',
+  'auth.forgotTitle': '¿Olvidaste tu contraseña?',
+  'auth.forgotBody': 'Escribe tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
+  'auth.sendResetLink': 'Enviar enlace',
+  'auth.backToSignIn': 'Volver a iniciar sesión',
+  'auth.checkEmailTitle': 'Revisa tu correo',
+  'auth.checkEmailBody': 'Si existe una cuenta con ese correo, te hemos enviado las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada y la carpeta de spam.',
 };
 
 export default es;

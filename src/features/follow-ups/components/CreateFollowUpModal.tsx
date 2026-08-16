@@ -139,7 +139,7 @@ export function CreateFollowUpModal({ isOpen, onClose, memberId, memberName }: C
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['follow-up-tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['member', memberId] });
+      queryClient.invalidateQueries({ queryKey: ['members', memberId] });
       reset();
       onClose();
     },

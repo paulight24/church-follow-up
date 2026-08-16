@@ -34,7 +34,11 @@ export function MemberProfilePage() {
   const canEscalate = usePermission('escalations.create');
 
   const { data: member, isLoading, isError, error } = useQuery({
-    queryKey: ['member', id],
+    // Plural, matching MemberEditPage/MemberListPage: an edit invalidates
+    // ['members'] and ['members', id], and prefix matching only reaches this
+    // query if it shares that first segment. As ['member', id] it never
+    // matched, so a saved edit showed stale data until a hard refresh.
+    queryKey: ['members', id],
     queryFn: () => membersApi.getMember(id as string).then((res) => res.data),
     enabled: !!id,
   });

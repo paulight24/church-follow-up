@@ -207,6 +207,12 @@ const en = {
   'auth.featSecureSub': 'Role-based access control',
   'auth.featCare': 'Member Care',
   'auth.featCareSub': 'Pastoral support tracking',
+  'auth.forgotTitle': 'Forgot password?',
+  'auth.forgotBody': "Enter your email address and we'll send you a link to reset your password.",
+  'auth.sendResetLink': 'Send reset link',
+  'auth.backToSignIn': 'Back to sign in',
+  'auth.checkEmailTitle': 'Check your email',
+  'auth.checkEmailBody': "If an account exists with that email, we've sent password reset instructions. Please check your inbox and spam folder.",
 } as const;
 
 export default en;
