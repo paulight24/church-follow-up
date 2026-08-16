@@ -18,12 +18,20 @@ import type { RegistrationFormValues } from '../lib/eventFields';
 import { EventRegistrationFields } from '../components/EventRegistrationFields';
 import { formatEventDay, formatEventWhen } from '../lib/eventDate';
 import { useSeo } from '@/lib/seo';
+import { LanguageSwitcher, useTranslation } from '@/i18n';
 
 /** Shared shell for every state of this page - centered, single-column, no app chrome. */
 function PageShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-white px-4 py-6 sm:py-12">
-      <div className="mx-auto w-full max-w-lg">{children}</div>
+      <div className="mx-auto w-full max-w-lg">
+        {/* Auto-detection is usually right, but a visitor on a shared or
+            English-set phone needs a visible way out. */}
+        <div className="mb-3 flex justify-end">
+          <LanguageSwitcher />
+        </div>
+        {children}
+      </div>
     </div>
   );
 }
@@ -95,6 +103,8 @@ function fieldErrorLines(errors: Record<string, string[]> | undefined): string[]
 }
 
 export function PublicEventRegistrationPage() {
+  const { t } = useTranslation();
+
   // Reached by QR/flier for one church's event — not a search result.
   useSeo({
     title: 'Event Registration',
@@ -171,12 +181,8 @@ export function PublicEventRegistrationPage() {
         <CenteredMessageCard
           icon={notFound ? SearchX : Frown}
           iconClassName={notFound ? 'bg-slate-100 text-slate-500' : 'bg-rose-100 text-rose-500'}
-          title={notFound ? 'We can’t find that event' : 'Something went wrong'}
-          description={
-            notFound
-              ? 'This link may be out of date, or the event isn’t published yet. Check with the church office for the current link.'
-              : 'We had trouble loading this page. Please try again in a moment.'
-          }
+          title={notFound ? t('event.notFoundTitle') : t('event.errorTitle')}
+          description={notFound ? t('event.notFoundBody') : t('event.errorBody')}
         />
       </PageShell>
     );
@@ -200,15 +206,21 @@ export function PublicEventRegistrationPage() {
           title={
             wasAlreadyRegistered
               ? submittedName
-                ? `You're already on the list, ${submittedName}!`
-                : "You're already on the list!"
+                ? t('event.alreadyTitleNamed', { name: submittedName })
+                : t('event.alreadyTitle')
               : submittedName
-                ? `We've got you, ${submittedName}!`
-                : "We've got you!"
+                ? t('event.successTitleNamed', { name: submittedName })
+                : t('event.successTitle')
           }
-          description={`${
-            wasAlreadyRegistered ? 'We updated your details rather than registering you twice. ' : ''
-          }See you ${formatEventDay(event.eventDate, 'EEEE, MMMM d')}${event.location ? ` at ${event.location}` : ''}.`}
+          description={
+            (wasAlreadyRegistered ? t('event.alreadyNote') : '') +
+            (event.location
+              ? t('event.seeYouAt', {
+                  when: formatEventDay(event.eventDate, 'EEEE, MMMM d'),
+                  location: event.location,
+                })
+              : t('event.seeYou', { when: formatEventDay(event.eventDate, 'EEEE, MMMM d') }))
+          }
         />
       </PageShell>
     );
@@ -221,8 +233,8 @@ export function PublicEventRegistrationPage() {
         <CenteredMessageCard
           icon={Frown}
           iconClassName="bg-amber-100 text-amber-600"
-          title="This event is full"
-          description={`${event.name} has reached capacity. Please reach out to the church office to ask about a waiting list.`}
+          title={t('event.fullTitle')}
+          description={t('event.fullBody', { event: event.name })}
         />
       </PageShell>
     );
@@ -236,8 +248,8 @@ export function PublicEventRegistrationPage() {
         <CenteredMessageCard
           icon={CalendarX2}
           iconClassName="bg-amber-100 text-amber-600"
-          title={copy?.title ?? 'Registration is closed'}
-          description={copy?.description(event.name) ?? `Registration for ${event.name} isn't open right now.`}
+          title={copy?.title ?? t('event.closedTitle')}
+          description={copy?.description(event.name) ?? t('event.closedBody', { event: event.name })}
         />
       </PageShell>
     );
@@ -280,8 +292,7 @@ export function PublicEventRegistrationPage() {
           const lines = fieldErrorLines(data?.errors);
           return (
             <Alert variant="error">
-              {data?.message ??
-                'We could not submit your registration. Please check the form and try again.'}
+              {data?.message ?? t('event.submitError')}
               {lines.length > 0 && (
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   {lines.map((line) => (
@@ -310,12 +321,9 @@ export function PublicEventRegistrationPage() {
         */}
         {fieldConfig.phone?.enabled && (
           <p className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500">
-            By giving your phone number you agree to receive text messages from{' '}
-            <strong className="font-semibold text-slate-600">{event.churchName ?? 'this church'}</strong>{' '}
-            about this event, service reminders and pastoral messages. Message frequency varies. Message
-            and data rates may apply. Reply <strong className="font-semibold text-slate-600">STOP</strong>{' '}
-            to unsubscribe or <strong className="font-semibold text-slate-600">HELP</strong> for help.
-            Consent is not a condition of attending.
+            {t('event.smsConsent', {
+              church: event.churchName ?? t('event.smsConsentChurchFallback'),
+            })}
           </p>
         )}
 
@@ -326,7 +334,7 @@ export function PublicEventRegistrationPage() {
           isLoading={mutation.isPending}
           leftIcon={<CheckCircle2 className="h-4 w-4" />}
         >
-          Register
+          {t('event.register')}
         </Button>
       </form>
     </PageShell>

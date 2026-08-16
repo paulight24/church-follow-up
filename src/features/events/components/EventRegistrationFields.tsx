@@ -5,6 +5,26 @@ import { Select } from '@/components/ui/Select';
 import type { EventCustomField, EventFieldConfig } from '@/types/event';
 import { EVENT_FIELD_DEFS } from '../lib/eventFields';
 import type { RegistrationFormValues } from '../lib/eventFields';
+import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
+
+/**
+ * Catalogue field -> translation key. Only the FIXED catalogue is translated:
+ * an event's own custom questions are free text a church typed in its own
+ * language, so they are rendered exactly as authored.
+ *
+ * Outside a public page there is no I18nProvider and useTranslation falls back
+ * to English, so the admin preview keeps showing the catalogue labels as-is.
+ */
+const FIELD_LABEL_KEYS: Record<string, TranslationKey> = {
+  firstName: 'field.firstName',
+  lastName: 'field.lastName',
+  email: 'field.email',
+  phone: 'field.phone',
+  dateOfBirth: 'field.dateOfBirth',
+  weddingAnniversary: 'field.weddingAnniversary',
+  prayerRequest: 'field.prayerRequest',
+};
 
 interface EventRegistrationFieldsProps {
   fields: EventFieldConfig;
@@ -30,6 +50,7 @@ export function EventRegistrationFields({
   errors,
   disabled,
 }: EventRegistrationFieldsProps) {
+  const { t } = useTranslation();
   const enabledDefs = EVENT_FIELD_DEFS.filter((def) => fields[def.key]?.enabled);
   // react-hook-form nests errors for dotted names, matching `custom.<key>`.
   const customErrors = (errors.custom ?? {}) as Record<string, { message?: string } | undefined>;
@@ -46,7 +67,8 @@ export function EventRegistrationFields({
     <div className="space-y-4">
       {enabledDefs.map((def) => {
         const required = fields[def.key]?.required ?? false;
-        const label = `${def.label}${required ? ' *' : ''}`;
+        const labelKey = FIELD_LABEL_KEYS[def.key];
+        const label = `${labelKey ? t(labelKey) : def.label}${required ? ' *' : ''}`;
         const error = errors[def.key]?.message as string | undefined;
 
         if (def.inputType === 'textarea') {

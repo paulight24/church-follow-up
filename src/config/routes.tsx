@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Spinner } from '@/components/ui/Spinner';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
+import { I18nProvider } from '@/i18n';
 
 // Auth pages
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -143,9 +144,14 @@ export function AppRoutes() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/accept-invite" element={<AcceptInvitePage />} />
         <Route path="/prayer" element={<PublicPrayerRequestPage />} />
-        <Route path="/e/:slug" element={<PublicEventRegistrationPage />} />
-        {/* Congregation listener page (QR from the projector — no login). */}
-        <Route path="/live/:slug" element={<PublicListenerPage />} />
+
+        {/* Congregation-facing pages, reached by QR by people who may not
+            read English. Wrapped in I18nProvider so they render in the
+            phone's language (or ?lang=) — the signed-in app stays English. */}
+        <Route element={<I18nProvider />}>
+          <Route path="/e/:slug" element={<PublicEventRegistrationPage />} />
+          <Route path="/live/:slug" element={<PublicListenerPage />} />
+        </Route>
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>

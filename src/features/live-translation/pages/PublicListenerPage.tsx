@@ -14,6 +14,7 @@ import { Captions, ChevronLeft, Headphones, Pause } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/cn';
 import { useSeo } from '@/lib/seo';
+import { LanguageSwitcher, useTranslation } from '@/i18n';
 import { Spinner } from '@/components/ui/Spinner';
 import { getPublicLiveInfo } from '../api/liveTranslation.api';
 import { PcmPlayer } from '../lib/pcmPlayer';
@@ -32,6 +33,7 @@ type ListenState =
 
 export function PublicListenerPage() {
   const { slug = '' } = useParams();
+  const { t } = useTranslation();
 
   // A live link for the people in the room, not a search result — and it
   // should never outlive the service in an index.
@@ -104,7 +106,7 @@ export function PublicListenerPage() {
             } else if (msg.live) {
               setState('listening');
             }
-            setNotice(msg.translationDown ? (msg.message ?? 'Translation is temporarily unavailable.') : null);
+            setNotice(msg.translationDown ? t('listen.unavailable') : null);
           } else if (msg.type === 'caption') {
             setCaptions((prev) => [...prev.slice(-5), msg.text]);
           } else if (msg.type === 'ended') {
@@ -133,7 +135,7 @@ export function PublicListenerPage() {
         }
       };
     },
-    []
+    [t]
   );
 
   const startListening = useCallback(
@@ -197,7 +199,7 @@ export function PublicListenerPage() {
   if (infoQuery.isError || !info) {
     return (
       <Shell>
-        <CenterCard emoji="🙏" title="Page not found" body="Check the link with your church's media team." />
+        <CenterCard emoji="🙏" title={t('listen.notFoundTitle')} body={t('listen.notFoundBody')} />
       </Shell>
     );
   }
@@ -209,14 +211,14 @@ export function PublicListenerPage() {
       {!live ? (
         <CenterCard
           emoji="⛪"
-          title="No live service right now"
-          body="When the service starts, this page will update by itself — keep it open."
+          title={t('listen.noServiceTitle')}
+          body={t('listen.noServiceBody')}
         />
       ) : state === 'ended' ? (
         <CenterCard
           emoji="🕊️"
-          title="The live service has ended."
-          body="Thank you for joining. God bless you!"
+          title={t('listen.endedTitle')}
+          body={t('listen.endedBody')}
         />
       ) : !listeningView ? (
         /* ── language chooser ── */
@@ -224,7 +226,7 @@ export function PublicListenerPage() {
           <div className="text-center">
             <LivePill status={live.status} />
             <h2 className="mt-3 text-xl font-bold text-slate-900">{live.title}</h2>
-            <p className="mt-1 text-sm text-slate-500">Choose your language</p>
+            <p className="mt-1 text-sm text-slate-500">{t('listen.chooseLanguage')}</p>
           </div>
           <div className="space-y-2">
             {live.languages.map((lang) => {
@@ -252,13 +254,13 @@ export function PublicListenerPage() {
                       )}
                     </span>
                   </span>
-                  {isSaved && <span className="text-xs font-medium text-indigo-600">Your language</span>}
+                  {isSaved && <span className="text-xs font-medium text-indigo-600">{t('listen.yourLanguage')}</span>}
                 </button>
               );
             })}
           </div>
           <p className="text-center text-xs text-slate-400">
-            Use your own earphones — AirPods, wired, anything works.
+            {t('listen.earphonesHint')}
           </p>
         </div>
       ) : (
@@ -280,28 +282,28 @@ export function PublicListenerPage() {
               'flex h-40 w-40 flex-col items-center justify-center gap-2 rounded-full text-white shadow-lg transition-transform active:scale-95',
               state === 'paused-by-user' ? 'bg-indigo-600' : 'bg-rose-600'
             )}
-            aria-label={state === 'paused-by-user' ? 'Listen' : 'Pause'}
+            aria-label={state === 'paused-by-user' ? t('listen.listenAria') : t('listen.pauseAria')}
           >
             {state === 'paused-by-user' ? (
               <>
                 <Headphones className="h-12 w-12" />
-                <span className="text-sm font-semibold">LISTEN</span>
+                <span className="text-sm font-semibold">{t('listen.listen')}</span>
               </>
             ) : (
               <>
                 <Pause className="h-12 w-12" />
-                <span className="text-sm font-semibold">PAUSE</span>
+                <span className="text-sm font-semibold">{t('listen.pause')}</span>
               </>
             )}
           </button>
 
           <p className="min-h-5 text-sm text-slate-500" role="status">
-            {state === 'connecting' && 'Connecting…'}
-            {state === 'reconnecting' && 'Reconnecting…'}
-            {state === 'waiting' && 'The service will start soon — stay on this page.'}
-            {state === 'paused-by-user' && 'Paused'}
+            {state === 'connecting' && t('listen.connecting')}
+            {state === 'reconnecting' && t('listen.reconnecting')}
+            {state === 'waiting' && t('listen.waiting')}
+            {state === 'paused-by-user' && t('listen.paused')}
             {state === 'listening' &&
-              (notice ?? (serverPaused ? 'Worship in progress — translation resumes shortly.' : 'Pastor is speaking…'))}
+              (notice ?? (serverPaused ? t('listen.worshipPaused') : t('listen.speaking')))}
           </p>
 
           {/* captions */}
@@ -315,12 +317,12 @@ export function PublicListenerPage() {
               )}
               aria-pressed={captionsOn}
             >
-              <Captions className="h-4 w-4" /> {captionsOn ? 'Hide captions' : 'Show captions'}
+              <Captions className="h-4 w-4" /> {captionsOn ? t('listen.hideCaptions') : t('listen.showCaptions')}
             </button>
             {captionsOn && (
               <div className="mt-3 min-h-24 rounded-2xl bg-slate-900 p-4 text-center text-base leading-relaxed text-white">
                 {captions.length === 0 ? (
-                  <span className="text-slate-400">Captions appear as Pastor speaks…</span>
+                  <span className="text-slate-400">{t('listen.captionsPlaceholder')}</span>
                 ) : (
                   captions.map((line, i) => (
                     <p key={i} className={cn(i === captions.length - 1 ? 'opacity-100' : 'opacity-50')}>
@@ -333,7 +335,7 @@ export function PublicListenerPage() {
           </div>
 
           <div className="flex items-center gap-4 text-xs text-slate-400">
-            {listenerCount !== null && <span>{listenerCount} listening in your language</span>}
+            {listenerCount !== null && <span>{t('listen.listenersCount', { count: listenerCount })}</span>}
             <button
               type="button"
               className="flex items-center gap-1 text-indigo-600"
@@ -342,7 +344,7 @@ export function PublicListenerPage() {
                 setState('idle');
               }}
             >
-              <ChevronLeft className="h-3.5 w-3.5" /> Change language
+              <ChevronLeft className="h-3.5 w-3.5" /> {t('listen.changeLanguage')}
             </button>
           </div>
         </div>
@@ -352,12 +354,15 @@ export function PublicListenerPage() {
 }
 
 function Shell({ children, churchName }: { children: React.ReactNode; churchName?: string }) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-4 py-3">
-        <div className="mx-auto flex max-w-md items-center justify-between">
-          <span className="text-sm font-semibold text-slate-900">{churchName ?? 'Live Translation'}</span>
-          <span className="text-xs text-slate-400">Live Translation</span>
+        <div className="mx-auto flex max-w-md items-center justify-between gap-2">
+          <span className="truncate text-sm font-semibold text-slate-900">
+            {churchName ?? t('listen.header')}
+          </span>
+          <LanguageSwitcher />
         </div>
       </header>
       <main className="mx-auto max-w-md px-4 py-6">{children}</main>
@@ -366,17 +371,18 @@ function Shell({ children, churchName }: { children: React.ReactNode; churchName
 }
 
 function LivePill({ status }: { status: 'LIVE' | 'READY' }) {
+  const { t } = useTranslation();
   return status === 'LIVE' ? (
     <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
       <span className="relative flex h-2 w-2">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-600" />
       </span>
-      LIVE NOW
+      {t('listen.liveNow')}
     </span>
   ) : (
     <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-      Starting soon
+      {t('listen.startingSoon')}
     </span>
   );
 }
