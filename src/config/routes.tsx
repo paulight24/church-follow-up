@@ -21,6 +21,8 @@ const PublicEventRegistrationPage = lazy(() =>
 const LandingPage = lazy(() => import('@/features/public/pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const RegisterChurchPage = lazy(() => import('@/features/public/pages/RegisterChurchPage').then(m => ({ default: m.RegisterChurchPage })));
 const ContactPage = lazy(() => import('@/features/public/pages/ContactPage').then(m => ({ default: m.ContactPage })));
+const PrivacyPage = lazy(() => import('@/features/public/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('@/features/public/pages/TermsPage').then(m => ({ default: m.TermsPage })));
 
 // Dashboard
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -149,6 +151,8 @@ export function AppRoutes() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
         <Route path="/contacts" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/accept-invite" element={<AcceptInvitePage />} />
         <Route path="/prayer" element={<PublicPrayerRequestPage />} />

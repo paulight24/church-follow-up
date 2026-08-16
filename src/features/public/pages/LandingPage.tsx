@@ -357,6 +357,15 @@ export function LandingPage() {
             <Link to="/contacts" className="text-sm font-medium text-slate-600 hover:text-slate-900">
               {t('landing.footer.contact')}
             </Link>
+            {/* Untranslated on purpose: these are the URLs carriers and
+                reviewers check, and they must resolve identically in every
+                locale. */}
+            <Link to="/privacy" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Privacy
+            </Link>
+            <Link to="/terms" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Terms
+            </Link>
             <p className="text-sm text-slate-500">
               {t('landing.footer.copyright', { year: new Date().getFullYear() })}
             </p>
