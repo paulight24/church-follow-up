@@ -255,7 +255,8 @@ export const guideGroups: GuideGroup[] = [
         steps: [
           'BEFORE THE SERVICE (do this once, the night before if you can) — open Live Translation and pick your Audio source. The best source is a clean feed of the Pastor\'s microphone from your mixer or OBS; the laptop microphone works but picks up the whole room and translates worse. Watch the Input level bar move while someone talks — if it never moves, the wrong device is selected.',
           'Press Test translation, choose one language, and speak for a few seconds. You should hear the interpretation on the laptop. This is the single check that proves the whole chain works. It stops itself after 45 seconds.',
-          'Set the service name, confirm Pastor speaks (the language being preached in), and tick the languages you want to offer today.',
+          'Set the service name, confirm Pastor speaks (the language being preached in), and tick the languages you want to offer today. The list of languages your church offers, the interpreter voice, and how long a service runs before stopping are all under Live Translation > Settings.',
+          'ONCE, WHEN YOU SET UP — under Settings, add your Church vocabulary: ministry names, your pastor\'s name, publications, and words like Rhema or Zoe. This is the single biggest thing you can do to improve accuracy, because these are exactly the words a translator guesses wrong.',
           'Set Stop automatically after — 2 hours is the default. This is a safety net so a forgotten session cannot keep running (and keep costing) all week. You can extend it live at any time.',
           'Put the QR on the screen — press Full screen on the "Listen to Live Translation" card and leave it on the projector before service and during announcements. It reads "Hear today\'s service in your language."',
           'WHEN THE PASTOR STARTS — press START LIVE TRANSLATION and confirm. The header turns red and shows LIVE with the time remaining.',
@@ -291,7 +292,7 @@ export const guideGroups: GuideGroup[] = [
           },
           {
             q: 'Can we keep a transcript of the message?',
-            a: 'Yes — it is on by default. The transcript of what was preached is saved with the session and can be opened afterwards by anyone with permission to view transcripts. This is also the groundwork for automatic sermon notes later.',
+            a: 'Yes — it is on by default. Open Live Translation > Past services, pick the service, and the transcript of what was preached is there to read or copy. You can switch saving off under Live Translation > Settings. This is also the groundwork for automatic sermon notes later.',
           },
           {
             q: 'Someone joined late — do they hear the beginning?',
@@ -324,6 +325,7 @@ export const guideGroups: GuideGroup[] = [
             fix: 'The server is running in demo/mock mode. Tell the technical unit to set LIVE_TRANSLATION_PROVIDER=gemini and GEMINI_API_KEY on the server and restart.',
           },
         ],
+        relatedPaths: ['/live-translation/history', '/live-translation/settings'],
         relatedPages: [{ label: 'Events', path: '/events' }],
         keywords: [
           'translation', 'translate', 'interpreter', 'interpretation', 'language', 'languages',
