@@ -71,7 +71,11 @@ export function FollowUpCyclesPage() {
   const cycles = data?.data ?? [];
 
   const { data: selectedCycle, isLoading: isLoadingDetail } = useQuery({
-    queryKey: ['follow-up-cycle', selectedCycleId],
+    // Plural, so the existing invalidateQueries(['follow-up-cycles']) after
+    // activate/close reaches this detail too. As ['follow-up-cycle', id] it
+    // shared no prefix with the list key, so the open panel kept showing the
+    // pre-activation status until a manual refresh.
+    queryKey: ['follow-up-cycles', selectedCycleId],
     queryFn: () => followUpCyclesApi.getCycle(selectedCycleId!).then((r) => r.data),
     enabled: !!selectedCycleId,
   });

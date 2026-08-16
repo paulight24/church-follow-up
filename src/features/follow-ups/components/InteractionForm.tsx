@@ -75,7 +75,7 @@ export function InteractionForm({ taskId, onSuccess, onCancel, presetOutcome }: 
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['follow-up-tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['follow-up-task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['follow-up-tasks', taskId] });
       queryClient.invalidateQueries({ queryKey: ['follow-up-task-interactions', taskId] });
       onSuccess();
     },
