@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpen, Copy, Eye, EyeOff, Languages, RefreshCw, Sparkles } from 'lucide-react';
+import { AlertTriangle, BookOpen, Copy, Eye, EyeOff, Languages, RefreshCw, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
@@ -208,6 +208,21 @@ export function SermonNotesCard({ sessionId, hasTranscript }: { sessionId: strin
                 should never see a language chooser with one option in it. */}
             {translations.length > 0 && (
               <LanguageTabs viewing={viewing} onChange={setViewing} translations={translations} />
+            )}
+
+            {/* The same failure that once put demo translations on a live
+                phone can put demo notes in front of members — and these
+                read as real, because they are built from the real
+                transcript. Say so before anyone publishes them. */}
+            {notes.provider === 'mock' && (
+              <p className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>
+                  Written by the demo provider, not by AI — key points are pulled straight from the
+                  transcript. Add <code className="font-mono">GEMINI_API_KEY</code> on the server and
+                  regenerate before publishing these.
+                </span>
+              </p>
             )}
 
             {isPublished && (
