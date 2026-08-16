@@ -20,6 +20,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { cn } from '@/lib/cn';
 import { liveTranslationApi, type SessionListItem } from '../api/liveTranslation.api';
 import { displayName } from '../lib/languages';
+import { SermonNotesCard } from '../components/SermonNotesCard';
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -251,6 +252,10 @@ export function LiveTranslationHistoryPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Notes above the raw transcript: the notes are what most
+                  people came for; the transcript is the source they check. */}
+              <SermonNotesCard sessionId={selected.id} hasTranscript={transcript.length > 0} />
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">

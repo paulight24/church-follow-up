@@ -93,6 +93,20 @@ export interface TranscriptSegment {
   createdAt: string;
 }
 
+export interface SermonNotes {
+  title: string;
+  summary: string;
+  keyPoints: string[];
+  scriptures: string[];
+  declarations: string[];
+  prayerPoints: string[];
+  actionPoints: string[];
+  provider: string;
+  model: string | null;
+  segmentCount: number;
+  generatedAt: string;
+}
+
 export interface UsageReport {
   from: string;
   to: string;
@@ -167,6 +181,12 @@ export const liveTranslationApi = {
   },
   getTranscript(id: string): Promise<AxiosResponse<TranscriptSegment[]>> {
     return api.get(`/live-translation/sessions/${id}/transcript`);
+  },
+  getSermonNotes(id: string): Promise<AxiosResponse<SermonNotes | null>> {
+    return api.get(`/live-translation/sessions/${id}/notes`);
+  },
+  generateSermonNotes(id: string, regenerate = false): Promise<AxiosResponse<SermonNotes>> {
+    return api.post(`/live-translation/sessions/${id}/notes`, { regenerate });
   },
   getUsage(params?: { from?: string; to?: string }): Promise<AxiosResponse<UsageReport>> {
     return api.get('/live-translation/usage', { params });
