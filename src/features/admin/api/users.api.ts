@@ -73,6 +73,8 @@ export interface CreateUserRequest {
 }
 
 export interface UpdateUserRequest {
+  /** Accepted only while the account is still INVITED. */
+  email?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
@@ -92,6 +94,14 @@ export interface GrantPermissionOverrideRequest {
   effect: 'ALLOW' | 'DENY';
   scopeType?: 'GLOBAL' | 'TEAM' | 'DEPARTMENT';
   scopeId?: string;
+}
+
+/** An invite can be recorded without being delivered — see deliveryWarning. */
+export interface InviteResult {
+  userId: string;
+  email: string;
+  /** Null when the email genuinely went out. */
+  deliveryWarning: string | null;
 }
 
 export const usersApi = {
@@ -116,7 +126,7 @@ export const usersApi = {
   },
 
   /** POST /users/:id/resend-invite - gated server-side on users.create. Only meaningful for status === 'INVITED'. */
-  resendInvite(id: string): Promise<AxiosResponse<AdminUserListItem>> {
+  resendInvite(id: string): Promise<AxiosResponse<InviteResult>> {
     return api.post(`/users/${id}/resend-invite`);
   },
 
