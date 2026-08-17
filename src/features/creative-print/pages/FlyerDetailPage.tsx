@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -49,6 +49,10 @@ export function FlyerDetailPage() {
   const [instruction, setInstruction] = useState('');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [generationId, setGenerationId] = useState<string | null>(null);
+  // Read inside the refetchInterval callback, which closes over the value
+  // at query-creation time and would otherwise never see an update.
+  const generationIdRef = useRef<string | null>(null);
+  generationIdRef.current = generationId;
   const [document, setDocument] = useState<PrintDocument | null>(null);
 
   const {
@@ -59,9 +63,12 @@ export function FlyerDetailPage() {
     queryKey: ['flyer', id],
     queryFn: () => creativeApi.getFlyer(id!).then((res) => res.data),
     enabled: !!id,
-    // While work is in flight the page polls, which is how a 202 endpoint
-    // is meant to be consumed.
-    refetchInterval: (query) => (query.state.data?.status === 'GENERATING' ? 2000 : false),
+    // Poll while EITHER the server says it is generating or we are tracking
+    // a generation we started. Keying off the flyer's own status alone was
+    // a bug: the first fetch could land before the generate call, leaving
+    // the query permanently idle while the work completed server-side.
+    refetchInterval: (query) =>
+      query.state.data?.status === 'GENERATING' || generationIdRef.current ? 2000 : false,
   });
 
   // Surface why a generation failed, rather than leaving the flyer to
@@ -77,8 +84,12 @@ export function FlyerDetailPage() {
           variant: 'error',
         });
         setGenerationId(null);
+        invalidate();
       } else if (generation.status === 'SUCCEEDED') {
         setGenerationId(null);
+        // Without this the page keeps showing "Designing your flyer…" over
+        // artwork that already exists.
+        invalidate();
       }
       return generation;
     },
@@ -153,10 +164,17 @@ export function FlyerDetailPage() {
   });
 
   // Arriving straight from the create form: start generating immediately.
-  if (searchParams.get('generate') === '1' && flyer?.status === 'DRAFT' && !generateMutation.isPending) {
+  // In an effect, not during render — and guarded, because StrictMode runs
+  // effects twice and a double-fire here would spend twice.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (autoStarted.current) return;
+    if (searchParams.get('generate') !== '1') return;
+    if (flyer?.status !== 'DRAFT') return;
+    autoStarted.current = true;
     setSearchParams({}, { replace: true });
     generateMutation.mutate();
-  }
+  }, [flyer?.status, searchParams, setSearchParams, generateMutation]);
 
   if (isLoading) {
     return (
