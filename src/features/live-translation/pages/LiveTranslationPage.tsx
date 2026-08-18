@@ -11,9 +11,12 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import {
   Activity,
   AlertTriangle,
+  ArrowRight,
+  BookOpen,
   Clock,
   Headphones,
   Languages as LanguagesIcon,
@@ -507,6 +510,18 @@ export function LiveTranslationPage() {
                   .join(' · ')}
               </p>
             )}
+
+            {/* The next thing a church actually wants after the service is
+                the notes. Without this the operator has to know to go to
+                Past services and find the service again by its timestamp. */}
+            <Link
+              to={`/live-translation/history?session=${summary.id}`}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100"
+            >
+              <BookOpen className="h-4 w-4" />
+              Write the sermon notes for this service
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </CardContent>
         </Card>
       )}

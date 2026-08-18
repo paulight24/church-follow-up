@@ -105,6 +105,35 @@ export interface SermonNotes {
   model: string | null;
   segmentCount: number;
   generatedAt: string;
+  /** Set once the church published these to the congregation link. */
+  publishedAt: string | null;
+}
+
+/** One locale's rendering of a set of notes. Same shape as the source so
+ *  the display component does not care which it is handed. */
+export interface SermonNoteTranslation {
+  locale: string;
+  title: string;
+  summary: string;
+  keyPoints: string[];
+  scriptures: string[];
+  declarations: string[];
+  prayerPoints: string[];
+  actionPoints: string[];
+  translatedAt: string;
+}
+
+export interface TranslateNotesResult {
+  translated: string[];
+  skipped: string[];
+  failed?: { locale: string; reason: string }[];
+}
+
+export interface PublicSermonNotes {
+  serviceTitle: string;
+  /** Locales this set was translated into; 'source' is the preached one. */
+  availableLocales: string[];
+  notes: Omit<SermonNoteTranslation, 'translatedAt'> & { locale: string };
 }
 
 export interface UsageReport {
@@ -127,6 +156,9 @@ export interface CreateSessionRequest {
 
 export interface PublicLiveInfo {
   churchName: string;
+  /** Set when a past service has published notes — the same link shows them
+   *  once the live audio is over. */
+  notesCode: string | null;
   live: {
     publicCode: string;
     title: string;
@@ -188,6 +220,15 @@ export const liveTranslationApi = {
   generateSermonNotes(id: string, regenerate = false): Promise<AxiosResponse<SermonNotes>> {
     return api.post(`/live-translation/sessions/${id}/notes`, { regenerate });
   },
+  getSermonNoteTranslations(id: string): Promise<AxiosResponse<SermonNoteTranslation[]>> {
+    return api.get(`/live-translation/sessions/${id}/notes/translations`);
+  },
+  translateSermonNotes(id: string, regenerate = false): Promise<AxiosResponse<TranslateNotesResult>> {
+    return api.post(`/live-translation/sessions/${id}/notes/translate`, { regenerate });
+  },
+  publishSermonNotes(id: string, published: boolean): Promise<AxiosResponse<{ published: boolean; publishedAt: string | null }>> {
+    return api.post(`/live-translation/sessions/${id}/notes/publish`, { published });
+  },
   getUsage(params?: { from?: string; to?: string }): Promise<AxiosResponse<UsageReport>> {
     return api.get('/live-translation/usage', { params });
   },
@@ -204,6 +245,17 @@ const publicClient = axios.create({ baseURL: import.meta.env.VITE_API_URL });
 export async function getPublicLiveInfo(slug: string): Promise<PublicLiveInfo> {
   const { data } = await publicClient.get<{ success: true; data: PublicLiveInfo }>(
     `/public/live/${encodeURIComponent(slug)}`
+  );
+  return data.data;
+}
+
+/** Notes for the congregation, addressed by the same opaque code as the
+ *  listener page. Resolves to null when the church has not published them —
+ *  the phone shows nothing rather than an error. */
+export async function getPublicSermonNotes(code: string, lang?: string): Promise<PublicSermonNotes | null> {
+  const { data } = await publicClient.get<{ success: true; data: PublicSermonNotes | null }>(
+    `/public/live/notes/${encodeURIComponent(code)}`,
+    { params: lang ? { lang } : undefined }
   );
   return data.data;
 }

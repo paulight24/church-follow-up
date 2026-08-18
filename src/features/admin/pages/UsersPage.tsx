@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, ShieldOff, Settings2, X, RefreshCw, Users} from 'lucide-react';
+import { UserPlus, ShieldOff, Settings2, X, RefreshCw, Mail, Users} from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -26,6 +26,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/Table';
+import { CorrectInviteEmailModal } from '../components/CorrectInviteEmailModal';
 import { usersApi } from '../api/users.api';
 import type { AdminUserListItem } from '../api/users.api';
 import { rolesApi } from '../api/roles.api';
@@ -86,12 +87,21 @@ export function UsersPage() {
   const [manageRolesUserId, setManageRolesUserId] = useState<string | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<AdminUserListItem | null>(null);
   const [resendingUserId, setResendingUserId] = useState<string | null>(null);
+  const [correctEmailUser, setCorrectEmailUser] = useState<AdminUserListItem | null>(null);
 
   const resendInviteMutation = useMutation({
     mutationFn: (id: string) => usersApi.resendInvite(id),
     onMutate: (id) => setResendingUserId(id),
-    onSuccess: () => {
-      toast({ title: 'Invite resent', variant: 'success' });
+    onSuccess: (res) => {
+      // The server tells us whether the email actually left the building.
+      // Reporting "resent" regardless is what let an admin promise someone an
+      // invite three times that was never delivered.
+      const warning = res.data.deliveryWarning;
+      toast(
+        warning
+          ? { title: 'Invite recorded, but not delivered', description: warning, variant: 'error' }
+          : { title: `Invite resent to ${res.data.email}`, variant: 'success' }
+      );
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
     onError: (err: unknown) => {
@@ -249,15 +259,28 @@ export function UsersPage() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         {canCreateUsers && u.status === 'INVITED' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
-                            isLoading={resendingUserId === u.id}
-                            onClick={() => resendInviteMutation.mutate(u.id)}
-                          >
-                            Resend
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
+                              isLoading={resendingUserId === u.id}
+                              onClick={() => resendInviteMutation.mutate(u.id)}
+                            >
+                              Resend
+                            </Button>
+                            {/* Wrong address = every resend goes nowhere, and
+                                until this existed there was no way to fix it. */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              leftIcon={<Mail className="h-3.5 w-3.5" />}
+                              onClick={() => setCorrectEmailUser(u)}
+                              title="Correct the email this invite is sent to"
+                            >
+                              Fix email
+                            </Button>
+                          </>
                         )}
                         {canManageRoles && (
                           <Button
@@ -308,6 +331,10 @@ export function UsersPage() {
 
       {manageRolesUserId && (
         <ManageRolesModal userId={manageRolesUserId} onClose={() => setManageRolesUserId(null)} roles={rolesQuery.data ?? []} />
+      )}
+
+      {correctEmailUser && (
+        <CorrectInviteEmailModal user={correctEmailUser} onClose={() => setCorrectEmailUser(null)} />
       )}
 
       <ConfirmDialog

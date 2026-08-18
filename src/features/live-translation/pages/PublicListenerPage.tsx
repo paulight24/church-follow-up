@@ -17,6 +17,7 @@ import { useSeo } from '@/lib/seo';
 import { LanguageSwitcher, useTranslation } from '@/i18n';
 import { Spinner } from '@/components/ui/Spinner';
 import { getPublicLiveInfo } from '../api/liveTranslation.api';
+import { PublicSermonNotesCard } from '../components/PublicSermonNotesCard';
 import { PcmPlayer } from '../lib/pcmPlayer';
 import { wsBaseUrl } from '../lib/wsUrl';
 
@@ -33,7 +34,7 @@ type ListenState =
 
 export function PublicListenerPage() {
   const { slug = '' } = useParams();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   // A live link for the people in the room, not a search result — and it
   // should never outlive the service in an index.
@@ -206,20 +207,37 @@ export function PublicListenerPage() {
 
   const listeningView = effectiveLanguage && state !== 'idle' && state !== 'ended';
 
+  // Read the notes in the language you listened in; failing that, the one the
+  // page itself is in. Someone who chose Spanish audio wants Spanish notes.
+  const notesLocale = language ?? locale;
+
   return (
     <Shell churchName={info.churchName}>
       {!live ? (
-        <CenterCard
-          emoji="⛪"
-          title={t('listen.noServiceTitle')}
-          body={t('listen.noServiceBody')}
-        />
+        <div className="space-y-5">
+          <CenterCard
+            emoji="⛪"
+            title={t('listen.noServiceTitle')}
+            body={t('listen.noServiceBody')}
+          />
+          {/* The same printed QR code that carried the live audio leads here
+              afterwards, so notes from the last service are what a member
+              finds when they come back to the link during the week. */}
+          {info.notesCode && (
+            <PublicSermonNotesCard code={info.notesCode} preferredLocale={notesLocale} />
+          )}
+        </div>
       ) : state === 'ended' ? (
-        <CenterCard
-          emoji="🕊️"
-          title={t('listen.endedTitle')}
-          body={t('listen.endedBody')}
-        />
+        <div className="space-y-5">
+          <CenterCard
+            emoji="🕊️"
+            title={t('listen.endedTitle')}
+            body={t('listen.endedBody')}
+          />
+          {info.notesCode && (
+            <PublicSermonNotesCard code={info.notesCode} preferredLocale={notesLocale} />
+          )}
+        </div>
       ) : !listeningView ? (
         /* ── language chooser ── */
         <div className="space-y-4">

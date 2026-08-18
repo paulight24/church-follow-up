@@ -43,6 +43,15 @@ const es: Translations = {
   'listen.notFoundBody': 'Verifica el enlace con el equipo de medios de tu iglesia.',
   'listen.header': 'Traducción en vivo',
 
+  // Sermon notes shown to members on the public listener page.
+  'notes.heading': 'Apuntes de este mensaje',
+  'notes.keyPoints': 'Puntos principales',
+  'notes.scriptures': 'Pasajes bíblicos',
+  'notes.declarations': 'Declaraciones',
+  'notes.prayerPoints': 'Peticiones de oración',
+  'notes.actionPoints': 'Pasos a seguir',
+  'notes.disclaimer': 'Escritos automáticamente a partir del mensaje. Léelos junto con tus propios apuntes.',
+
   'event.register': 'Registrarme',
   'event.notFoundTitle': 'No encontramos ese evento',
   'event.notFoundBody':

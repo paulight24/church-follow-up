@@ -264,6 +264,8 @@ export const guideGroups: GuideGroup[] = [
           'WATCH TWO THINGS ONLY — the Input level moves when the Pastor speaks, and the Health card reads Audio: Excellent / Translation: Connected. Everything else is detail.',
           'IF TIME RUNS SHORT — a banner appears about 15 minutes before the automatic stop. Press +30 min or +60 min.',
           'AT THE END — press END TRANSLATION, then End Service. Every listener sees "The live service has ended." and all translation stops immediately. You then get a summary: duration, languages, peak listeners and translation minutes used.',
+          'AFTER THE SERVICE — on that summary, press "Write the sermon notes for this service". This reads the transcript and writes the title, summary, key points, scriptures, declarations, prayer points and action points. Read them over: they are written automatically, and the pastor\'s name for them is not always the one you would choose.',
+          'THEN, IF YOU WANT MEMBERS TO HAVE THEM — press Translate (this renders the notes into the languages that were actually listened to today, nothing else) and then Publish to members. Until you press Publish, nobody outside the church office can see them. Members get them by opening the same link they used to listen: no new QR code, no email needed. Press Unpublish at any time to take them down.',
         ],
         tip: 'A language only starts costing anything when the first person actually listens to it, and it shuts down again a few minutes after the last person leaves. So it is safe to offer Spanish, Chinese and French every week even if only one of them gets used — you are not charged for empty languages. Fifty people listening in Spanish is still only one translation running, not fifty.',
         whoCanDoThis: [ROLE_SUPER_ADMIN, ROLE_PASTOR, ROLE_ADMIN, ROLE_COMMS_MANAGER],
@@ -292,7 +294,15 @@ export const guideGroups: GuideGroup[] = [
           },
           {
             q: 'Can we keep a transcript of the message?',
-            a: 'Yes — it is on by default. Open Live Translation > Past services, pick the service, and the transcript of what was preached is there to read or copy. You can switch saving off under Live Translation > Settings. This is also the groundwork for automatic sermon notes later.',
+            a: 'Yes — it is on by default. Open Live Translation > Past services, pick the service, and the transcript of what was preached is there to read or copy. You can switch saving off under Live Translation > Settings. The same page turns that transcript into sermon notes you can publish to members.',
+          },
+          {
+            q: 'Can members get the sermon notes in their own language?',
+            a: 'Yes. After the service, generate the notes, press Translate, then Publish to members. Anyone who opens the same service link — the one from the QR code — reads them in the language they listened in. They stay private until you press Publish.',
+          },
+          {
+            q: 'We regenerated the notes. What happens to the translations?',
+            a: 'They are removed, because they described the old wording. Press Translate again to redo them from the new notes. If the notes were published, republish after you have read the new version.',
           },
           {
             q: 'Someone joined late — do they hear the beginning?',
@@ -303,6 +313,10 @@ export const guideGroups: GuideGroup[] = [
           {
             symptom: 'The Input level bar never moves.',
             fix: 'The wrong audio device is selected, or the browser blocked the microphone. Pick a different Audio source from the dropdown; if the page says microphone access was blocked, click the padlock in the browser address bar, allow the microphone, and reload the page.',
+          },
+          {
+            symptom: 'The sermon notes carry an amber "demo provider" warning.',
+            fix: 'The server has no GEMINI_API_KEY, so the notes were assembled from the transcript rather than written by AI. They are not wrong, but they are not proper notes either. Ask the technical unit to set the key, then press Regenerate before publishing anything to members.',
           },
           {
             symptom: 'A language shows "Unavailable" but the others are fine.',

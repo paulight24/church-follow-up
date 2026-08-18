@@ -45,6 +45,15 @@ const en = {
   'listen.notFoundBody': "Check the link with your church's media team.",
   'listen.header': 'Live Translation',
 
+  // Sermon notes shown to members on the public listener page.
+  'notes.heading': 'Notes from this message',
+  'notes.keyPoints': 'Key points',
+  'notes.scriptures': 'Scriptures',
+  'notes.declarations': 'Declarations',
+  'notes.prayerPoints': 'Prayer points',
+  'notes.actionPoints': 'Action points',
+  'notes.disclaimer': 'Written automatically from the message. Read them alongside your own notes.',
+
   // ── public event registration ──
   'event.register': 'Register',
   'event.notFoundTitle': 'We can’t find that event',

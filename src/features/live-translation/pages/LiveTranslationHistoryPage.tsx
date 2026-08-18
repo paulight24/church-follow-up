@@ -7,7 +7,8 @@
  * also the groundwork the future Sermon Notes feature reads from, so it is
  * worth surfacing plainly rather than leaving as an API-only artefact.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Clock, Copy, FileText, Languages as LanguagesIcon, Radio, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -49,6 +50,10 @@ export function LiveTranslationHistoryPage() {
   const canViewTranscript = usePermission('live_translation.view_transcript');
   const canManage = usePermission('live_translation.manage');
   const [selected, setSelected] = useState<SessionListItem | null>(null);
+  // ?session=<id> so the operator console can hand off to the service that
+  // just ended, and so a chosen service survives a refresh or a shared link.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedId = searchParams.get('session');
 
   const sessionsQuery = useQuery({
     queryKey: ['live-translation', 'sessions'],
@@ -73,6 +78,20 @@ export function LiveTranslationHistoryPage() {
   });
 
   const sessions = sessionsQuery.data ?? [];
+
+  // Depends on the query data rather than the defaulted `sessions` array,
+  // which is a fresh reference on every render.
+  useEffect(() => {
+    if (!requestedId || selected?.id === requestedId) return;
+    const match = sessionsQuery.data?.find((s) => s.id === requestedId);
+    if (match) setSelected(match);
+  }, [requestedId, sessionsQuery.data, selected?.id]);
+
+  /** Selection and the URL move together, so a refresh lands in the same place. */
+  const selectSession = (session: SessionListItem) => {
+    setSelected(session);
+    setSearchParams({ session: session.id }, { replace: true });
+  };
   const usage = usageQuery.data;
   const transcript = transcriptQuery.data ?? [];
 
@@ -163,7 +182,7 @@ export function LiveTranslationHistoryPage() {
                       <li key={s.id}>
                         <button
                           type="button"
-                          onClick={() => setSelected(s)}
+                          onClick={() => selectSession(s)}
                           aria-current={isSelected ? 'true' : undefined}
                           className={cn(
                             'w-full px-4 py-3 text-left transition-colors',
