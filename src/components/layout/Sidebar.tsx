@@ -32,6 +32,9 @@ import {
   Users,
   UsersRound,
   Globe2,
+  Sparkles,
+  Printer,
+  Palette,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
@@ -190,6 +193,20 @@ const navSections: NavSection[] = [
     items: [
       { label: 'Reports', path: '/reports', icon: BarChart3, permission: 'reports.view' },
       { label: 'Audit Logs', path: '/admin/audit-logs', icon: FileText, permission: 'audit.view' },
+    ],
+  },
+  {
+    id: 'creative-print',
+    label: 'Creative & Print',
+    items: [
+      { label: 'Creative Studio', path: '/creative', icon: Sparkles, permission: 'creative.view' },
+      { label: 'Print Orders', path: '/creative/orders', icon: Printer, permission: 'print.view' },
+      {
+        label: 'Brand Kit',
+        path: '/creative/brand',
+        icon: Palette,
+        permission: 'creative.manage_brand',
+      },
     ],
   },
   {

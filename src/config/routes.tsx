@@ -115,6 +115,13 @@ const DepartmentsPage = lazy(() => import('@/features/admin/pages/DepartmentsPag
 const FellowshipGroupsPage = lazy(() => import('@/features/admin/pages/FellowshipGroupsPage').then(m => ({ default: m.FellowshipGroupsPage })));
 const ServiceSchedulesPage = lazy(() => import('@/features/admin/pages/ServiceSchedulesPage').then(m => ({ default: m.ServiceSchedulesPage })));
 
+// Creative & Print
+const CreativeStudioPage = lazy(() => import('@/features/creative-print/pages/CreativeStudioPage').then(m => ({ default: m.CreativeStudioPage })));
+const FlyerCreatePage = lazy(() => import('@/features/creative-print/pages/FlyerCreatePage').then(m => ({ default: m.FlyerCreatePage })));
+const FlyerDetailPage = lazy(() => import('@/features/creative-print/pages/FlyerDetailPage').then(m => ({ default: m.FlyerDetailPage })));
+const PrintOrderListPage = lazy(() => import('@/features/creative-print/pages/PrintOrderListPage').then(m => ({ default: m.PrintOrderListPage })));
+const PrintOrderDetailPage = lazy(() => import('@/features/creative-print/pages/PrintOrderDetailPage').then(m => ({ default: m.PrintOrderDetailPage })));
+
 function PageLoader() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
@@ -258,6 +265,22 @@ export function AppRoutes() {
             </Route>
             <Route element={<ProtectedRoute permission="attendance.view_reports" />}>
               <Route path="/services/reports" element={<AttendanceReportsPage />} />
+            </Route>
+
+            {/* Creative & Print. `/creative/new` is registered before
+                `/creative/:id` so "new" is never read as a flyer id. */}
+            <Route element={<ProtectedRoute permission="creative.create" />}>
+              <Route path="/creative/new" element={<FlyerCreatePage />} />
+            </Route>
+            {/* Orders are registered before /creative/:id so "orders" is
+                never parsed as a flyer id. */}
+            <Route element={<ProtectedRoute permission="print.view" />}>
+              <Route path="/creative/orders" element={<PrintOrderListPage />} />
+              <Route path="/creative/orders/:id" element={<PrintOrderDetailPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="creative.view" />}>
+              <Route path="/creative" element={<CreativeStudioPage />} />
+              <Route path="/creative/:id" element={<FlyerDetailPage />} />
             </Route>
 
             {/* Events */}

@@ -3,7 +3,15 @@ import type { ComponentProps } from 'react';
 
 type BadgeVariant = ComponentProps<typeof Badge>['variant'];
 
-type StatusType = 'followUp' | 'member' | 'escalation' | 'campaign' | 'announcement' | 'event';
+type StatusType =
+  | 'followUp'
+  | 'member'
+  | 'escalation'
+  | 'campaign'
+  | 'announcement'
+  | 'event'
+  | 'flyer'
+  | 'printOrder';
 
 const statusMaps: Record<StatusType, Record<string, BadgeVariant>> = {
   followUp: {
@@ -42,6 +50,31 @@ const statusMaps: Record<StatusType, Record<string, BadgeVariant>> = {
     PUBLISHED: 'success',
     CLOSED: 'warning',
     CANCELLED: 'danger',
+  },
+  flyer: {
+    DRAFT: 'gray',
+    GENERATING: 'info',
+    READY: 'purple',
+    APPROVED: 'success',
+    ARCHIVED: 'gray',
+  },
+  // All fourteen fulfilment states are mapped: an unmapped one renders an
+  // undefined variant, which is a blank badge rather than a visible bug.
+  printOrder: {
+    DRAFT: 'gray',
+    QUOTED: 'info',
+    AWAITING_PAYMENT: 'warning',
+    PAID: 'info',
+    SUBMITTING: 'info',
+    SUBMITTED: 'info',
+    ACCEPTED: 'info',
+    PRINTING: 'purple',
+    READY_FOR_PICKUP: 'success',
+    SHIPPED: 'success',
+    DELIVERED: 'success',
+    COMPLETED: 'success',
+    CANCELLED: 'gray',
+    FAILED: 'danger',
   },
 };
 
