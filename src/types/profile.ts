@@ -20,6 +20,13 @@ export interface MyProfile {
   roles?: Array<{ id: string; name: string; code: string }>;
   /** Null when the account has no linked member record yet (common for staff-only accounts). */
   member: Member | null;
+  /** The member's own active follow-up assignment; null when none (or no member record). */
+  followUp: {
+    since: string;
+    teamName: string;
+    primaryWorker: { name: string; avatarUrl: string | null };
+    backupWorker: { name: string; avatarUrl: string | null } | null;
+  } | null;
 }
 
 /**

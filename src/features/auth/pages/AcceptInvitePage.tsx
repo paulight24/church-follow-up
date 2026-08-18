@@ -84,8 +84,16 @@ export function AcceptInvitePage() {
         navigate('/', { replace: true });
       }, 1500);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: ApiError } })?.response?.data?.message;
-      setSubmitError(message ?? 'Something went wrong setting your password. Please try again.');
+      const body = (err as { response?: { data?: ApiError } })?.response?.data;
+      // The API's validation errors carry the real reason per field
+      // ("Password must contain at least one number") in `errors`; the
+      // top-level message is just "Validation failed". Surface the specific
+      // lines - this page is reached from an email link by someone with no
+      // account and nobody to ask, so a bare "Validation failed" is a wall.
+      const detail = body?.errors
+        ? Object.values(body.errors).flat().join(' ')
+        : undefined;
+      setSubmitError(detail || body?.message || 'Something went wrong setting your password. Please try again.');
     }
   });
 

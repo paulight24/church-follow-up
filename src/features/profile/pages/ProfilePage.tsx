@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Info, Lock, ShieldCheck, UserCircle2 } from 'lucide-react';
+import { Info, Lock, ShieldCheck, UserCircle2, HeartHandshake } from 'lucide-react';
 import type { AxiosError } from 'axios';
 import type { ApiError } from '@/types';
 import type { UpdateMyProfileRequest } from '@/types/profile';
@@ -115,6 +115,35 @@ export function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Who is walking with this member - shown only when an active
+          follow-up assignment exists, so staff accounts and unassigned
+          members simply never see the card. */}
+      {profile.followUp && (
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-2">
+            <HeartHandshake className="h-4 w-4 text-slate-400" />
+            <CardTitle className="text-base">Your follow-up contact</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center gap-3">
+            <Avatar
+              src={profile.followUp.primaryWorker.avatarUrl ?? undefined}
+              name={profile.followUp.primaryWorker.name}
+              size="lg"
+            />
+            <div>
+              <p className="font-semibold text-slate-900">{profile.followUp.primaryWorker.name}</p>
+              <p className="text-sm text-slate-500">
+                {profile.followUp.teamName}
+                {profile.followUp.backupWorker ? ` · with ${profile.followUp.backupWorker.name}` : ''}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Here to walk with you — they may reach out by phone, text, or email.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Member record */}
       {member === null ? (
