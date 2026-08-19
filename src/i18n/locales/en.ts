@@ -87,6 +87,15 @@ const en = {
   'field.weddingAnniversary': 'Wedding Anniversary',
   'field.prayerRequest': 'Tell us how we can pray for you',
   'field.optional': 'optional',
+  // Placeholders. Shown inside the input, so an untranslated one is as
+  // visibly wrong as an untranslated label - the prayer-request box was
+  // reported reading English under a Spanish label.
+  'field.placeholder.firstName': 'Grace',
+  'field.placeholder.lastName': 'Adeyemi',
+  'field.placeholder.email': 'grace@example.com',
+  'field.placeholder.phone': '+1 (555) 123-4567',
+  'field.placeholder.prayerRequest': 'Share anything you would like the team to pray with you about (optional)...',
+  'field.select.placeholder': 'Select...',
   // ── landing page (public marketing funnel) ──
   'landing.seoTitle': 'Church Member Care Software — Follow-Up, Attendance & Live Sermon Translation',
   'landing.seoDescription':

@@ -103,7 +103,7 @@ function fieldErrorLines(errors: Record<string, string[]> | undefined): string[]
 }
 
 export function PublicEventRegistrationPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   // Reached by QR/flier for one church's event — not a search result.
   useSeo({
@@ -125,8 +125,8 @@ export function PublicEventRegistrationPage() {
     isError,
     error: loadError,
   } = useQuery({
-    queryKey: ['public-event', slug],
-    queryFn: () => publicEventsApi.getEvent(slug!).then((res) => res.data),
+    queryKey: ['public-event', slug, locale],
+    queryFn: () => publicEventsApi.getEvent(slug!, locale).then((res) => res.data),
     enabled: !!slug,
     retry: false,
   });
@@ -216,10 +216,10 @@ export function PublicEventRegistrationPage() {
             (wasAlreadyRegistered ? t('event.alreadyNote') : '') +
             (event.location
               ? t('event.seeYouAt', {
-                  when: formatEventDay(event.eventDate, 'EEEE, MMMM d'),
+                  when: formatEventDay(event.eventDate, 'EEEE, MMMM d', locale, 'PPP'),
                   location: event.location,
                 })
-              : t('event.seeYou', { when: formatEventDay(event.eventDate, 'EEEE, MMMM d') }))
+              : t('event.seeYou', { when: formatEventDay(event.eventDate, 'EEEE, MMMM d', locale, 'PPP') }))
           }
         />
       </PageShell>
@@ -263,7 +263,7 @@ export function PublicEventRegistrationPage() {
         <h1 className="text-2xl font-bold text-slate-900">{event.name}</h1>
         <p className="mt-1.5 flex items-center justify-center gap-1.5 text-sm font-medium text-indigo-700">
           <CalendarClock className="h-3.5 w-3.5" />
-          {formatEventWhen(event.eventDate, event.startTime, event.endTime)}
+          {formatEventWhen(event.eventDate, event.startTime, event.endTime, undefined, locale)}
         </p>
         {event.location && (
           <p className="mt-1 flex items-center justify-center gap-1 text-sm text-slate-500">

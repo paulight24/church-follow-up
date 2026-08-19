@@ -47,8 +47,9 @@ publicClient.interceptors.response.use(
 );
 
 export const publicEventsApi = {
-  getEvent(slug: string): Promise<AxiosResponse<PublicEvent>> {
-    return publicClient.get(`/public/events/${slug}`).then((res) => {
+  /** `locale` asks the API to translate the event's own custom questions. */
+  getEvent(slug: string, locale?: string): Promise<AxiosResponse<PublicEvent>> {
+    return publicClient.get(`/public/events/${slug}`, { params: locale && locale !== 'en' ? { locale } : undefined }).then((res) => {
       res.data = (res.data as { success?: boolean; data?: PublicEvent })?.data ?? res.data;
       return res;
     });

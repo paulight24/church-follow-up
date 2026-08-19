@@ -84,6 +84,12 @@ const es: Translations = {
   'field.weddingAnniversary': 'Aniversario de bodas',
   'field.prayerRequest': 'Cuéntanos cómo podemos orar por ti',
   'field.optional': 'opcional',
+  'field.placeholder.firstName': 'María',
+  'field.placeholder.lastName': 'García',
+  'field.placeholder.email': 'maria@ejemplo.com',
+  'field.placeholder.phone': '+1 (555) 123-4567',
+  'field.placeholder.prayerRequest': 'Comparte cualquier cosa por la que quieras que el equipo ore contigo (opcional)...',
+  'field.select.placeholder': 'Selecciona...',
   // ── landing page (public marketing funnel) ──
   'landing.seoTitle': 'Software de cuidado de miembros para iglesias — Seguimiento, asistencia y traducción del mensaje en vivo',
   'landing.seoDescription':

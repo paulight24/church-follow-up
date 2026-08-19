@@ -9,6 +9,14 @@
 import type { Member } from './member';
 
 /** GET /profile/me response: the caller's account plus their linked member (if any). */
+/** The one worker assigned to this member — not a staff directory entry. */
+export interface FollowUpWorker {
+  name: string;
+  avatarUrl: string | null;
+  email: string | null;
+  phone: string | null;
+}
+
 export interface MyProfile {
   id: string;
   email: string;
@@ -24,8 +32,8 @@ export interface MyProfile {
   followUp: {
     since: string;
     teamName: string;
-    primaryWorker: { name: string; avatarUrl: string | null };
-    backupWorker: { name: string; avatarUrl: string | null } | null;
+    primaryWorker: FollowUpWorker;
+    backupWorker: FollowUpWorker | null;
   } | null;
 }
 

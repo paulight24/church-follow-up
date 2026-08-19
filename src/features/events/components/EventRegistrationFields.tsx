@@ -26,6 +26,21 @@ const FIELD_LABEL_KEYS: Record<string, TranslationKey> = {
   prayerRequest: 'field.prayerRequest',
 };
 
+/**
+ * Catalogue field -> placeholder translation key. A placeholder sits inside
+ * the input in the same eyeline as its label, so leaving it in English under
+ * a translated label is exactly as visible as an untranslated label - which
+ * is how the prayer-request box came to read English on a Spanish form.
+ * Fields with no entry (the two date inputs) render no placeholder at all.
+ */
+const FIELD_PLACEHOLDER_KEYS: Record<string, TranslationKey> = {
+  firstName: 'field.placeholder.firstName',
+  lastName: 'field.placeholder.lastName',
+  email: 'field.placeholder.email',
+  phone: 'field.placeholder.phone',
+  prayerRequest: 'field.placeholder.prayerRequest',
+};
+
 interface EventRegistrationFieldsProps {
   fields: EventFieldConfig;
   /** This event's own questions, rendered after the catalogue fields. */
@@ -69,6 +84,8 @@ export function EventRegistrationFields({
         const required = fields[def.key]?.required ?? false;
         const labelKey = FIELD_LABEL_KEYS[def.key];
         const label = `${labelKey ? t(labelKey) : def.label}${required ? ' *' : ''}`;
+        const placeholderKey = FIELD_PLACEHOLDER_KEYS[def.key];
+        const placeholder = placeholderKey ? t(placeholderKey) : def.placeholder;
         const error = errors[def.key]?.message as string | undefined;
 
         if (def.inputType === 'textarea') {
@@ -76,7 +93,7 @@ export function EventRegistrationFields({
             <Textarea
               key={def.key}
               label={label}
-              placeholder={def.placeholder}
+              placeholder={placeholder}
               rows={4}
               disabled={disabled}
               error={error}
@@ -90,7 +107,7 @@ export function EventRegistrationFields({
             key={def.key}
             label={label}
             type={def.inputType}
-            placeholder={def.placeholder}
+            placeholder={placeholder}
             disabled={disabled}
             error={error}
             {...register(def.key)}
@@ -126,8 +143,15 @@ export function EventRegistrationFields({
               disabled={disabled}
               error={error}
               options={[
-                { value: '', label: 'Select…' },
-                ...(field.options ?? []).map((option) => ({ value: option, label: option })),
+                { value: '', label: t('field.select.placeholder') },
+                // Value stays the authored option; only what the visitor
+                // reads is translated. Submitting the translated text would
+                // fail the event's own choice check and make the form
+                // unsubmittable in that language.
+                ...(field.options ?? []).map((option, index) => ({
+                  value: option,
+                  label: field.optionLabels?.[index] ?? option,
+                })),
               ]}
               {...register(name)}
             />

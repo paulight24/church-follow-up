@@ -79,6 +79,12 @@ const zh: Translations = {
   'field.weddingAnniversary': '结婚纪念日',
   'field.prayerRequest': '请告诉我们如何为您代祷',
   'field.optional': '选填',
+  'field.placeholder.firstName': '小明',
+  'field.placeholder.lastName': '陈',
+  'field.placeholder.email': 'ming@example.com',
+  'field.placeholder.phone': '+1 (555) 123-4567',
+  'field.placeholder.prayerRequest': '请分享任何您希望团队与您一同代祷的事情（选填）……',
+  'field.select.placeholder': '请选择……',
   // ── landing page (public marketing funnel) ──
   'landing.seoTitle': '教会成员关怀软件——跟进、出席与实时讲道翻译',
   'landing.seoDescription':

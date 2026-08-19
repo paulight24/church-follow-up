@@ -42,8 +42,12 @@ export interface EventCustomField {
   label: string;
   type: EventCustomFieldType;
   required: boolean;
-  /** `select` only. */
+  /** `select` only. Always the AUTHORED choices — these are the values the
+   *  form submits and the export prints, so they never vary by language. */
   options?: string[];
+  /** `select` only. Display text for `options`, same length and order, when
+   *  the page is served in a translated locale. Presentation only. */
+  optionLabels?: string[];
   helpText?: string;
 }
 
