@@ -53,6 +53,7 @@ export const PRINT_SIZE_LABELS: Record<PrintSize, string> = {
   HALF_PAGE: 'Half page',
   THIRD_PAGE: 'Third page',
   QUARTER_PAGE: 'Quarter page',
+  A4_2UP: 'A4 two-up (8¼″ × 5¼″)',
 };
 
 export const PRINT_SIZE_DESCRIPTIONS: Record<PrintSize, string> = {
@@ -60,6 +61,7 @@ export const PRINT_SIZE_DESCRIPTIONS: Record<PrintSize, string> = {
   HALF_PAGE: 'Two per sheet. The usual choice for handouts.',
   THIRD_PAGE: 'Three per sheet. Slim strips, good for pew cards.',
   QUARTER_PAGE: 'Four per sheet. Cheapest for large giveaways.',
+  A4_2UP: 'Two 8¼″ × 5¼″ pieces on an A4 sheet — matches the physical cutting template. Great for double-sided handouts.',
 };
 
 export const PAPER_LABELS: Record<PaperPreset, string> = {

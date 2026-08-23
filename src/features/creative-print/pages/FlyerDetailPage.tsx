@@ -3,9 +3,11 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CheckCircle2,
+  Upload,
   ChevronRight,
   Download,
   FileWarning,
+  Layers,
   QrCode,
   Sparkles,
   Wand2,
@@ -24,7 +26,11 @@ import type { FlyerVersion, PrintDocument } from '@/types/creativePrint';
 
 function errorMessage(err: unknown, fallback: string): string {
   return (
-    (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback
+    (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+    // Client-side guards reject with a plain Error and never reach the API;
+    // without this they would surface as the generic fallback.
+    (err instanceof Error ? err.message : undefined) ??
+    fallback
   );
 }
 
@@ -48,6 +54,9 @@ export function FlyerDetailPage() {
 
   const [instruction, setInstruction] = useState('');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  // '' = single-sided; otherwise the id of the APPROVED flyer whose approved
+  // version becomes the back of a two-sided print file.
+  const [backFlyerId, setBackFlyerId] = useState('');
   const [generationId, setGenerationId] = useState<string | null>(null);
   // Read inside the refetchInterval callback, which closes over the value
   // at query-creation time and would otherwise never see an update.
@@ -136,14 +145,61 @@ export function FlyerDetailPage() {
     onSuccess: invalidate,
   });
 
+  // Approved flyers make eligible back sides for a double-sided print —
+  // typically a translation of this one (e.g. Spanish on the back).
+  const { data: approvedFlyers } = useQuery({
+    queryKey: ['flyers', 'approved-backs'],
+    queryFn: () =>
+      creativeApi.getFlyers({ status: 'APPROVED', pageSize: 100 }).then((res) => res.data.data),
+  });
+  const backOptions = (approvedFlyers ?? []).filter(
+    (candidate) => candidate.id !== id && candidate.currentVersionId
+  );
+  const selectedBack = backOptions.find((candidate) => candidate.id === backFlyerId);
+
   const proofMutation = useMutation({
-    mutationFn: (versionId: string) =>
-      printApi.createDocument({ flyerVersionId: versionId, mode: 'OFFICE' }),
+    mutationFn: (versionId: string) => {
+      // A chosen back can vanish from the list — the approved-flyers query
+      // shares the ['flyers'] prefix that every invalidate() touches, so an
+      // unapprove elsewhere drops it. Refusing here is the point: building
+      // single-sided under a button that says "two-sided" would be silent.
+      if (backFlyerId && !selectedBack?.currentVersionId) {
+        return Promise.reject(
+          new Error(
+            'That back design is no longer approved. Pick another, or build the front on its own.'
+          )
+        );
+      }
+      return printApi.createDocument({
+        flyerVersionId: versionId,
+        backFlyerVersionId: selectedBack?.currentVersionId ?? undefined,
+        mode: 'OFFICE',
+      });
+    },
     onSuccess: (res) => setDocument(res.data),
     onError: (err) =>
       toast({
         title: 'Could not build the print file',
         description: errorMessage(err, 'Please try again.'),
+        variant: 'error',
+      }),
+  });
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => creativeApi.uploadDesign(id!, file),
+    onSuccess: () => {
+      toast({
+        title: 'Design uploaded',
+        description: 'Build the proof to check it, then approve.',
+        variant: 'success',
+      });
+      invalidate();
+    },
+    onError: (err) =>
+      toast({
+        title: 'Could not upload the design',
+        description: errorMessage(err, 'Use a PNG or JPEG under 30MB.'),
         variant: 'error',
       }),
   });
@@ -192,6 +248,18 @@ export function FlyerDetailPage() {
 
   return (
     <div className="space-y-6">
+      {/* One hidden input serves every upload button on the page. */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) uploadMutation.mutate(file);
+          e.target.value = '';
+        }}
+      />
       <nav className="flex items-center gap-1.5 text-sm text-slate-500">
         <Link to="/creative" className="hover:text-indigo-600">
           Creative Studio
@@ -235,28 +303,49 @@ export function FlyerDetailPage() {
                 Generate a few concepts and pick the one you like.
               </p>
             </div>
-            {canGenerate ? (
+            <div className="flex flex-wrap justify-center gap-3">
+              {canGenerate ? (
+                <Button
+                  leftIcon={<Sparkles className="h-4 w-4" />}
+                  isLoading={generateMutation.isPending}
+                  onClick={() => generateMutation.mutate()}
+                >
+                  Generate concepts
+                </Button>
+              ) : null}
               <Button
-                leftIcon={<Sparkles className="h-4 w-4" />}
-                isLoading={generateMutation.isPending}
-                onClick={() => generateMutation.mutate()}
+                variant="outline"
+                leftIcon={<Upload className="h-4 w-4" />}
+                isLoading={uploadMutation.isPending}
+                onClick={() => fileInputRef.current?.click()}
               >
-                Generate concepts
+                Upload your own design
               </Button>
-            ) : null}
+            </div>
           </CardContent>
         </Card>
       ) : null}
 
       {flyer.versions.length > 0 ? (
         <Card>
-          <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6">
             <h2 className="font-semibold text-slate-900">
               Designs
               <span className="ml-2 text-sm font-normal text-slate-500">
                 {flyer.versions.length} {flyer.versions.length === 1 ? 'version' : 'versions'}
               </span>
             </h2>
+            {!isApproved ? (
+              <Button
+                size="sm"
+                variant="outline"
+                leftIcon={<Upload className="h-4 w-4" />}
+                isLoading={uploadMutation.isPending}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Upload design
+              </Button>
+            ) : null}
           </div>
           <CardContent className="grid gap-3 py-4 sm:grid-cols-2 lg:grid-cols-3">
             {flyer.versions.map((version) => (
@@ -309,12 +398,18 @@ export function FlyerDetailPage() {
               produce — not a preview of it.
             </p>
 
+            <BackSidePicker
+              options={backOptions}
+              value={backFlyerId}
+              onChange={setBackFlyerId}
+            />
+
             <Button
               variant="outline"
               isLoading={proofMutation.isPending}
               onClick={() => proofMutation.mutate(current.id)}
             >
-              Build print-ready proof
+              {backFlyerId ? 'Build two-sided proof' : 'Build print-ready proof'}
             </Button>
 
             {document ? <ProofSummary document={document} canDownload={canDownload} /> : null}
@@ -367,13 +462,18 @@ export function FlyerDetailPage() {
             <p className="text-sm text-slate-500">
               Download the print-ready PDF and take it anywhere, or order copies through MemberCare.
             </p>
+            <BackSidePicker
+              options={backOptions}
+              value={backFlyerId}
+              onChange={setBackFlyerId}
+            />
             <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
                 isLoading={proofMutation.isPending}
                 onClick={() => current && proofMutation.mutate(current.id)}
               >
-                Build print file
+                {backFlyerId ? 'Build two-sided print file' : 'Build print file'}
               </Button>
               {document && canDownload ? (
                 <Button
@@ -436,6 +536,47 @@ function VersionCard({
 }
 
 /**
+ * Choose what prints on the back. Only APPROVED flyers are offered: a proof
+ * with an unapproved back would render, but it could never be ordered, and
+ * offering it here just manufactures a dead end.
+ */
+function BackSidePicker({
+  options,
+  value,
+  onChange,
+}: {
+  options: { id: string; title: string }[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  if (options.length === 0) return null;
+  return (
+    <div className="space-y-1">
+      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+        <Layers className="h-4 w-4 text-slate-400" />
+        Print on both sides?
+      </label>
+      <select
+        className="w-full max-w-md rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">Front only (single-sided)</option>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            Back: {option.title}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-slate-500">
+        Pick another approved design — a translation, for example — and both sides come out
+        aligned, ready for double-sided printing or cutting.
+      </p>
+    </div>
+  );
+}
+
+/**
  * What the paper will actually be. Reports the real finished size, since
  * office mode scales the grid to fit a printable margin — showing the
  * nominal label when the paper says otherwise would be a lie.
@@ -462,7 +603,37 @@ function ProofSummary({
         <p className="text-slate-600">
           Per sheet: <span className="font-medium text-slate-900">{document.perSheet}</span>
         </p>
+        {document.isDoubleSided ? (
+          <>
+            <p className="text-slate-600">
+              Sides: <span className="font-medium text-slate-900">Double-sided (2 pages)</span>
+            </p>
+            {document.backEffectiveDpi !== null ? (
+              <p className="text-slate-600">
+                Back resolution:{' '}
+                <span className="font-medium text-slate-900">
+                  {document.backEffectiveDpi} DPI
+                </span>
+              </p>
+            ) : null}
+            {/* effectiveDpi is deliberately the WORSE of the two sides —
+                it is what the ordering gate reads. Labelled as such, so it
+                is never mistaken for the back figure printed above it; the
+                warnings below name each side explicitly. */}
+            <p className="text-slate-600">
+              Lowest of both sides:{' '}
+              <span className="font-medium text-slate-900">{document.effectiveDpi} DPI</span>
+            </p>
+          </>
+        ) : null}
       </div>
+
+      {document.duplexInstruction ? (
+        <p className="flex items-start gap-1.5 text-sm text-slate-700">
+          <Layers className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+          {document.duplexInstruction}
+        </p>
+      ) : null}
 
       <p className="flex items-center gap-1.5 text-sm">
         <QrCode className="h-4 w-4 text-slate-400" />

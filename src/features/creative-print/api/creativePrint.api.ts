@@ -77,6 +77,15 @@ export const creativeApi = {
     return api.get(`/creative/generations/${id}`);
   },
 
+  /** A church's own finished design, as multipart — never base64 in JSON. */
+  uploadDesign(flyerId: string, file: File): Promise<AxiosResponse<FlyerDetail>> {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post(`/creative/flyers/${flyerId}/versions/upload`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
   selectVersion(flyerId: string, versionId: string): Promise<AxiosResponse<FlyerDetail>> {
     return api.post(`/creative/flyers/${flyerId}/versions/${versionId}/select`);
   },
@@ -104,6 +113,8 @@ export const printApi = {
 
   createDocument(data: {
     flyerVersionId: string;
+    /** Approved version of the back design, for double-sided printing. */
+    backFlyerVersionId?: string;
     layout?: PrintSize;
     mode?: PrintMode;
     cutGuides?: boolean;

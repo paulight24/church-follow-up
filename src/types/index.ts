@@ -41,6 +41,14 @@ export interface User {
   avatarUrl?: string | null;
   isPlatformAdmin?: boolean;
   activeChurch?: ActiveChurch;
+  /**
+   * Server-side switches, from /auth/me. Absent (older backend) reads as
+   * off — the safe default, since the routes 404 behind the kill switch
+   * and a visible nav item pointing at 404s helps nobody.
+   */
+  features?: {
+    creativePrint?: boolean;
+  };
 }
 
 export interface PaginatedResponse<T> {

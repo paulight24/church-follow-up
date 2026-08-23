@@ -11,7 +11,15 @@
  *   not told us shipping is free — render it as absent, not as $0.00.
  */
 
-export const PRINT_SIZES = ['FULL_PAGE', 'HALF_PAGE', 'THIRD_PAGE', 'QUARTER_PAGE'] as const;
+export const PRINT_SIZES = [
+  'FULL_PAGE',
+  'HALF_PAGE',
+  'THIRD_PAGE',
+  'QUARTER_PAGE',
+  // 8.25×5.25in pieces, two-up on a real A4 sheet — matches the physical
+  // cutting template many churches already print against.
+  'A4_2UP',
+] as const;
 export type PrintSize = (typeof PRINT_SIZES)[number];
 
 export const PRINT_MODES = ['OFFICE', 'PRESS'] as const;
@@ -152,6 +160,12 @@ export interface PrintDocument {
   id: string;
   flyerId: string;
   flyerVersionId: string;
+  /** Set when this is a double-sided document; the PDF has two pages. */
+  backFlyerVersionId: string | null;
+  isDoubleSided: boolean;
+  pageCount: number;
+  /** How to feed the duplex printer ("flip on the LONG edge…"). */
+  duplexInstruction: string | null;
   layout: PrintSize;
   mode: PrintMode;
   perSheet: number;
@@ -162,8 +176,11 @@ export interface PrintDocument {
    */
   finishedInches: { width: number; height: number };
   sheetInches: { width: number; height: number };
+  /** Worst of the two sides for duplex documents. */
   effectiveDpi: number;
   resolutionVerdict: ResolutionVerdict;
+  backEffectiveDpi: number | null;
+  backResolutionVerdict: ResolutionVerdict | null;
   sizeBytes: number;
   checksum: string | null;
   /** Ordering stays blocked until this is true. */

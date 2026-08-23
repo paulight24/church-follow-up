@@ -333,7 +333,7 @@ function NavChildRow({ to, label, active }: { to: string; label: string; active:
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
   const location = useLocation();
 
   // Which item (top-level, section item, or a section item's own children)
@@ -373,6 +373,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const visibleTopLevelItems = topLevelItems.filter(filterItem);
 
   const visibleSections = navSections
+    // Creative & Print ships behind a backend kill switch. Permissions say
+    // who may use it; the flag says whether it exists in this deployment,
+    // and a nav item whose every call 404s is worse than no nav item.
+    .filter((section) => section.id !== 'creative-print' || user?.features?.creativePrint)
     .map((section) => ({
       ...section,
       items: section.items
