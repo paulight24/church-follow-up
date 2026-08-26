@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, ChevronRight, MapPin, Pencil, Send, Trash2, Users, EyeOff } from 'lucide-react';
+import { CalendarDays, ChevronRight, MapPin, Pencil, Send, Trash2, Users, EyeOff, Megaphone } from 'lucide-react';
 import { formatEventWhen as formatEventWhenShared } from '../lib/eventDate';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -16,6 +16,7 @@ import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import type { EventRecord } from '@/types/event';
 import { eventsApi } from '../api/events.api';
 import { EventQrShare } from '../components/EventQrShare';
+import { EventAnnounceModal } from '../components/EventAnnounceModal';
 import { EventRegistrationsPanel } from '../components/EventRegistrationsPanel';
 
 function errorMessage(err: unknown, fallback: string): string {
@@ -39,6 +40,7 @@ export function EventDetailPage() {
   const canViewRegistrations = usePermission('events.view_registrations');
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [announceOpen, setAnnounceOpen] = useState(false);
 
   const { data: event, isLoading, isError } = useQuery({
     queryKey: ['event', id],
@@ -109,6 +111,14 @@ export function EventDetailPage() {
         subtitle="Manage event details, publish it for sign-ups, and see who's registered"
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            {canUpdate && event.status === 'PUBLISHED' && (
+              <Button
+                leftIcon={<Megaphone className="h-4 w-4" />}
+                onClick={() => setAnnounceOpen(true)}
+              >
+                Announce
+              </Button>
+            )}
             {canUpdate && (
               <Button
                 variant="outline"
@@ -196,6 +206,10 @@ export function EventDetailPage() {
       <EventQrShare slug={event.slug} eventName={event.name} />
 
       {canViewRegistrations && <EventRegistrationsPanel event={event} />}
+
+      {announceOpen && (
+        <EventAnnounceModal eventId={event.id} eventName={event.name} onClose={() => setAnnounceOpen(false)} />
+      )}
 
       <ConfirmDialog
         isOpen={deleteConfirmOpen}

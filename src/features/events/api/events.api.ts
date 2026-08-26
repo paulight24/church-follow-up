@@ -10,6 +10,23 @@ import type {
   UpdateEventRequest,
 } from '@/types/event';
 
+export interface AnnounceTestResult {
+  results: Array<{ to: string; status: 'SENT' | 'FAILED' | 'SIMULATED'; reason?: string }>;
+  eligibleForFullSend: number;
+}
+
+export interface AnnounceJob {
+  eventId: string;
+  channel: 'email' | 'sms';
+  startedAt: string;
+  finishedAt: string | null;
+  total: number;
+  sent: number;
+  failed: number;
+  simulated: number;
+  failures: Array<{ to: string; reason: string }>;
+}
+
 export const eventsApi = {
   getEvents(filters?: EventListFilters): Promise<AxiosResponse<PaginatedResponse<EventRecord>>> {
     return api.get('/events', { params: filters });
@@ -37,6 +54,24 @@ export const eventsApi = {
 
   unpublishEvent(id: string): Promise<AxiosResponse<EventRecord>> {
     return api.post(`/events/${id}/unpublish`);
+  },
+
+  announceTest(
+    id: string,
+    body: { emails: string[]; flierUrls?: string[]; note?: string }
+  ): Promise<AxiosResponse<AnnounceTestResult>> {
+    return api.post(`/events/${id}/announce/test`, body);
+  },
+
+  announceSend(
+    id: string,
+    body: { channel: 'email' | 'sms'; flierUrls?: string[]; note?: string; confirm: true }
+  ): Promise<AxiosResponse<AnnounceJob>> {
+    return api.post(`/events/${id}/announce`, body);
+  },
+
+  announceStatus(id: string, channel: 'email' | 'sms'): Promise<AxiosResponse<AnnounceJob | null>> {
+    return api.get(`/events/${id}/announce/status`, { params: { channel } });
   },
 
   getRegistrations(
