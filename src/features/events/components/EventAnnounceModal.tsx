@@ -39,6 +39,7 @@ export function EventAnnounceModal({
   const queryClient = useQueryClient();
 
   const [testEmails, setTestEmails] = useState('');
+  const [subject, setSubject] = useState('');
   // Flier URLs survive the round trip from "send me the sample" to "send to
   // everyone" (often a different day) via localStorage — the full send must
   // be the email that was approved, not a from-memory reconstruction.
@@ -66,6 +67,7 @@ export function EventAnnounceModal({
           emails: testEmails.split(/[\s,;]+/).map((e) => e.trim()).filter(Boolean),
           flierUrls: parsedFliers(),
           note: note.trim() || undefined,
+          subject: subject.trim() || undefined,
         })
         .then((r) => r.data),
     onSuccess: (data) => {
@@ -94,6 +96,7 @@ export function EventAnnounceModal({
           confirm: true,
           flierUrls: parsedFliers(),
           note: note.trim() || undefined,
+          subject: subject.trim() || undefined,
         })
         .then((r) => r.data),
     onSuccess: (job) => {
@@ -121,6 +124,12 @@ export function EventAnnounceModal({
             placeholder="you@example.com, teammate@example.com"
             value={testEmails}
             onChange={(e) => setTestEmails(e.target.value)}
+          />
+          <Input
+            label="Subject line"
+            placeholder="You&apos;re invited: A Day of Blessing — this Sunday"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
           />
           <Textarea
             label="Flier image URLs (one per line — shown full-width in the email)"

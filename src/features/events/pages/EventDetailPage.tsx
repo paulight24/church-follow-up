@@ -17,6 +17,7 @@ import type { EventRecord } from '@/types/event';
 import { eventsApi } from '../api/events.api';
 import { EventQrShare } from '../components/EventQrShare';
 import { EventAnnounceModal } from '../components/EventAnnounceModal';
+import { EventRemindersCard } from '../components/EventRemindersCard';
 import { EventRegistrationsPanel } from '../components/EventRegistrationsPanel';
 
 function errorMessage(err: unknown, fallback: string): string {
@@ -204,6 +205,8 @@ export function EventDetailPage() {
       </Card>
 
       <EventQrShare slug={event.slug} eventName={event.name} />
+
+      {canUpdate && event.status === 'PUBLISHED' && <EventRemindersCard eventId={event.id} />}
 
       {canViewRegistrations && <EventRegistrationsPanel event={event} />}
 

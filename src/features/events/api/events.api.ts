@@ -15,6 +15,15 @@ export interface AnnounceTestResult {
   eligibleForFullSend: number;
 }
 
+export interface EventCampaign {
+  enabled: boolean;
+  audience: 'all_members';
+  subject?: string;
+  note?: string;
+  flierUrls?: string[];
+  sent: { announce?: string; T3?: string; T1?: string; DAY_OF?: string };
+}
+
 export interface AnnounceJob {
   eventId: string;
   channel: 'email' | 'sms';
@@ -58,20 +67,35 @@ export const eventsApi = {
 
   announceTest(
     id: string,
-    body: { emails: string[]; flierUrls?: string[]; note?: string }
+    body: { emails: string[]; flierUrls?: string[]; note?: string; subject?: string }
   ): Promise<AxiosResponse<AnnounceTestResult>> {
     return api.post(`/events/${id}/announce/test`, body);
   },
 
   announceSend(
     id: string,
-    body: { channel: 'email' | 'sms'; flierUrls?: string[]; note?: string; confirm: true }
+    body: { channel: 'email' | 'sms'; flierUrls?: string[]; note?: string; subject?: string; confirm: true }
   ): Promise<AxiosResponse<AnnounceJob>> {
     return api.post(`/events/${id}/announce`, body);
   },
 
   announceStatus(id: string, channel: 'email' | 'sms'): Promise<AxiosResponse<AnnounceJob | null>> {
     return api.get(`/events/${id}/announce/status`, { params: { channel } });
+  },
+
+  getCampaign(id: string): Promise<AxiosResponse<EventCampaign | null>> {
+    return api.get(`/events/${id}/campaign`);
+  },
+
+  toggleReminders(id: string, enabled: boolean): Promise<AxiosResponse<EventCampaign>> {
+    return api.post(`/events/${id}/reminders/toggle`, { enabled });
+  },
+
+  sendReminderNow(
+    id: string,
+    offset: 'T3' | 'T1' | 'DAY_OF'
+  ): Promise<AxiosResponse<{ skipped?: string; total?: number; sent?: number; failed?: number; simulated?: number }>> {
+    return api.post(`/events/${id}/reminders/send`, { offset });
   },
 
   getRegistrations(
