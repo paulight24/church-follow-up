@@ -58,7 +58,7 @@ export function PrintOrderCreatePage() {
   // The advisor names the ACTIVE provider; capabilities lists every adapter,
   // connected or not. Joining them is the only way the form is built against
   // the printer that will actually take the order.
-  const { data: advice } = useQuery({
+  const { data: advice, isError: adviceError } = useQuery({
     queryKey: ['print-advice', flyer?.event?.eventDate ?? null],
     queryFn: () =>
       printApi
@@ -67,12 +67,12 @@ export function PrintOrderCreatePage() {
     enabled: !!flyer,
   });
 
-  const { data: allCapabilities } = useQuery({
+  const { data: allCapabilities, isError: capabilitiesError } = useQuery({
     queryKey: ['print-capabilities'],
     queryFn: () => printApi.getCapabilities().then((res) => res.data),
   });
 
-  const { data: paperOptions } = useQuery({
+  const { data: paperOptions, isError: paperError } = useQuery({
     queryKey: ['print-paper-options'],
     queryFn: () => printApi.getPaperOptions().then((res) => res.data),
   });
@@ -96,7 +96,12 @@ export function PrintOrderCreatePage() {
     }
   }, [paperOptions, paperPreset]);
   useEffect(() => {
-    if (advice && urgency === null) setUrgency(advice.recommendedUrgency);
+    if (!advice || urgency !== null) return;
+    // When nothing can arrive in time the advisor recommends the fastest
+    // option the provider has, which is also the most expensive — and the
+    // page is simultaneously telling the church it will not arrive. Ordering
+    // for "next time" should not silently cost rush money.
+    setUrgency(advice.tooLate ? 'STANDARD' : advice.recommendedUrgency);
   }, [advice, urgency]);
 
   const {
@@ -134,6 +139,12 @@ export function PrintOrderCreatePage() {
   const { quote, quoteState, error, isPlacing, requestQuote, placeOrder } =
     usePrintOrderDraft(pricedConfig);
 
+  // Loading and broken must look different: without this, a 403 or a 500 on
+  // any lookup leaves a church staring at "Asking the printer what it can
+  // do…" forever, with no error and no way forward.
+  const optionsUnavailable =
+    adviceError || capabilitiesError || paperError || (!!allCapabilities && !!advice && !capabilities);
+
   const destinationReady =
     (address.postalCode ?? '').trim().length >= 3 &&
     (address.stateOrProvince ?? '').trim().length >= 2 &&
@@ -148,13 +159,22 @@ export function PrintOrderCreatePage() {
   }
   if (!flyer) return <Alert variant="error">Could not load this flyer.</Alert>;
 
-  if (!documentId || documentError || !document) {
+  // A stale ?documentId= from the back button — or a hand-edited one — would
+  // otherwise print flyer B's file under flyer A's name, breadcrumb and
+  // download filename. The server checks the document's own approval, not
+  // the pairing, so this is the only place it can be caught.
+  const documentBelongsToFlyer = !document || document.flyerId === flyer.id;
+
+  if (!documentId || documentError || !document || !documentBelongsToFlyer) {
     return (
       <div className="space-y-4">
         <Breadcrumb flyerId={flyer.id} flyerTitle={flyer.title} />
         <Alert variant="warning" title="Build the print file first">
-          An order is placed against a specific print-ready file, so a printer receives exactly what
-          you approved. Build it on the flyer page, then come back.
+          {documentId && document && !documentBelongsToFlyer
+            ? 'That print file belongs to a different flyer, so it is not what this page would be ordering. Build the print file for this flyer and come back.'
+            : documentId && documentError
+              ? 'That print file could not be loaded, so there is nothing to order against. Build it again on the flyer page.'
+              : 'An order is placed against a specific print-ready file, so a printer receives exactly what you approved. Build it on the flyer page, then come back.'}
         </Alert>
         <Button onClick={() => navigate(`/creative/${flyer.id}`)}>Back to the flyer</Button>
       </div>
@@ -216,7 +236,28 @@ export function PrintOrderCreatePage() {
         </CardContent>
       </Card>
 
-      {capabilities && paperOptions && quantity && paperPreset && urgency ? (
+      {optionsUnavailable ? (
+        <Card>
+          <CardContent className="space-y-3 py-6">
+            <Alert variant="error" title="We could not reach the printer">
+              The printing options could not be loaded, so there is nothing safe to quote against.
+              Try again in a moment — and in the meantime the print-ready PDF is yours to download
+              and take to any print shop.
+            </Alert>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Try again
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => downloadPrintDocument(document.id, `${flyer.title}.pdf`)}
+              >
+                Download the print file
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : capabilities && paperOptions && quantity !== null && paperPreset !== null && urgency !== null ? (
         <Card>
           <CardContent className="py-5">
             <PrintOptionsForm
@@ -302,6 +343,10 @@ export function PrintOrderCreatePage() {
                 type="button"
                 variant={quoteState === 'FRESH' ? 'outline' : 'primary'}
                 leftIcon={<RefreshCw className="h-4 w-4" />}
+                // Re-quoting while an order is in flight would mint a fresh
+                // key for the next attempt, which is exactly how one intent
+                // becomes two boxes of flyers.
+                disabled={isPlacing}
                 onClick={() => requestQuote(pricedConfig)}
               >
                 {quoteState === 'NONE' ? 'Get a price' : 'Get an updated price'}

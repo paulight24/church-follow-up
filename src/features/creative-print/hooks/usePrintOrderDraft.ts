@@ -54,11 +54,18 @@ export function usePrintOrderDraft(config: PricedConfig | null): UsePrintOrderDr
 
   const fingerprint = config ? fingerprintOf(config) : null;
 
+  const expiresAt = quote?.expiresAt ?? null;
   useEffect(() => {
-    if (!quote?.expiresAt) return;
-    const timer = setInterval(() => setClock((n) => n + 1), EXPIRY_TICK_MS);
+    if (!expiresAt) return;
+    // Stops itself once the boundary is crossed: after that the verdict can
+    // no longer change, and a timer re-rendering the page every 30 seconds
+    // for the rest of the session buys nothing.
+    const timer = setInterval(() => {
+      setClock((n) => n + 1);
+      if (Date.now() >= Date.parse(expiresAt)) clearInterval(timer);
+    }, EXPIRY_TICK_MS);
     return () => clearInterval(timer);
-  }, [quote?.expiresAt]);
+  }, [expiresAt]);
 
   const quoteState: QuoteState = useMemo(() => {
     if (!quote) return 'NONE';

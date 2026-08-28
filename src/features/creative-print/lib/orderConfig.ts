@@ -50,7 +50,7 @@ export const addressSchema = z.object({
     .length(2, 'Use the two-letter country code, e.g. US')
     .transform((value) => value.toUpperCase()),
   phone: optionalText(z.string().trim().max(40)),
-  email: optionalText(z.string().email('That does not look like an email address').max(200)),
+  email: optionalText(z.string().trim().email('That does not look like an email address').max(200)),
 });
 
 export type PrintAddress = z.infer<typeof addressSchema>;

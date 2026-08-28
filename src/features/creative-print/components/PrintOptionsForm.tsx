@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Layers, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import {
@@ -51,6 +52,13 @@ export function PrintOptionsForm({
   const presets = quantityPresets(capabilities);
   const urgencies = supportedUrgencies(capabilities);
 
+  // The half-typed value is LOCAL. Lifting it would mean an empty field sets
+  // the page's quantity to 0 — and the page only renders this form when it
+  // has a quantity, so backspacing would unmount the input mid-edit and
+  // leave a spinner claiming to be loading. Only valid numbers travel up.
+  const [draft, setDraft] = useState(String(quantity));
+  useEffect(() => setDraft(String(quantity)), [quantity]);
+
   return (
     <div className="space-y-6">
       <section className="space-y-2">
@@ -60,6 +68,7 @@ export function PrintOptionsForm({
             <button
               key={preset}
               type="button"
+              aria-pressed={quantity === preset}
               onClick={() => onQuantityChange(preset)}
               className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
                 quantity === preset
@@ -74,14 +83,28 @@ export function PrintOptionsForm({
         <Input
           type="number"
           label="Or enter an amount"
-          value={quantity}
+          value={draft}
           min={capabilities.minQuantity}
           max={capabilities.maxQuantity}
           step={capabilities.quantityStep}
-          onChange={(e) => onQuantityChange(Number(e.target.value))}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            const parsed = Number(e.target.value);
+            if (e.target.value !== '' && Number.isFinite(parsed) && parsed > 0) {
+              onQuantityChange(parsed);
+            }
+          }}
           // Snapped on blur, not on every keystroke: clamping mid-typing
           // fights the person entering "1000" one digit at a time.
-          onBlur={(e) => onQuantityChange(clampQuantity(Number(e.target.value), capabilities))}
+          onBlur={() => {
+            const parsed = Number(draft);
+            const next = clampQuantity(
+              Number.isFinite(parsed) && parsed > 0 ? parsed : capabilities.minQuantity,
+              capabilities
+            );
+            setDraft(String(next));
+            onQuantityChange(next);
+          }}
           helpText={`${capabilities.displayName} prints in batches of ${capabilities.quantityStep}, starting at ${capabilities.minQuantity}.`}
           className="max-w-[220px]"
         />
@@ -94,6 +117,7 @@ export function PrintOptionsForm({
             <button
               key={option.preset}
               type="button"
+              aria-pressed={paperPreset === option.preset}
               onClick={() => onPaperChange(option.preset)}
               className={`rounded-lg border p-3 text-left transition-colors ${
                 paperPreset === option.preset
@@ -123,6 +147,7 @@ export function PrintOptionsForm({
               <button
                 key={option}
                 type="button"
+                aria-pressed={urgency === option}
                 onClick={() => onUrgencyChange(option)}
                 className={`rounded-lg border p-3 text-left transition-colors ${
                   urgency === option
