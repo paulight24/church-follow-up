@@ -121,6 +121,7 @@ const FlyerCreatePage = lazy(() => import('@/features/creative-print/pages/Flyer
 const FlyerDetailPage = lazy(() => import('@/features/creative-print/pages/FlyerDetailPage').then(m => ({ default: m.FlyerDetailPage })));
 const PrintOrderListPage = lazy(() => import('@/features/creative-print/pages/PrintOrderListPage').then(m => ({ default: m.PrintOrderListPage })));
 const PrintOrderDetailPage = lazy(() => import('@/features/creative-print/pages/PrintOrderDetailPage').then(m => ({ default: m.PrintOrderDetailPage })));
+const PrintOrderCreatePage = lazy(() => import('@/features/creative-print/pages/PrintOrderCreatePage').then(m => ({ default: m.PrintOrderCreatePage })));
 
 function PageLoader() {
   return (
@@ -277,6 +278,12 @@ export function AppRoutes() {
             <Route element={<ProtectedRoute permission="print.view" />}>
               <Route path="/creative/orders" element={<PrintOrderListPage />} />
               <Route path="/creative/orders/:id" element={<PrintOrderDetailPage />} />
+            </Route>
+            {/* Ordering spends money, so it sits behind print.order rather
+                than the creative.view the flyer page uses. Registered before
+                /creative/:id for the same reason as the orders routes. */}
+            <Route element={<ProtectedRoute permission="print.order" />}>
+              <Route path="/creative/:id/order" element={<PrintOrderCreatePage />} />
             </Route>
             <Route element={<ProtectedRoute permission="creative.view" />}>
               <Route path="/creative" element={<CreativeStudioPage />} />

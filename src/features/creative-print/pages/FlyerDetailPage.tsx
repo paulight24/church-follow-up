@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CheckCircle2,
@@ -8,6 +8,7 @@ import {
   Download,
   FileWarning,
   Layers,
+  Printer,
   QrCode,
   Sparkles,
   Wand2,
@@ -45,12 +46,14 @@ const CHECKLIST = [
 export function FlyerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const canGenerate = usePermission('creative.generate');
   const canApprove = usePermission('creative.approve');
   const canDownload = usePermission('print.download');
+  const canOrder = usePermission('print.order');
 
   const [instruction, setInstruction] = useState('');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -483,7 +486,25 @@ export function FlyerDetailPage() {
                   Download PDF
                 </Button>
               ) : null}
+              {canOrder && document ? (
+                <Button
+                  variant="outline"
+                  leftIcon={<Printer className="h-4 w-4" />}
+                  // The document id travels in the URL: it lives in this
+                  // page's state and would otherwise be lost on navigation,
+                  // and an order must name the exact file it is for.
+                  onClick={() => navigate(`/creative/${flyer.id}/order?documentId=${document.id}`)}
+                >
+                  Order prints
+                </Button>
+              ) : null}
             </div>
+            {!canOrder ? (
+              <p className="text-sm text-slate-500">
+                You can download the print-ready PDF and take it to any printer. Placing a paid
+                print order needs someone with ordering rights — usually a pastor or administrator.
+              </p>
+            ) : null}
             {document ? <ProofSummary document={document} canDownload={canDownload} /> : null}
           </CardContent>
         </Card>

@@ -12,19 +12,24 @@ import type {
   BrandProfile,
   BrandProfileRequest,
   CreateFlyerRequest,
+  Finish,
   FlyerDetail,
   FlyerStatus,
   FlyerSummary,
+  FulfillmentType,
   Generation,
   PaperOption,
+  PaperPreset,
   PrintAdvice,
   PrintDocument,
   PrintMode,
   PrintOrder,
   PrintOrderDetail,
   PrintQuote,
+  PrintShippingAddress,
   PrintSize,
   ProviderCapabilities,
+  Sides,
   Urgency,
 } from '@/types/creativePrint';
 
@@ -125,14 +130,19 @@ export const printApi = {
     return api.get(`/print/documents/${id}`);
   },
 
+  /**
+   * Costs money on the server side once a real printer is connected, and
+   * `sides` must match the document (the server 400s both ways round) —
+   * hence the narrow types rather than `string`.
+   */
   createQuote(data: {
     printDocumentId: string;
     quantity: number;
-    paperPreset: string;
-    sides: string;
-    finish?: string;
-    fulfillmentType: string;
-    urgency: Urgency;
+    paperPreset: PaperPreset | string;
+    sides: Sides;
+    finish?: Finish;
+    fulfillmentType: FulfillmentType;
+    urgency: Urgency | string;
     destination?: { postalCode: string; stateOrProvince: string; country: string };
   }): Promise<AxiosResponse<PrintQuote>> {
     return api.post('/print/quotes', data);
@@ -140,8 +150,12 @@ export const printApi = {
 
   createOrder(data: {
     quoteId: string;
+    /**
+     * One intent, one key. Minted per quote and reused across retries, so a
+     * double-tap or a network timeout can never become a second print run.
+     */
     idempotencyKey: string;
-    shippingAddress?: Record<string, string>;
+    shippingAddress?: PrintShippingAddress;
   }): Promise<AxiosResponse<PrintOrder>> {
     return api.post('/print/orders', data);
   },

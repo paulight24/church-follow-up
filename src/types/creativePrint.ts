@@ -190,6 +190,20 @@ export interface PrintDocument {
   createdAt: string;
 }
 
+/** What the courier needs. Mirrors the server's shippingAddress schema. */
+export interface PrintShippingAddress {
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  stateOrProvince: string;
+  postalCode: string;
+  /** Two-letter ISO code — the server rejects anything else. */
+  country: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface QuoteLineItem {
   label: string;
   amountCents: number;
