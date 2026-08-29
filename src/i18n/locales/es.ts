@@ -70,6 +70,14 @@ const es: Translations = {
   'event.alreadyNote': 'Actualizamos tus datos en lugar de registrarte dos veces. ',
   'event.seeYou': 'Nos vemos el {when}.',
   'event.seeYouAt': 'Nos vemos el {when} en {location}.',
+  'event.shareTitle': 'Traiga a alguien con usted',
+  'event.shareBody': 'Un toque abre WhatsApp con la invitación lista — usted solo elige a quién enviarla.',
+  'event.shareLead': 'Está invitado a {event}',
+  'event.shareWhatsApp': 'Compartir por WhatsApp',
+  'event.shareCopy': 'Copiar enlace',
+  'event.shareCopied': '¡Enlace copiado!',
+  'event.shareMore': 'Más…',
+  'event.shareCopyManual': 'Copie este enlace:',
   'event.submitError':
     'No pudimos enviar tu registro. Por favor revisa el formulario e inténtalo de nuevo.',
   'event.smsConsent':

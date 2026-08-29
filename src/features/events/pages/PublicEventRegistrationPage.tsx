@@ -16,6 +16,7 @@ import { publicEventsApi } from '../api/publicEvents.api';
 import { EVENT_FIELD_DEFS, buildRegistrationSchema, defaultRegistrationValues, publicFieldsToConfig } from '../lib/eventFields';
 import type { RegistrationFormValues } from '../lib/eventFields';
 import { EventRegistrationFields } from '../components/EventRegistrationFields';
+import { ShareEventCard } from '../components/ShareEventCard';
 import { formatEventDay, formatEventWhen } from '../lib/eventDate';
 import { useSeo } from '@/lib/seo';
 import { LanguageSwitcher, useTranslation } from '@/i18n';
@@ -222,6 +223,16 @@ export function PublicEventRegistrationPage() {
               : t('event.seeYou', { when: formatEventDay(event.eventDate, 'EEEE, MMMM d', locale, 'PPP') }))
           }
         />
+        {/* The most willing inviter in the congregation is whoever just
+            decided to come. This is the one moment they are certain to be
+            enthusiastic, so it is the one place worth asking. */}
+        <div className="mt-6">
+          <ShareEventCard
+            eventName={event.name}
+            when={formatEventWhen(event.eventDate, event.startTime, event.endTime, undefined, locale)}
+            location={event.location}
+          />
+        </div>
       </PageShell>
     );
   }
@@ -337,6 +348,16 @@ export function PublicEventRegistrationPage() {
           {t('event.register')}
         </Button>
       </form>
+
+      {/* Also offered to someone who has not registered — a visitor who is
+          not coming themselves may still know exactly who should. */}
+      <div className="mt-6">
+        <ShareEventCard
+          eventName={event.name}
+          when={formatEventWhen(event.eventDate, event.startTime, event.endTime, undefined, locale)}
+          location={event.location}
+        />
+      </div>
     </PageShell>
   );
 }
