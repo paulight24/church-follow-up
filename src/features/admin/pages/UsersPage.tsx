@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, ShieldOff, Settings2, X, RefreshCw, Mail, Users} from 'lucide-react';
+import { UserPlus, ShieldOff, Settings2, X, RefreshCw, Mail, Users, Link as LinkIcon, Check } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -88,6 +88,42 @@ export function UsersPage() {
   const [deactivateTarget, setDeactivateTarget] = useState<AdminUserListItem | null>(null);
   const [resendingUserId, setResendingUserId] = useState<string | null>(null);
   const [correctEmailUser, setCorrectEmailUser] = useState<AdminUserListItem | null>(null);
+
+  const [copiedUserId, setCopiedUserId] = useState<string | null>(null);
+
+  /**
+   * A link the church can send however it actually reaches people.
+   *
+   * Invites ARE delivered — verified against the provider — and land in
+   * spam: "set up your account" plus a long random link from a young domain
+   * is what a filter reads as phishing. Rather than resending into the same
+   * folder, hand the admin a link for WhatsApp, a text, or in person.
+   */
+  const inviteLinkMutation = useMutation({
+    mutationFn: (id: string) => usersApi.createInviteLink(id),
+    onSuccess: async (res) => {
+      const { url, email } = res.data;
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopiedUserId(res.data.userId);
+        window.setTimeout(() => setCopiedUserId(null), 2500);
+        toast({
+          title: 'Invite link copied',
+          description: `Send it to ${email} any way you like. It replaces any earlier link, including one already emailed, and expires in 7 days.`,
+          variant: 'success',
+        });
+      } catch {
+        // Clipboard access is permission-gated and blocked outright in some
+        // in-app browsers. Showing the link beats a toast that lies about
+        // having copied it.
+        window.prompt(`Copy this invite link for ${email}:`, url);
+      }
+    },
+    onError: (err: unknown) => {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast({ title: 'Could not create an invite link', description: message, variant: 'error' });
+    },
+  });
 
   const resendInviteMutation = useMutation({
     mutationFn: (id: string) => usersApi.resendInvite(id),
@@ -271,6 +307,25 @@ export function UsersPage() {
                             </Button>
                             {/* Wrong address = every resend goes nowhere, and
                                 until this existed there was no way to fix it. */}
+                            {/* Email is one route, not the only one — an
+                                invite that landed in spam is indistinguishable
+                                from one that never arrived. */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              leftIcon={
+                                copiedUserId === u.id ? (
+                                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <LinkIcon className="h-3.5 w-3.5" />
+                                )
+                              }
+                              isLoading={inviteLinkMutation.isPending && inviteLinkMutation.variables === u.id}
+                              onClick={() => inviteLinkMutation.mutate(u.id)}
+                              title="Copy a link to send by WhatsApp, text, or in person"
+                            >
+                              {copiedUserId === u.id ? 'Copied' : 'Copy link'}
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"

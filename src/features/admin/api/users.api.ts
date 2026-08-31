@@ -96,6 +96,19 @@ export interface GrantPermissionOverrideRequest {
   scopeId?: string;
 }
 
+/**
+ * A link to hand someone directly. Invites do get delivered — they land in
+ * spam, because "set up your account" plus a long random link from a young
+ * domain looks like phishing to a filter. This makes email one route rather
+ * than the only one.
+ */
+export interface InviteLink {
+  userId: string;
+  email: string;
+  url: string;
+  expiresAt: string;
+}
+
 /** An invite can be recorded without being delivered — see deliveryWarning. */
 export interface InviteResult {
   userId: string;
@@ -128,6 +141,17 @@ export const usersApi = {
   /** POST /users/:id/resend-invite - gated server-side on users.create. Only meaningful for status === 'INVITED'. */
   resendInvite(id: string): Promise<AxiosResponse<InviteResult>> {
     return api.post(`/users/${id}/resend-invite`);
+  },
+
+  /**
+   * POST /users/:id/invite-link - a link to send by any channel. Same
+   * server-side gate as resending, because the link it returns is
+   * credential-equivalent: whoever holds it can set up that account.
+   * Issuing one invalidates any earlier invite, including one already
+   * emailed.
+   */
+  createInviteLink(id: string): Promise<AxiosResponse<InviteLink>> {
+    return api.post(`/users/${id}/invite-link`);
   },
 
   getUserRoles(id: string): Promise<AxiosResponse<AdminUserRoleDetail[]>> {
