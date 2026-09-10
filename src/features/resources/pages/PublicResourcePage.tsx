@@ -18,6 +18,7 @@ import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { useSeo } from '@/lib/seo';
 import { LanguageSwitcher, useTranslation } from '@/i18n';
 import { publicResourcesApi } from '../api/publicResources.api';
+import { ResourceResponseForm } from '../components/ResourceResponseForm';
 import type { PublicResourcePage as PublicResourcePageData } from '@/types/resource';
 
 function PageShell({ children }: { children: ReactNode }) {
@@ -175,6 +176,10 @@ export function PublicResourcePage() {
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.contactNote) }}
         />
       )}
+
+      {/* After the material, never before it: the books are ungated, and this
+          is the other half of that decision. */}
+      <ResourceResponseForm slug={slug!} />
 
       {church && (church.address || church.phone || church.email || church.website) && (
         <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">

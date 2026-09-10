@@ -12,30 +12,10 @@ import { formatDateTime } from '@/lib/formatters';
 import type { EventFieldKey, EventRecord, EventRegistration } from '@/types/event';
 import { eventsApi } from '../api/events.api';
 import { EVENT_FIELD_DEFS } from '../lib/eventFields';
+import { downloadCsv } from '@/lib/downloadCsv';
 
 const PAGE_SIZE = 20;
 
-// Same client-side CSV construction ReportsPage uses (src/features/reports/pages/ReportsPage.tsx)
-// - no export dependency, just a Blob + object URL.
-function downloadCsv(filename: string, rows: Array<Record<string, unknown>>) {
-  if (rows.length === 0) return;
-  const headers = Object.keys(rows[0]);
-  const escape = (value: unknown) => {
-    const str = value == null ? '' : String(value);
-    return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
-  };
-  const csv = [headers.join(','), ...rows.map((row) => headers.map((h) => escape(row[h])).join(','))].join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
 
 // A registration's `answers` only holds what THIS event's form actually collected, but the
 // linked Member may already have a first/last name, email, or phone on file from elsewhere

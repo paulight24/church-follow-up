@@ -1,6 +1,12 @@
 import type { AxiosResponse } from 'axios';
 import api from '@/config/api';
-import type { ResourceItemDraft, ResourcePage, ResourcePageStatus } from '@/types/resource';
+import type {
+  ResourceItemDraft,
+  ResourcePage,
+  ResourcePageStatus,
+  ResourceResponse,
+  ResourceResponseExportRow,
+} from '@/types/resource';
 
 export interface ResourcePagePayload {
   title: string;
@@ -32,5 +38,14 @@ export const resourcesApi = {
   },
   remove(id: string): Promise<AxiosResponse<null>> {
     return api.delete(`/resource-pages/${id}`);
+  },
+  listResponses(id: string): Promise<AxiosResponse<ResourceResponse[]>> {
+    return api.get(`/resource-pages/${id}/responses`);
+  },
+  exportResponses(id: string): Promise<AxiosResponse<ResourceResponseExportRow[]>> {
+    return api.get(`/resource-pages/${id}/responses/export`);
+  },
+  markResponseHandled(id: string, responseId: string, handled: boolean) {
+    return api.post(`/resource-pages/${id}/responses/${responseId}/handled`, { handled });
   },
 };

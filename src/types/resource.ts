@@ -60,3 +60,46 @@ export interface PublicResourcePage {
     url: string;
   }>;
 }
+
+export const RESOURCE_INTERESTS = ['RECEIVE_CHRIST', 'LEARN_MORE', 'JOIN_CHURCH', 'CELL_GROUP'] as const;
+export type ResourceInterest = (typeof RESOURCE_INTERESTS)[number];
+
+export interface ResourceResponseSubmission {
+  firstName: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  wantsContact?: boolean;
+  interests?: ResourceInterest[];
+  prayerRequest?: string;
+  locale?: string;
+}
+
+export interface ResourceResponse {
+  id: string;
+  createdAt: string;
+  firstName: string;
+  lastName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  wantsContact: boolean;
+  interests: string[];
+  prayerRequest?: string | null;
+  locale?: string | null;
+  memberId?: string | null;
+  memberName?: string | null;
+  handledAt?: string | null;
+}
+
+export interface ResourceResponseExportRow {
+  receivedAt: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  wantsContact: string;
+  interests: string;
+  prayerRequest: string;
+  language: string;
+  memberId: string;
+}

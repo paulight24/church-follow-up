@@ -22,6 +22,7 @@ import type { ResourceItemDraft } from '@/types/resource';
 import { resourcesApi } from '../api/resources.api';
 import { ResourceItemsEditor } from '../components/ResourceItemsEditor';
 import { ResourceQrShare } from '../components/ResourceQrShare';
+import { ResourceResponsesPanel } from '../components/ResourceResponsesPanel';
 
 /** Mirrors the API's slug rule, so the error appears before the round trip. */
 function slugify(value: string): string {
@@ -257,6 +258,8 @@ export function ResourcePageEditorPage() {
       </Card>
 
       {page && <ResourceQrShare slug={page.slug} title={page.title} />}
+
+      {page && <ResourceResponsesPanel pageId={page.id} pageTitle={page.title} />}
 
       <div className="flex flex-wrap items-center justify-end gap-3">
         {localProblem && <span className="text-sm text-amber-700">{localProblem}</span>}

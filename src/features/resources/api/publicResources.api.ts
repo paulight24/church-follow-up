@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosError, AxiosResponse } from 'axios';
-import type { PublicResourcePage } from '@/types/resource';
+import type { PublicResourcePage, ResourceResponseSubmission } from '@/types/resource';
 
 /**
  * Deliberately a bare axios client, NOT the shared `api` instance: this page
@@ -41,5 +41,12 @@ export const publicResourcesApi = {
         res.data = (res.data as { success?: boolean; data?: PublicResourcePage })?.data ?? res.data;
         return res;
       });
+  },
+
+  respond(slug: string, body: ResourceResponseSubmission): Promise<AxiosResponse<{ id: string }>> {
+    return publicClient.post(`/public/resources/${slug}/respond`, body).then((res) => {
+      res.data = (res.data as { success?: boolean; data?: { id: string } })?.data ?? res.data;
+      return res;
+    });
   },
 };
