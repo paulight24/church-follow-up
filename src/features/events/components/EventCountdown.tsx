@@ -9,17 +9,18 @@
  *    the date that matters to someone still deciding. So a `registrationClosesAt`
  *    that falls before the start wins, and the label says so.
  *
- * 2. **Seconds only tick on the last two days.** A five-week countdown that
- *    re-renders every second is noise with a battery cost and nothing to say;
- *    a countdown inside the final day that *doesn't* move looks broken. So the
- *    unit row changes shape once — days/hours/minutes out in the distance,
- *    hours/minutes/seconds (and a warmer colour) when it is nearly here.
+ * 2. **Seconds always tick.** The first church to use this asked for them
+ *    explicitly: a second hand is the part that creates urgency, and a
+ *    countdown that only moves once a minute reads as decoration. The row
+ *    drops the days cell once it would read "00", and warms to amber inside
+ *    the last two days, so it tightens as the deadline approaches instead of
+ *    changing shape.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { parseEventTime, toCalendarDate } from '../lib/eventDate';
 
-/** Inside this much, the deadline is close enough to be worth a second hand. */
+/** Inside this much, the deadline is close enough to say so in colour. */
 const URGENT_MS = 48 * 60 * 60 * 1000;
 
 export function EventCountdown({
@@ -51,26 +52,24 @@ export function EventCountdown({
 
   useEffect(() => {
     if (expired) return;
-    const id = window.setInterval(() => setNow(Date.now()), urgent ? 1000 : 30000);
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
-  }, [expired, urgent]);
+  }, [expired]);
 
   // The page already renders a "registration is closed" state of its own; a
   // countdown at zero would only be a second, worse way of saying it.
   if (expired || Number.isNaN(target.at)) return null;
 
   const totalSeconds = Math.floor(remaining / 1000);
-  const units = urgent
-    ? [
-        { value: Math.floor(totalSeconds / 3600), label: t('event.countdownHours') },
-        { value: Math.floor((totalSeconds % 3600) / 60), label: t('event.countdownMinutes') },
-        { value: totalSeconds % 60, label: t('event.countdownSeconds') },
-      ]
-    : [
-        { value: Math.floor(totalSeconds / 86400), label: t('event.countdownDays') },
-        { value: Math.floor((totalSeconds % 86400) / 3600), label: t('event.countdownHours') },
-        { value: Math.floor((totalSeconds % 3600) / 60), label: t('event.countdownMinutes') },
-      ];
+  const days = Math.floor(totalSeconds / 86400);
+  const units = [
+    // Dropped rather than shown as "00": a dead cell on the left makes the
+    // whole row read as broken on the day itself.
+    ...(days > 0 ? [{ value: days, label: t('event.countdownDays') }] : []),
+    { value: Math.floor((totalSeconds % 86400) / 3600), label: t('event.countdownHours') },
+    { value: Math.floor((totalSeconds % 3600) / 60), label: t('event.countdownMinutes') },
+    { value: totalSeconds % 60, label: t('event.countdownSeconds') },
+  ];
 
   return (
     <div
@@ -92,7 +91,7 @@ export function EventCountdown({
         {target.label}
       </span>
       <span className="hidden h-4 w-px bg-slate-200 sm:block" aria-hidden="true" />
-      <div className="flex items-baseline gap-2.5" aria-hidden="true">
+      <div className="flex items-baseline gap-2" aria-hidden="true">
         {units.map((unit) => (
           <div key={unit.label} className="flex items-baseline gap-1">
             {/* tabular-nums so the row does not twitch sideways as digits change. */}
