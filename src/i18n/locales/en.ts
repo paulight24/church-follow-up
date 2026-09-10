@@ -85,6 +85,12 @@ const en = {
   'event.smsConsent':
     'By giving your phone number you agree to receive text messages from {church} about this event, service reminders and pastoral messages. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of attending.',
   'event.smsConsentChurchFallback': 'this church',
+  'event.countdownToClose': 'Registration closes in',
+  'event.countdownToStart': 'Event starts in',
+  'event.countdownDays': 'days',
+  'event.countdownHours': 'hours',
+  'event.countdownMinutes': 'min',
+  'event.countdownSeconds': 'sec',
 
   // ── form field labels (shared with the event form) ──
   'field.firstName': 'First Name',

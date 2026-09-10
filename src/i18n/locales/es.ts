@@ -83,6 +83,12 @@ const es: Translations = {
   'event.smsConsent':
     'Al proporcionar tu número de teléfono aceptas recibir mensajes de texto de {church} sobre este evento, recordatorios de servicios y mensajes pastorales. La frecuencia de los mensajes varía. Pueden aplicarse tarifas de mensajes y datos. Responde STOP para cancelar la suscripción o HELP para obtener ayuda. El consentimiento no es requisito para asistir.',
   'event.smsConsentChurchFallback': 'esta iglesia',
+  'event.countdownToClose': 'La inscripción cierra en',
+  'event.countdownToStart': 'El evento comienza en',
+  'event.countdownDays': 'días',
+  'event.countdownHours': 'horas',
+  'event.countdownMinutes': 'min',
+  'event.countdownSeconds': 'seg',
 
   'field.firstName': 'Nombre',
   'field.lastName': 'Apellido',
