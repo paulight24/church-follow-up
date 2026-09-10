@@ -85,6 +85,12 @@ const en = {
   'event.smsConsent':
     'By giving your phone number you agree to receive text messages from {church} about this event, service reminders and pastoral messages. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of attending.',
   'event.smsConsentChurchFallback': 'this church',
+  'resources.notFoundTitle': 'We can’t find that page',
+  'resources.notFoundBody': 'This link may have changed, or the church has not published it yet. Please check with the church office.',
+  'resources.errorTitle': 'Something went wrong',
+  'resources.errorBody': 'We had trouble loading this page. Please try again in a moment.',
+  'resources.emptyBody': 'Nothing has been added to this page yet. Please check back soon.',
+  'resources.contactTitle': 'Reach the church',
   'event.detailsToggle': 'About this event',
   'event.countdownToClose': 'Registration closes in',
   'event.countdownToStart': 'Event starts in',

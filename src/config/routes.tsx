@@ -73,6 +73,9 @@ const ServiceAttendancePage = lazy(() => import('@/features/attendance/pages/Ser
 const AttendanceReportsPage = lazy(() => import('@/features/attendance/pages/AttendanceReportsPage').then(m => ({ default: m.AttendanceReportsPage })));
 
 // Events
+const ResourcePageListPage = lazy(() => import('@/features/resources/pages/ResourcePageListPage').then(m => ({ default: m.ResourcePageListPage })));
+const ResourcePageEditorPage = lazy(() => import('@/features/resources/pages/ResourcePageEditorPage').then(m => ({ default: m.ResourcePageEditorPage })));
+const PublicResourcePage = lazy(() => import('@/features/resources/pages/PublicResourcePage').then(m => ({ default: m.PublicResourcePage })));
 const EventListPage = lazy(() => import('@/features/events/pages/EventListPage').then(m => ({ default: m.EventListPage })));
 const EventCreatePage = lazy(() => import('@/features/events/pages/EventCreatePage').then(m => ({ default: m.EventCreatePage })));
 const EventEditPage = lazy(() => import('@/features/events/pages/EventEditPage').then(m => ({ default: m.EventEditPage })));
@@ -172,6 +175,8 @@ export function AppRoutes() {
             phone's language (or ?lang=) — the signed-in app stays English. */}
         <Route element={<I18nProvider />}>
           <Route path="/e/:slug" element={<PublicEventRegistrationPage />} />
+          {/* Deliberately as short as /e/ for the same reason: it is printed. */}
+          <Route path="/r/:slug" element={<PublicResourcePage />} />
           <Route path="/live/:slug" element={<PublicListenerPage />} />
         </Route>
 
@@ -293,6 +298,15 @@ export function AppRoutes() {
             </Route>
             <Route element={<ProtectedRoute permission="events.update" />}>
               <Route path="/events/:id/edit" element={<EventEditPage />} />
+            </Route>
+
+            {/* Resource pages (public downloads behind a printed QR code) */}
+            <Route element={<ProtectedRoute permission="resource_pages.view" />}>
+              <Route path="/resources" element={<ResourcePageListPage />} />
+              <Route path="/resources/:id" element={<ResourcePageEditorPage />} />
+            </Route>
+            <Route element={<ProtectedRoute permission="resource_pages.create" />}>
+              <Route path="/resources/new" element={<ResourcePageEditorPage />} />
             </Route>
 
             {/* Foundation School */}

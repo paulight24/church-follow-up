@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
+  BookMarked,
   AlertTriangle,
   BarChart3,
   Bell,
@@ -142,6 +143,7 @@ const navSections: NavSection[] = [
         permission: 'foundation_school.view',
       },
       { label: 'Events', path: '/events', icon: CalendarHeart, permission: 'events.view' },
+      { label: 'Resources', path: '/resources', icon: BookMarked, permission: 'resource_pages.view' },
     ],
   },
   {
