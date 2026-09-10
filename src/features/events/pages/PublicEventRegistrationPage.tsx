@@ -11,12 +11,12 @@ import { Alert } from '@/components/ui/Alert';
 import { Spinner } from '@/components/ui/Spinner';
 import type { ApiError } from '@/types';
 import type { EventRegistrationAnswers, PublicRegistrationStatus } from '@/types/event';
-import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { publicEventsApi } from '../api/publicEvents.api';
 import { EVENT_FIELD_DEFS, buildRegistrationSchema, defaultRegistrationValues, publicFieldsToConfig } from '../lib/eventFields';
 import type { RegistrationFormValues } from '../lib/eventFields';
 import { EventRegistrationFields } from '../components/EventRegistrationFields';
 import { EventCountdown } from '../components/EventCountdown';
+import { EventDetailsDisclosure } from '../components/EventDetailsDisclosure';
 import { ShareEventCard } from '../components/ShareEventCard';
 import { formatEventDay, formatEventWhen } from '../lib/eventDate';
 import { useSeo } from '@/lib/seo';
@@ -294,20 +294,6 @@ export function PublicEventRegistrationPage() {
         registrationClosesAt={event.registrationClosesAt}
       />
 
-      {event.description && (
-        <div
-          // `prose` alone leaves paragraphs butted together here — the reset
-          // strips the browser's own <p> margin — so a multi-paragraph
-          // description read as one wall of text. The explicit spacing rules
-          // are what actually separate them.
-          className="prose prose-sm mb-6 max-w-none rounded-2xl bg-white p-5 text-slate-700 shadow-sm [&_a]:text-indigo-600 [&_img]:rounded-lg [&_p+p]:mt-3 [&_p]:leading-relaxed"
-          // This page is public - anyone on the internet, logged in or not, can load
-          // it - so admin-authored HTML is run through the shared sanitizer helper
-          // before it's ever handed to dangerouslySetInnerHTML. See src/lib/sanitizeHtml.ts.
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description) }}
-        />
-      )}
-
       <form
         onSubmit={handleSubmit((values) => mutation.mutate(values as EventRegistrationAnswers))}
         className="space-y-5 rounded-2xl bg-white p-6 shadow-lg sm:p-8"
@@ -362,6 +348,10 @@ export function PublicEventRegistrationPage() {
           {t('event.register')}
         </Button>
       </form>
+
+      {/* The prose sits after the form, collapsed: whoever scanned the flier
+          was already sold, and the fields should not be below the pitch. */}
+      {event.description && <EventDetailsDisclosure description={event.description} />}
 
       {/* Also offered to someone who has not registered — a visitor who is
           not coming themselves may still know exactly who should. */}

@@ -78,6 +78,7 @@ const zh: Translations = {
   'event.smsConsent':
     '提供电话号码即表示您同意接收来自 {church} 的短信，内容包括本活动通知、聚会提醒及牧养信息。发送频率不定，可能产生短信和数据费用。回复 STOP 退订，回复 HELP 获取帮助。同意接收短信并非参加活动的条件。',
   'event.smsConsentChurchFallback': '本教会',
+  'event.detailsToggle': '活动详情',
   'event.countdownToClose': '报名截止还有',
   'event.countdownToStart': '距离活动开始还有',
   'event.countdownDays': '天',

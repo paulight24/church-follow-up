@@ -85,6 +85,7 @@ const en = {
   'event.smsConsent':
     'By giving your phone number you agree to receive text messages from {church} about this event, service reminders and pastoral messages. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of attending.',
   'event.smsConsentChurchFallback': 'this church',
+  'event.detailsToggle': 'About this event',
   'event.countdownToClose': 'Registration closes in',
   'event.countdownToStart': 'Event starts in',
   'event.countdownDays': 'days',
@@ -104,9 +105,9 @@ const en = {
   // Placeholders. Shown inside the input, so an untranslated one is as
   // visibly wrong as an untranslated label - the prayer-request box was
   // reported reading English under a Spanish label.
-  'field.placeholder.firstName': 'Grace',
-  'field.placeholder.lastName': 'Adeyemi',
-  'field.placeholder.email': 'grace@example.com',
+  'field.placeholder.firstName': 'John',
+  'field.placeholder.lastName': 'Smith',
+  'field.placeholder.email': 'john.smith@example.com',
   'field.placeholder.phone': '+1 (555) 123-4567',
   'field.placeholder.prayerRequest': 'Share anything you would like the team to pray with you about (optional)...',
   'field.select.placeholder': 'Select...',

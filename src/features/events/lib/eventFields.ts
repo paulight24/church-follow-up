@@ -24,9 +24,9 @@ export interface EventFieldDef {
  * each hardcoding their own copy.
  */
 export const EVENT_FIELD_DEFS: EventFieldDef[] = [
-  { key: 'firstName', label: 'First Name', inputType: 'text', placeholder: 'Grace' },
-  { key: 'lastName', label: 'Last Name', inputType: 'text', placeholder: 'Adeyemi' },
-  { key: 'email', label: 'Email', inputType: 'email', placeholder: 'grace@example.com' },
+  { key: 'firstName', label: 'First Name', inputType: 'text', placeholder: 'John' },
+  { key: 'lastName', label: 'Last Name', inputType: 'text', placeholder: 'Smith' },
+  { key: 'email', label: 'Email', inputType: 'email', placeholder: 'john.smith@example.com' },
   { key: 'phone', label: 'Phone', inputType: 'tel', placeholder: '+1 (555) 123-4567' },
   { key: 'dateOfBirth', label: 'Date of Birth', inputType: 'date' },
   { key: 'weddingAnniversary', label: 'Wedding Anniversary', inputType: 'date' },
