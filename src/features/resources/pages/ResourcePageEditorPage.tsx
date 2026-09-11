@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { ArrowLeft, Eye, EyeOff, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, RotateCcw, Save, Trash2 } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -133,6 +133,19 @@ export function ResourcePageEditorPage() {
       }),
   });
 
+  const resetCounts = useMutation({
+    mutationFn: () => resourcesApi.resetDownloadCounts(id!),
+    onSuccess: (res) => {
+      // Write the fresh counts straight into the form rather than refetching:
+      // the form is seeded once, so a refetch would not update what is on
+      // screen and the zeroes would only appear after a reload.
+      setItems(res.data.items);
+      invalidate();
+      toast({ title: 'Download counts reset', variant: 'success' });
+    },
+    onError: () => toast({ title: 'Could not reset the counts', variant: 'error' }),
+  });
+
   const remove = useMutation({
     mutationFn: () => resourcesApi.remove(id!),
     onSuccess: () => {
@@ -251,6 +264,21 @@ export function ResourcePageEditorPage() {
         </CardHeader>
         <CardContent>
           <ResourceItemsEditor value={items} onChange={setItems} disabled={save.isPending} />
+          {page && items.some((item) => (item.downloadCount ?? 0) > 0) && (
+            <div className="mt-4 flex items-center justify-end border-t border-slate-100 pt-3">
+              {/* Testing your own page before printing the QR code leaves taps
+                  that look exactly like real ones. */}
+              <Button
+                variant="ghost"
+                size="sm"
+                isLoading={resetCounts.isPending}
+                leftIcon={<RotateCcw className="h-3.5 w-3.5" />}
+                onClick={() => resetCounts.mutate()}
+              >
+                Reset download counts
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

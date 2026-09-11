@@ -39,6 +39,9 @@ export const resourcesApi = {
   remove(id: string): Promise<AxiosResponse<null>> {
     return api.delete(`/resource-pages/${id}`);
   },
+  resetDownloadCounts(id: string): Promise<AxiosResponse<ResourcePage>> {
+    return api.post(`/resource-pages/${id}/items/reset-counts`);
+  },
   listResponses(id: string): Promise<AxiosResponse<ResourceResponse[]>> {
     return api.get(`/resource-pages/${id}/responses`);
   },
