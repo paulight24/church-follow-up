@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChurchLogoField } from '../components/ChurchLogoField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Cake, Gem } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -32,6 +33,7 @@ export function SettingsPage() {
   });
 
   const [churchName, setChurchName] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -94,6 +96,7 @@ export function SettingsPage() {
     if (!data) return;
     const profile = data.CHURCH_PROFILE ?? {};
     setChurchName(asString(profile.churchName));
+    setLogoUrl(asString(profile.logoUrl));
     setAddress(asString(profile.address));
     setPhone(asString(profile.phone));
     setEmail(asString(profile.email));
@@ -135,7 +138,7 @@ export function SettingsPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       await Promise.all([
-        settingsApi.updateCategory('CHURCH_PROFILE', { churchName, address, phone, email, website }),
+        settingsApi.updateCategory('CHURCH_PROFILE', { churchName, logoUrl, address, phone, email, website }),
         settingsApi.updateCategory('FOLLOW_UP', {
           cycleDuration,
           autoEscalationDays: autoEscalation,
@@ -208,6 +211,9 @@ export function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <ChurchLogoField value={logoUrl} onChange={setLogoUrl} />
+            </div>
             <div className="md:col-span-2">
               <Input
                 label="Church Name"
