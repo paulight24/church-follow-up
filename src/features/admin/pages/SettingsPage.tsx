@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChurchLogoField } from '../components/ChurchLogoField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Cake, Gem } from 'lucide-react';
@@ -92,8 +92,18 @@ export function SettingsPage() {
     'With love from your family at {{churchName}}.'
   );
 
+  // Seed the form once, not on every settings object.
+  //
+  // TanStack Query hands back a fresh object after any refetch — including the
+  // one each Save triggers — and re-seeding from it discarded whatever else
+  // was on screen but unsaved. Uploading a logo and then saving lost the logo,
+  // because saving refetched and the refetch reset the field to what the
+  // server still had.
+  const hydrated = useRef(false);
+
   useEffect(() => {
-    if (!data) return;
+    if (!data || hydrated.current) return;
+    hydrated.current = true;
     const profile = data.CHURCH_PROFILE ?? {};
     setChurchName(asString(profile.churchName));
     setLogoUrl(asString(profile.logoUrl));
