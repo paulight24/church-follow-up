@@ -9,10 +9,11 @@
  */
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Download, Inbox, Mail, MessageSquareHeart, Phone, Undo2 } from 'lucide-react';
+import { Check, Download, Inbox, Mail, MessageSquareHeart, Phone, Trash2, Undo2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
@@ -37,6 +38,7 @@ export function ResourceResponsesPanel({ pageId, pageTitle }: { pageId: string; 
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>('needsAction');
   const [isExporting, setIsExporting] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const { data: responses, isLoading, isError } = useQuery({
     queryKey: ['resource-responses', pageId],
@@ -48,6 +50,15 @@ export function ResourceResponsesPanel({ pageId, pageTitle }: { pageId: string; 
       resourcesApi.markResponseHandled(pageId, id, handled),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['resource-responses', pageId] }),
     onError: () => toast({ title: 'Could not update that response', variant: 'error' }),
+  });
+
+  const remove = useMutation({
+    mutationFn: (responseId: string) => resourcesApi.deleteResponse(pageId, responseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resource-responses', pageId] });
+      toast({ title: 'Response deleted', variant: 'success' });
+    },
+    onError: () => toast({ title: 'Could not delete that response', variant: 'error' }),
   });
 
   const visible = useMemo(() => {
@@ -187,25 +198,50 @@ export function ResourceResponsesPanel({ pageId, pageTitle }: { pageId: string; 
                     )}
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    leftIcon={
-                      response.handledAt ? <Undo2 className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />
-                    }
-                    isLoading={markHandled.isPending && markHandled.variables?.id === response.id}
-                    onClick={() =>
-                      markHandled.mutate({ id: response.id, handled: !response.handledAt })
-                    }
-                  >
-                    {response.handledAt ? 'Reopen' : 'Followed up'}
-                  </Button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      leftIcon={
+                        response.handledAt ? <Undo2 className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />
+                      }
+                      isLoading={markHandled.isPending && markHandled.variables?.id === response.id}
+                      onClick={() =>
+                        markHandled.mutate({ id: response.id, handled: !response.handledAt })
+                      }
+                    >
+                      {response.handledAt ? 'Reopen' : 'Followed up'}
+                    </Button>
+                    <button
+                      type="button"
+                      aria-label="Delete this response"
+                      className="rounded p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-600"
+                      onClick={() => setPendingDelete(response.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </CardContent>
+
+      <ConfirmDialog
+        isOpen={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => {
+          if (pendingDelete) remove.mutate(pendingDelete);
+          setPendingDelete(null);
+        }}
+        title="Delete this response?"
+        // Said plainly because the two are easy to confuse, and someone
+        // clearing spam should not fear deleting a person by accident.
+        message="The message is removed for good. The member record and any prayer request it raised are kept."
+        confirmText="Delete"
+        variant="danger"
+      />
     </Card>
   );
 }

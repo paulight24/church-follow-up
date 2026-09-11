@@ -146,78 +146,107 @@ export function PublicResourcePage() {
         />
       )}
 
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-slate-900">{data.title}</h1>
-        {data.churchName && <p className="mt-1.5 text-sm font-medium text-indigo-700">{data.churchName}</p>}
+      <div className="mb-7 text-center">
+        {/* The church's own mark first. Without it the first page a new
+            convert sees is branded as nothing in particular — and this is
+            the moment where "am I in the right place?" gets answered. */}
+        {church?.logoUrl && (
+          <img
+            src={church.logoUrl}
+            alt=""
+            className="mx-auto mb-4 h-16 w-16 rounded-full border border-white bg-white object-contain shadow-sm"
+          />
+        )}
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">{data.title}</h1>
+        {data.churchName && (
+          <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-indigo-700">
+            {data.churchName}
+          </p>
+        )}
       </div>
 
+      {/* Deliberately NOT a card. Every white card on this page is something
+          you can act on — a resource, or the form. Wrapping the welcome
+          paragraph in one too made four identical boxes and no hierarchy, so
+          nothing read as the thing to do. */}
       {data.intro && (
         <div
-          className="prose prose-sm mb-6 max-w-none rounded-2xl bg-white p-5 text-slate-700 shadow-sm [&_a]:text-indigo-600 [&_p+p]:mt-3 [&_p]:leading-relaxed"
+          className="mb-7 px-1 text-center text-[15px] leading-relaxed text-slate-600 [&_a]:text-indigo-600 [&_p+p]:mt-3 [&_strong]:text-slate-900"
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.intro) }}
         />
       )}
 
       {data.items.length > 0 ? (
-        <div className="space-y-3">
-          {data.items.map((item) => (
-            <ResourceTile key={item.id} item={item} />
-          ))}
-        </div>
+        <>
+          <h2 className="mb-2.5 px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            {t('resources.listLabel')}
+          </h2>
+          <div className="space-y-3">
+            {data.items.map((item) => (
+              <ResourceTile key={item.id} item={item} />
+            ))}
+          </div>
+        </>
       ) : (
         <p className="rounded-2xl bg-white p-5 text-center text-sm text-slate-500 shadow-sm">
           {t('resources.emptyBody')}
         </p>
       )}
 
-      {data.contactNote && (
-        <div
-          className="prose prose-sm mt-6 max-w-none rounded-2xl bg-white p-5 text-slate-700 shadow-sm [&_a]:text-indigo-600 [&_p+p]:mt-3 [&_p]:leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.contactNote) }}
-        />
-      )}
-
       {/* After the material, never before it: the books are ungated, and this
           is the other half of that decision. */}
       <ResourceResponseForm slug={slug!} />
 
-      {church && (church.address || church.phone || church.email || church.website) && (
-        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-slate-900">{t('resources.contactTitle')}</h2>
-          <ul className="space-y-2 text-sm text-slate-600">
-            {church.address && (
-              <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                <span>{church.address}</span>
-              </li>
-            )}
-            {church.phone && (
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-slate-400" />
-                <a href={`tel:${church.phone}`} className="text-indigo-600">
-                  {church.phone}
-                </a>
-              </li>
-            )}
-            {church.email && (
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0 text-slate-400" />
-                <a href={`mailto:${church.email}`} className="text-indigo-600">
-                  {church.email}
-                </a>
-              </li>
-            )}
-            {church.website && (
-              <li className="flex items-center gap-2">
-                <Globe className="h-4 w-4 shrink-0 text-slate-400" />
-                <a href={church.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600">
-                  {church.website.replace(/^https?:\/\//, '')}
-                </a>
-              </li>
-            )}
-          </ul>
+      {(data.contactNote || (church && (church.address || church.phone || church.email || church.website))) && (
+        <div className="mt-8 rounded-2xl border border-slate-200/70 bg-white/60 p-5">
+          {data.contactNote && (
+            <div
+              className="mb-4 text-sm leading-relaxed text-slate-600 [&_a]:text-indigo-600 [&_p+p]:mt-3 [&_strong]:text-slate-900"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.contactNote) }}
+            />
+          )}
+          {church && (church.address || church.phone || church.email || church.website) && (
+            <>
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                {t('resources.contactTitle')}
+              </h2>
+              <ul className="space-y-2 text-sm text-slate-600">
+                {church.address && (
+                  <li className="flex items-start gap-2">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                    <span>{church.address}</span>
+                  </li>
+                )}
+                {church.phone && (
+                  <li className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 shrink-0 text-slate-400" />
+                    <a href={`tel:${church.phone}`} className="text-indigo-600">
+                      {church.phone}
+                    </a>
+                  </li>
+                )}
+                {church.email && (
+                  <li className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 shrink-0 text-slate-400" />
+                    <a href={`mailto:${church.email}`} className="text-indigo-600">
+                      {church.email}
+                    </a>
+                  </li>
+                )}
+                {church.website && (
+                  <li className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 shrink-0 text-slate-400" />
+                    <a href={church.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600">
+                      {church.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </>
+          )}
         </div>
       )}
+
     </PageShell>
   );
 }

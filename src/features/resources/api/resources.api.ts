@@ -48,4 +48,7 @@ export const resourcesApi = {
   markResponseHandled(id: string, responseId: string, handled: boolean) {
     return api.post(`/resource-pages/${id}/responses/${responseId}/handled`, { handled });
   },
+  deleteResponse(id: string, responseId: string): Promise<AxiosResponse<null>> {
+    return api.delete(`/resource-pages/${id}/responses/${responseId}`);
+  },
 };

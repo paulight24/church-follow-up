@@ -94,6 +94,7 @@ const zh: Translations = {
   'resources.submitError': '发送失败，请稍后再试。',
   'resources.thanksTitle': '谢谢，我们已收到您的信息',
   'resources.thanksBody': '教会的同工会与您联系。随时欢迎您。',
+  'resources.listLabel': '这些都可以带走',
   'resources.notFoundTitle': '找不到该页面',
   'resources.notFoundBody': '链接可能已更改，或教会尚未发布该页面。请与教会办公室联系。',
   'resources.errorTitle': '出现问题',

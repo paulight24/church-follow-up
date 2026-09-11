@@ -101,6 +101,7 @@ const en = {
   'resources.submitError': 'We could not send that. Please try again in a moment.',
   'resources.thanksTitle': 'Thank you — we have your message',
   'resources.thanksBody': 'Someone from the church will be in touch. You are welcome here any time.',
+  'resources.listLabel': 'Take these with you',
   'resources.notFoundTitle': 'We can’t find that page',
   'resources.notFoundBody': 'This link may have changed, or the church has not published it yet. Please check with the church office.',
   'resources.errorTitle': 'Something went wrong',

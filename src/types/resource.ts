@@ -44,6 +44,7 @@ export interface PublicResourcePage {
   churchName?: string | null;
   church?: {
     name: string;
+    logoUrl?: string | null;
     address?: string | null;
     phone?: string | null;
     email?: string | null;

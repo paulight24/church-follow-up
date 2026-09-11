@@ -99,6 +99,7 @@ const es: Translations = {
   'resources.submitError': 'No pudimos enviarlo. Inténtalo de nuevo en un momento.',
   'resources.thanksTitle': 'Gracias, ya recibimos tu mensaje',
   'resources.thanksBody': 'Alguien de la iglesia se pondrá en contacto contigo. Siempre eres bienvenido aquí.',
+  'resources.listLabel': 'Llévate esto contigo',
   'resources.notFoundTitle': 'No encontramos esa página',
   'resources.notFoundBody': 'Puede que el enlace haya cambiado o que la iglesia aún no la haya publicado. Consulta con la oficina de la iglesia.',
   'resources.errorTitle': 'Algo salió mal',
