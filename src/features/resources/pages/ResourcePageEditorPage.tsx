@@ -3,7 +3,7 @@
  * difference is whether there is already a row — and splitting it into a
  * create wizard plus an edit form is how the two drift apart.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
@@ -56,8 +56,18 @@ export function ResourcePageEditorPage() {
   const [items, setItems] = useState<ResourceItemDraft[]>([]);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // Hydrate once per page, not on every `page` object.
+  //
+  // TanStack Query refetches on window focus, which hands back a new object
+  // with the same contents — and seeding the form from that threw away
+  // whatever was unsaved. Adding a resource and glancing at another window
+  // was enough to lose the row, which is exactly what someone does while
+  // hunting for the PDF they are about to upload.
+  const hydratedFor = useRef<string | null>(null);
+
   useEffect(() => {
-    if (!page) return;
+    if (!page || hydratedFor.current === page.id) return;
+    hydratedFor.current = page.id;
     setTitle(page.title);
     setSlug(page.slug);
     setSlugTouched(true);
