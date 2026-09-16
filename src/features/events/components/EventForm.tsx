@@ -52,6 +52,7 @@ const eventFormSchema = z.object({
   startTime: z.string().refine((v) => !v || TIME_RE.test(v), { message: 'Use HH:mm (24-hour)' }),
   endTime: z.string().refine((v) => !v || TIME_RE.test(v), { message: 'Use HH:mm (24-hour)' }),
   location: z.string().max(200),
+  requiresReview: z.boolean(),
   capacity: z
     .string()
     .refine((v) => !v || (/^\d+$/.test(v) && Number(v) > 0), { message: 'Capacity must be a positive whole number' }),
@@ -71,6 +72,7 @@ export interface EventFormValues {
   endTime: string;
   location: string;
   capacity: string;
+  requiresReview: boolean;
   registrationOpensAt: string;
   registrationClosesAt: string;
   fields: EventFieldConfig;
@@ -118,6 +120,7 @@ export function EventForm({ initialValues, onSubmit, isSubmitting, onCancel, sub
       endTime: initialValues?.endTime ?? '',
       location: initialValues?.location ?? '',
       capacity: initialValues?.capacity ?? '',
+      requiresReview: initialValues?.requiresReview ?? false,
       registrationOpensAt: toLocalInputValue(initialValues?.registrationOpensAt),
       registrationClosesAt: toLocalInputValue(initialValues?.registrationClosesAt),
     },
@@ -232,6 +235,22 @@ export function EventForm({ initialValues, onSubmit, isSubmitting, onCancel, sub
             error={errors.capacity?.message}
             {...register('capacity')}
           />
+
+          <label className="flex items-start gap-2.5 sm:col-span-2">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600"
+              {...register('requiresReview')}
+            />
+            <span className="text-sm text-slate-700">
+              Submissions need to be reviewed
+              <span className="mt-0.5 block text-xs text-slate-500">
+                For a form where sending it is a request rather than a place — an Open Mic slot, say.
+                You get a decision, a running order and a note of who has been told, instead of a
+                plain list of names.
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 

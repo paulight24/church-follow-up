@@ -19,6 +19,7 @@ import { EventQrShare } from '../components/EventQrShare';
 import { EventAnnounceModal } from '../components/EventAnnounceModal';
 import { EventRemindersCard } from '../components/EventRemindersCard';
 import { EventRegistrationsPanel } from '../components/EventRegistrationsPanel';
+import { RegistrationReviewPanel } from '../components/RegistrationReviewPanel';
 
 function errorMessage(err: unknown, fallback: string): string {
   return (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback;
@@ -208,7 +209,15 @@ export function EventDetailPage() {
 
       {canUpdate && event.status === 'PUBLISHED' && <EventRemindersCard eventId={event.id} />}
 
-      {canViewRegistrations && <EventRegistrationsPanel event={event} />}
+      {/* An event whose submissions are requests gets the review panel
+          instead of the plain list — the same rows, but arranged around the
+          decision that has to be made about each one. */}
+      {canViewRegistrations &&
+        (event.requiresReview ? (
+          <RegistrationReviewPanel eventId={event.id} eventName={event.name} />
+        ) : (
+          <EventRegistrationsPanel event={event} />
+        ))}
 
       {announceOpen && (
         <EventAnnounceModal eventId={event.id} eventName={event.name} onClose={() => setAnnounceOpen(false)} />

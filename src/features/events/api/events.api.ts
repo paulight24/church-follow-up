@@ -8,6 +8,7 @@ import type {
   EventRegistration,
   EventRegistrationExportRow,
   UpdateEventRequest,
+  ReviewRegistrationPayload,
 } from '@/types/event';
 
 export interface AnnounceTestResult {
@@ -103,6 +104,15 @@ export const eventsApi = {
     params?: { page?: number; pageSize?: number },
   ): Promise<AxiosResponse<PaginatedResponse<EventRegistration>>> {
     return api.get(`/events/${id}/registrations`, { params });
+  },
+
+  /** Records what the team decided about one submission. */
+  reviewRegistration(
+    id: string,
+    registrationId: string,
+    data: ReviewRegistrationPayload,
+  ): Promise<AxiosResponse<EventRegistration>> {
+    return api.patch(`/events/${id}/registrations/${registrationId}/review`, data);
   },
 
   /** Flat, CSV-ready rows for every registration - backs the "Export CSV" button. */

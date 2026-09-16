@@ -74,6 +74,8 @@ export interface EventRecord {
   location?: string | null;
   status: EventStatus;
   capacity?: number | null;
+  /** Submissions are requests to be decided on, not places. */
+  requiresReview?: boolean;
   registrationOpensAt?: string | null;
   registrationClosesAt?: string | null;
   fields: EventFieldConfig;
@@ -95,6 +97,8 @@ export interface CreateEventRequest {
   endTime?: string;
   location?: string;
   capacity?: number | null;
+  /** Submissions are requests to be decided on, not places. */
+  requiresReview?: boolean;
   registrationOpensAt?: string;
   registrationClosesAt?: string;
   fields: EventFieldConfig;
@@ -111,6 +115,8 @@ export interface UpdateEventRequest {
   endTime?: string | null;
   location?: string | null;
   capacity?: number | null;
+  /** Submissions are requests to be decided on, not places. */
+  requiresReview?: boolean;
   registrationOpensAt?: string | null;
   registrationClosesAt?: string | null;
   fields?: EventFieldConfig;
@@ -143,6 +149,28 @@ export interface EventRegistrationMemberRef {
  * for); `member` is the Member row the registration got linked/created against, which may
  * carry a value even for a field this event didn't collect on its own form.
  */
+export const EVENT_REVIEW_STATUSES = ['NEW', 'UNDER_REVIEW', 'APPROVED', 'WAITLISTED', 'DECLINED'] as const;
+export type EventReviewStatus = (typeof EVENT_REVIEW_STATUSES)[number];
+
+export const EVENT_REHEARSAL_STATUSES = ['NOT_NEEDED', 'TO_ARRANGE', 'SCHEDULED', 'DONE'] as const;
+export type EventRehearsalStatus = (typeof EVENT_REHEARSAL_STATUSES)[number];
+
+/**
+ * What the team decided about a submission — separate from `status`, which
+ * only says whether the submission itself still stands.
+ */
+export interface EventRegistrationReview {
+  status: EventReviewStatus;
+  reviewerUserId: string | null;
+  reviewerName: string | null;
+  notes: string | null;
+  approvedDurationMinutes: number | null;
+  runningOrder: number | null;
+  rehearsalStatus: EventRehearsalStatus | null;
+  reviewedAt: string | null;
+  decisionSentAt: string | null;
+}
+
 export interface EventRegistration {
   id: string;
   status: EventRegistrationStatus;
@@ -152,6 +180,17 @@ export interface EventRegistration {
     /** Answers to this event's own questions, keyed by custom field key. */
     custom?: Record<string, string>;
   };
+  review: EventRegistrationReview;
+}
+
+export interface ReviewRegistrationPayload {
+  reviewStatus?: EventReviewStatus;
+  reviewerUserId?: string | null;
+  reviewNotes?: string | null;
+  approvedDurationMinutes?: number | null;
+  runningOrder?: number | null;
+  rehearsalStatus?: EventRehearsalStatus | null;
+  decisionSent?: boolean;
 }
 
 /** One flattened row from GET /events/:id/registrations/export - already CSV-ready. */
@@ -167,6 +206,12 @@ export interface EventRegistrationExportRow {
   dateOfBirth: string;
   weddingAnniversary: string;
   prayerRequest: string;
+  reviewStatus: string;
+  reviewer: string;
+  approvedDurationMinutes: number | string;
+  runningOrder: number | string;
+  rehearsalStatus: string;
+  decisionSentAt: string;
 }
 
 export type PublicRegistrationStatus = 'OPEN' | 'NOT_YET_OPEN' | 'CLOSED' | 'FULL';

@@ -19,6 +19,7 @@ function toCreateEventRequest(values: EventFormValues): CreateEventRequest {
     // Backend stores eventDate as a full ISO datetime even though the form only collects
     // a calendar date - midnight local time, same convention ServicesPage uses for serviceDate.
     eventDate: new Date(`${values.eventDate}T00:00:00`).toISOString(),
+    requiresReview: values.requiresReview,
     fields: values.fields,
     customFields: values.customFields,
   };
