@@ -26,6 +26,7 @@ const TermsPage = lazy(() => import('@/features/public/pages/TermsPage').then(m 
 
 // Dashboard
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const MyPeoplePage = lazy(() => import('@/features/my-people/pages/MyPeoplePage').then(m => ({ default: m.MyPeoplePage })));
 
 // Guide
 const GuidePage = lazy(() => import('@/features/guide/pages/GuidePage').then(m => ({ default: m.GuidePage })));
@@ -134,13 +135,20 @@ function PageLoader() {
 }
 
 /**
- * The root path is the funnel entrance: signed-in users go straight to
- * their dashboard; visitors see the public landing page.
+ * The root path is the funnel entrance: signed-in users go to the screen
+ * their role actually works from; visitors see the public landing page.
+ *
+ * Oversight roles (`members.view_all` — Pastor, Administrator, Super Admin)
+ * open on the church-wide dashboard. Everyone else — team leads and
+ * follow-up workers — opens on their own people, because the dashboard's
+ * church-wide KPIs are not their job and reading past them to find their
+ * four names is the friction this replaces.
  */
 function RootGate() {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated, hasPermission } = useAuth();
   if (isLoading) return <PageLoader />;
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/welcome" replace />;
+  if (!isAuthenticated) return <Navigate to="/welcome" replace />;
+  return <Navigate to={hasPermission('members.view_all') ? '/dashboard' : '/my-people'} replace />;
 }
 
 export function AppRoutes() {
@@ -186,6 +194,9 @@ export function AppRoutes() {
             {/* Dashboard & Guide are open to every authenticated role, so no
                 extra permission gate beyond the auth check above. */}
             <Route path="/dashboard" element={<DashboardPage />} />
+            {/* The people assigned to this user. Self-scoping on the server,
+                so it needs no permission beyond being signed in. */}
+            <Route path="/my-people" element={<MyPeoplePage />} />
             <Route path="/guide" element={<GuidePage />} />
 
             {/* My Profile (self-service) */}

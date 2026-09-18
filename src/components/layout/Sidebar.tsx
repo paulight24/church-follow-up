@@ -36,6 +36,7 @@ import {
   Sparkles,
   Printer,
   Palette,
+  HeartHandshake,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
@@ -67,6 +68,10 @@ interface NavSection {
 
 /** Items that always sit above the collapsible sections, unaffected by permissions. */
 const topLevelItems: NavItem[] = [
+  // First, and above Dashboard on purpose: for a worker or a team lead this
+  // is the screen they came to use, and the dashboard's church-wide figures
+  // are somebody else's job.
+  { label: 'My People', path: '/my-people', icon: HeartHandshake, permission: 'members.view' },
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   // Every role including MEMBER holds announcements.view - this is one of
   // very few pages an ordinary member can see, so it sits at the top level
@@ -85,7 +90,7 @@ const navSections: NavSection[] = [
         label: 'My Follow-Ups',
         path: '/follow-ups',
         icon: ClipboardCheck,
-        permission: ['follow_ups.view', 'follow_ups.view_own'],
+        permission: ['follow_ups.view', 'follow_ups.view_team', 'follow_ups.view_own'],
       },
       {
         label: 'Follow-Up Cycles',
