@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Phone, MessageSquare, Users } from 'lucide-react';
+import { Phone, MessageSquare, Users, NotebookPen } from 'lucide-react';
 import { getMyPeople, type MyPerson } from '../api';
+import { LogContactDialog } from '../components/LogContactDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { Spinner } from '@/components/ui/Spinner';
 
@@ -31,6 +33,7 @@ function lastContactLabel(iso: string | null): { text: string; urgent: boolean }
 }
 
 function PersonCard({ person }: { person: MyPerson }) {
+  const [logging, setLogging] = useState(false);
   const last = lastContactLabel(person.lastContactedAt);
   // tel: and sms: rather than a dialer page — on the phone this is opened on,
   // these hand straight to the app that makes the call.
@@ -91,6 +94,25 @@ function PersonCard({ person }: { person: MyPerson }) {
           </span>
         )}
       </div>
+
+      {/* Full width and under the call button on purpose: it is the step that
+          happens after the call, and it is the one that makes the next
+          person's list useful. */}
+      <button
+        type="button"
+        onClick={() => setLogging(true)}
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      >
+        <NotebookPen className="h-4 w-4" />
+        Log a call
+      </button>
+
+      <LogContactDialog
+        memberId={person.id}
+        memberName={person.displayName}
+        isOpen={logging}
+        onClose={() => setLogging(false)}
+      />
     </li>
   );
 }

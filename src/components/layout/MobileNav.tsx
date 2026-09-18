@@ -4,6 +4,7 @@ import {
   Bell,
   BookOpen,
   ClipboardCheck,
+  HeartHandshake,
   LayoutDashboard,
   Settings,
   Users,
@@ -27,13 +28,16 @@ interface MobileNavItem {
 // destinations, so a tab is never shown here if the equivalent desktop nav
 // link (and the route itself) would be hidden/forbidden for the same user.
 const mobileNavItems: MobileNavItem[] = [
+  // First here as on the desktop sidebar: on a phone, after service, this is
+  // the screen the volunteer opened the app for.
+  { label: 'My People', path: '/my-people', icon: HeartHandshake, permission: 'members.view' },
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Guide', path: '/guide', icon: BookOpen },
   {
     label: 'Follow-Ups',
     path: '/follow-ups',
     icon: ClipboardCheck,
-    permission: ['follow_ups.view', 'follow_ups.view_own'],
+    permission: ['follow_ups.view', 'follow_ups.view_team', 'follow_ups.view_own'],
   },
   { label: 'Members', path: '/members', icon: Users, permission: 'members.view' },
   { label: 'Notifications', path: '/notifications', icon: Bell, useBadge: true, permission: 'notifications.view' },
@@ -81,7 +85,9 @@ export function MobileNav() {
                   </span>
                 )}
               </span>
-              <span>{item.label}</span>
+              {/* One line each: a sixth tab makes "Follow-Ups" wrap and
+                  shoves that tab's icon out of line with the others. */}
+              <span className="max-w-full truncate whitespace-nowrap">{item.label}</span>
             </NavLink>
           );
         })}
