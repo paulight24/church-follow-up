@@ -9,12 +9,15 @@ import { useDebounce } from '@/hooks/useDebounce';
 import api from '@/config/api';
 import { foundationSchoolApi } from '../api/foundation-school.api';
 
+/**
+ * What the member lookup returns — a name and a partial phone, not a
+ * directory row. A teacher may reach any member in order to enrol them, but
+ * holds no `members.view_all`, so this is all the endpoint will say.
+ */
 interface SearchMember {
   id: string;
-  firstName: string;
-  lastName: string;
-  email?: string | null;
-  phonePrimary?: string | null;
+  displayName: string;
+  phoneHint: string | null;
 }
 
 interface EnrollMemberModalProps {
@@ -36,8 +39,11 @@ export function EnrollMemberModal({ isOpen, onClose, cohortId }: EnrollMemberMod
   const memberResults = useQuery({
     queryKey: ['foundation-school', 'member-search', debouncedSearch],
     queryFn: () =>
+      // /members/lookup, not /members: the roster query is scoped to what the
+      // caller may see, which for a teacher is their own class — and you
+      // cannot enrol someone who is already in your class.
       api
-        .get<{ data: SearchMember[] }>('/members', { params: { search: debouncedSearch, pageSize: 8 } })
+        .get<{ data: SearchMember[] }>('/members/lookup', { params: { q: debouncedSearch } })
         .then((res) => res.data.data ?? []),
     enabled: debouncedSearch.trim().length >= 2,
   });
@@ -103,7 +109,7 @@ export function EnrollMemberModal({ isOpen, onClose, cohortId }: EnrollMemberMod
             <div className="flex items-center gap-2 text-sm text-indigo-900">
               <User className="h-4 w-4" />
               <span className="font-medium">
-                {selectedMember.firstName} {selectedMember.lastName}
+                {selectedMember.displayName}
               </span>
             </div>
             <button
@@ -140,10 +146,8 @@ export function EnrollMemberModal({ isOpen, onClose, cohortId }: EnrollMemberMod
                       onClick={() => setSelectedMember(m)}
                       className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-slate-50"
                     >
-                      <span className="font-medium text-slate-800">
-                        {m.firstName} {m.lastName}
-                      </span>
-                      <span className="text-xs text-slate-400">{m.phonePrimary ?? m.email ?? ''}</span>
+                      <span className="font-medium text-slate-800">{m.displayName}</span>
+                      <span className="text-xs text-slate-400">{m.phoneHint ? `••• ${m.phoneHint}` : ''}</span>
                     </button>
                   ))
                 )}

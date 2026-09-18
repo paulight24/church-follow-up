@@ -13,9 +13,27 @@ import type {
 import type { PaginatedResponse } from '@/types';
 import api from '@/config/api';
 
+/** What `GET /members/lookup` returns: enough to pick a person, no more. */
+export interface MemberLookupResult {
+  id: string;
+  displayName: string;
+  /** Last four digits of the primary phone, for telling two same-names apart. */
+  phoneHint: string | null;
+}
+
 export const membersApi = {
   getMembers(filters: MemberListFilters): Promise<AxiosResponse<PaginatedResponse<Member>>> {
     return api.get('/members', { params: filters });
+  },
+
+  /**
+   * Find one person by name in order to act on them. For roles that may reach
+   * anyone (ushers at the door, Foundation School teachers enrolling) without
+   * being able to browse the roster. Returns nothing for a term under two
+   * characters.
+   */
+  lookup(q: string): Promise<AxiosResponse<MemberLookupResult[]>> {
+    return api.get('/members/lookup', { params: { q } });
   },
 
   getMember(id: string): Promise<AxiosResponse<Member>> {

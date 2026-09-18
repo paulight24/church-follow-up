@@ -41,12 +41,33 @@ export function ServiceAttendancePage() {
     queryFn: () => attendanceApi.getAttendance(serviceId).then((res) => res.data.data),
   });
 
+  // An usher holds `members.lookup`, not `members.view_all`: they may reach
+  // any member by name to check them in, but the roster is not theirs to
+  // browse. So the picker has two modes — a browsable list for the roles that
+  // may see everyone, and a name search for the ones that may not. Without
+  // this split the door queue would have shown an usher an empty list.
+  const canBrowseRoster = hasPermission('members.view_all');
+
   const { data: members, isLoading: membersLoading } = useQuery({
-    queryKey: ['members', 'attendance-picker', debouncedSearch],
+    queryKey: ['members', 'attendance-picker', debouncedSearch, canBrowseRoster],
     queryFn: () =>
-      membersApi
-        .getMembers({ search: debouncedSearch || undefined, pageSize: 50, sortBy: 'firstName', sortOrder: 'asc' })
-        .then((res) => res.data.data),
+      canBrowseRoster
+        ? membersApi
+            .getMembers({ search: debouncedSearch || undefined, pageSize: 50, sortBy: 'firstName', sortOrder: 'asc' })
+            .then((res) =>
+              res.data.data.map((m) => ({ id: m.id, displayName: m.displayName, detail: m.phonePrimary ?? null }))
+            )
+        : membersApi
+            .lookup(debouncedSearch)
+            .then((res) =>
+              res.data.map((m) => ({
+                id: m.id,
+                displayName: m.displayName,
+                detail: m.phoneHint ? `••• ${m.phoneHint}` : null,
+              }))
+            ),
+    // Nothing to ask for until they have typed something, in lookup mode.
+    enabled: canBrowseRoster || debouncedSearch.trim().length >= 2,
   });
 
   // memberId -> status, so each row knows whether it's already been recorded.
@@ -136,6 +157,10 @@ export function ServiceAttendancePage() {
             <div className="flex justify-center py-16">
               <Spinner size="lg" className="text-indigo-600" />
             </div>
+          ) : !canBrowseRoster && debouncedSearch.trim().length < 2 ? (
+            <p className="py-16 text-center text-sm text-slate-500">
+              Type a name to find someone to check in.
+            </p>
           ) : (members ?? []).length === 0 ? (
             <p className="py-16 text-center text-sm text-slate-500">No members match that search.</p>
           ) : (
@@ -162,8 +187,8 @@ export function ServiceAttendancePage() {
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-slate-900">{member.displayName}</p>
-                        {member.phonePrimary && (
-                          <p className="truncate text-xs text-slate-500">{member.phonePrimary}</p>
+                        {member.detail && (
+                          <p className="truncate text-xs text-slate-500">{member.detail}</p>
                         )}
                       </div>
 
