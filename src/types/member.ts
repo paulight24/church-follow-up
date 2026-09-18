@@ -96,12 +96,21 @@ export interface Member {
   middleName?: string | null;
   lastName: string;
   preferredName?: string | null;
-  /** Computed server-side: preferredName ?? firstName + ' ' + lastName */
+  /** Honorific the church addresses this person by: Bro., Sis., Dcn., Pastor. */
+  title?: string | null;
+  /** Computed server-side: title + (preferredName ?? firstName) + lastName */
   displayName: string;
   phonePrimary?: string | null;
   phoneSecondary?: string | null;
   email?: string | null;
+  /**
+   * Absent unless the caller holds `members.view_full_dob`. Its absence means
+   * "you may not see the year", NOT "no birthday recorded" — read
+   * `birthdayMonthDay` for that.
+   */
   dateOfBirth?: string | null;
+  /** "MM-DD", always present when a birthday is on file. */
+  birthdayMonthDay?: string | null;
   weddingAnniversary?: string | null;
   gender?: Gender | null;
   maritalStatus?: MaritalStatus | null;

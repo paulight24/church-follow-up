@@ -17,6 +17,7 @@ const memberFormSchema = z.object({
   middleName: z.string().max(150).optional().or(z.literal('')),
   lastName: z.string().min(1, 'Last name is required').max(150),
   preferredName: z.string().max(150).optional().or(z.literal('')),
+  title: z.string().max(40).optional().or(z.literal('')),
   gender: z.enum(['MALE', 'FEMALE', '']).optional(),
   maritalStatus: z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED', '']).optional(),
   dateOfBirth: z.string().optional().or(z.literal('')),
@@ -187,6 +188,7 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
       middleName: initialData?.middleName ?? '',
       lastName: initialData?.lastName ?? '',
       preferredName: initialData?.preferredName ?? '',
+      title: initialData?.title ?? '',
       gender: (initialData?.gender as MemberFormValues['gender']) ?? '',
       maritalStatus: (initialData?.maritalStatus as MemberFormValues['maritalStatus']) ?? '',
       dateOfBirth: toDateInputValue(initialData?.dateOfBirth),
@@ -249,6 +251,28 @@ export function MemberForm({ initialData, onSubmit, isSubmitting, onCancel }: Me
             error={errors.preferredName?.message}
             {...register('preferredName')}
           />
+          {/* A datalist rather than a Select: these four cover almost every
+              record, but a church with its own form of address must still be
+              able to type it. */}
+          <div>
+            <Input
+              label="Title"
+              placeholder="Bro., Sis., Dcn., Pastor"
+              list="member-title-options"
+              error={errors.title?.message}
+              {...register('title')}
+            />
+            <datalist id="member-title-options">
+              <option value="Bro." />
+              <option value="Sis." />
+              <option value="Dcn." />
+              <option value="Dcns." />
+              <option value="Pastor" />
+              <option value="Brother" />
+              <option value="Sister" />
+              <option value="Deacon" />
+            </datalist>
+          </div>
           <Select
             label="Gender"
             placeholder="Select gender"

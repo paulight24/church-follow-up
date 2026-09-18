@@ -9,6 +9,8 @@ export interface MyPerson {
   phonePrimary: string | null;
   email: string | null;
   isFirstTimer: boolean;
+  /** "MM-DD". The birth year is not sent unless the caller may see it. */
+  birthdayMonthDay: string | null;
   visitorJourneyStage: string | null;
   assignmentRole: 'PRIMARY' | 'BACKUP';
   team: { id: string; name: string } | null;

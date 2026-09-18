@@ -7,8 +7,10 @@ import {
   ClipboardList,
   UserPlus,
   ChevronRight,
+  Pencil,
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { EditTeamModal } from '@/features/teams/components/EditTeamModal';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
@@ -37,11 +39,16 @@ export function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showMemberAssignModal, setShowMemberAssignModal] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<TeamUser | null>(null);
   // Backend: POST /teams/:id/users and DELETE /teams/:id/users/:userId both
   // require teams.manage_members. Gating both add + remove on the same code.
   const canManageMembers = usePermission('teams.manage_members');
+  // Renaming a team is church-wide authority, not team-roster authority: a
+  // lead may staff their own team, but the team's name and status belong to
+  // whoever administers the church.
+  const canEditTeam = usePermission('teams.update');
 
   const {
     data: team,
@@ -110,20 +117,33 @@ export function TeamDetailPage() {
       <PageHeader
         title={team.name}
         actions={
-          canManageMembers ? (
+          canManageMembers || canEditTeam ? (
             <div className="flex flex-wrap gap-2">
+              {canEditTeam && (
+                <Button
+                  variant="outline"
+                  leftIcon={<Pencil className="h-4 w-4" />}
+                  onClick={() => setShowEditModal(true)}
+                >
+                  Edit
+                </Button>
+              )}
               {/* Two different things, deliberately labelled apart: workers are
                   staff who log in; members are the congregation they follow up. */}
-              <Button
-                variant="outline"
-                leftIcon={<UserCheck className="h-4 w-4" />}
-                onClick={() => setShowMemberAssignModal(true)}
-              >
-                Assign Members
-              </Button>
-              <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setShowAssignmentModal(true)}>
-                Add Worker
-              </Button>
+              {canManageMembers && (
+                <>
+                  <Button
+                    variant="outline"
+                    leftIcon={<UserCheck className="h-4 w-4" />}
+                    onClick={() => setShowMemberAssignModal(true)}
+                  >
+                    Assign Members
+                  </Button>
+                  <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={() => setShowAssignmentModal(true)}>
+                    Add Worker
+                  </Button>
+                </>
+              )}
             </div>
           ) : undefined
         }
@@ -253,6 +273,8 @@ export function TeamDetailPage() {
       </div>
 
       {/* Assignment Modal */}
+      <EditTeamModal team={team} isOpen={showEditModal} onClose={() => setShowEditModal(false)} />
+
       <MemberAssignmentModal
         isOpen={showMemberAssignModal}
         onClose={() => setShowMemberAssignModal(false)}

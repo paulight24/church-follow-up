@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Phone, MessageSquare, Users, NotebookPen } from 'lucide-react';
+import { Phone, MessageSquare, Users, NotebookPen, Cake } from 'lucide-react';
 import { getMyPeople, type MyPerson } from '../api';
 import { LogContactDialog } from '../components/LogContactDialog';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,12 +32,41 @@ function lastContactLabel(iso: string | null): { text: string; urgent: boolean }
   return { text: `Contacted ${Math.floor(days / 30)} months ago`, urgent: true };
 }
 
+/**
+ * "Birthday today" / "Birthday in 3 days", or nothing at all.
+ *
+ * Deliberately month-and-day only: the API withholds the birth year from
+ * anyone without `members.view_full_dob`, and a volunteer does not need
+ * someone's age to wish them well. Anything further out than a fortnight is
+ * not something to act on today, so it is not shown.
+ */
+function birthdayNote(monthDay: string | null): string | null {
+  if (!monthDay) return null;
+  const [m, d] = monthDay.split('-').map(Number);
+  if (!m || !d) return null;
+  const today = new Date();
+  // Compared in local time against a local "today": this is a wall-calendar
+  // question ("is it their birthday where they are?"), not an instant.
+  let next = new Date(today.getFullYear(), m - 1, d);
+  const midnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if (next < midnight) next = new Date(today.getFullYear() + 1, m - 1, d);
+  const days = Math.round((next.getTime() - midnight.getTime()) / 86_400_000);
+  if (days === 0) return 'Birthday today';
+  if (days === 1) return 'Birthday tomorrow';
+  if (days <= 14) return `Birthday in ${days} days`;
+  return null;
+}
+
 function PersonCard({ person }: { person: MyPerson }) {
   const [logging, setLogging] = useState(false);
   const last = lastContactLabel(person.lastContactedAt);
+  const birthday = birthdayNote(person.birthdayMonthDay);
   // tel: and sms: rather than a dialer page — on the phone this is opened on,
   // these hand straight to the app that makes the call.
   const tel = person.phonePrimary?.replace(/[^\d+]/g, '');
+  // wa.me wants digits only, no leading +. It opens the app on a phone and
+  // WhatsApp Web on a desktop, so one link serves both.
+  const wa = tel?.replace(/^\+/, '');
 
   return (
     <li className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200">
@@ -63,6 +92,12 @@ function PersonCard({ person }: { person: MyPerson }) {
                 Backup
               </span>
             )}
+            {birthday && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">
+                <Cake className="h-3 w-3" />
+                {birthday}
+              </span>
+            )}
             {person.team && (
               <span className="truncate rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
                 {person.team.name}
@@ -79,6 +114,18 @@ function PersonCard({ person }: { person: MyPerson }) {
               className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 text-slate-600 transition hover:bg-slate-50"
             >
               <MessageSquare className="h-5 w-5" />
+            </a>
+            <a
+              href={`https://wa.me/${wa}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`WhatsApp ${person.displayName}`}
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#25d366] text-white shadow-sm transition hover:bg-[#1eb855]"
+            >
+              {/* Inline mark: the button must not wait on a network request. */}
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-current">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.896 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488" />
+              </svg>
             </a>
             <a
               href={`tel:${tel}`}
