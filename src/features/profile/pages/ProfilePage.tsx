@@ -32,6 +32,13 @@ function toUpdateRequest(values: ProfileFormValues): UpdateMyProfileRequest {
   // Always send this one (unlike the string fields above) so explicitly turning
   // consent OFF is actually saved instead of being treated as "left blank".
   payload.communicationConsentWhatsapp = values.communicationConsentWhatsapp ?? false;
+  // Sent even when blank, unlike the string fields above: clearing a
+  // department or a title is a real answer, and "only send what's set" would
+  // make it impossible to undo a wrong choice.
+  payload.title = values.title || null;
+  payload.bornAgainStatus = values.bornAgainStatus || null;
+  payload.departmentId = values.departmentId || null;
+  payload.fellowshipGroupId = values.fellowshipGroupId || null;
   return payload;
 }
 
@@ -45,6 +52,14 @@ export function ProfilePage() {
   const { data: profile, isLoading, isError } = useQuery({
     queryKey: ['profile', 'me'],
     queryFn: () => profileApi.getMyProfile().then((res) => res.data),
+  });
+
+  // Fetched alongside the profile rather than on demand: the form is the
+  // whole page, so there is no moment where these are not wanted.
+  const { data: options } = useQuery({
+    queryKey: ['profile', 'me', 'options'],
+    queryFn: () => profileApi.getMyOptions().then((res) => res.data),
+    enabled: canEdit,
   });
 
   const updateMutation = useMutation({
@@ -187,10 +202,11 @@ export function ProfilePage() {
             </CardHeader>
             <CardContent>
               <p className="mb-4 text-sm text-slate-500">
-                These fields are managed by your pastoral team, not by you — reach out to your leader or
-                cell group if any of this looks out of date.
+                Where the church has you in its own records. Your pastoral team sets these — reach out
+                to your leader if any of it looks out of date. Your department and cell group are yours
+                to set, just below.
               </p>
-              <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">
                     Membership status
@@ -213,18 +229,6 @@ export function ProfilePage() {
                     {member.visitorJourneyStage
                       ? member.visitorJourneyStage.replace(/_/g, ' ').toLowerCase()
                       : <span className="text-slate-400">Not set</span>}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">Department</dt>
-                  <dd className="mt-1 text-sm text-slate-700">
-                    {member.department?.name ?? <span className="text-slate-400">Not assigned</span>}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">Cell group</dt>
-                  <dd className="mt-1 text-sm text-slate-700">
-                    {member.fellowshipGroup?.name ?? <span className="text-slate-400">Not assigned</span>}
                   </dd>
                 </div>
               </dl>
@@ -253,6 +257,7 @@ export function ProfilePage() {
                     </div>
                   )}
                   <ProfileForm
+                    options={options}
                     member={member}
                     onSubmit={(values) => {
                       setSubmitError(null);

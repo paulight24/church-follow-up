@@ -56,4 +56,8 @@ export interface UpdateMyProfileRequest {
    * member's own preference to control - see ProfilePage.
    */
   communicationConsentWhatsapp?: boolean;
+  title?: string | null;
+  bornAgainStatus?: 'Yes' | 'No' | 'Unknown' | null;
+  departmentId?: string | null;
+  fellowshipGroupId?: string | null;
 }
