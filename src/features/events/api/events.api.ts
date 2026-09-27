@@ -9,6 +9,8 @@ import type {
   EventRegistrationExportRow,
   UpdateEventRequest,
   ReviewRegistrationPayload,
+  EventInviteLink,
+  CreateInviteLinkRequest,
 } from '@/types/event';
 
 export interface AnnounceTestResult {
@@ -113,6 +115,16 @@ export const eventsApi = {
     data: ReviewRegistrationPayload,
   ): Promise<AxiosResponse<EventRegistration>> {
     return api.patch(`/events/${id}/registrations/${registrationId}/review`, data);
+  },
+
+  getInviteLinks(id: string): Promise<AxiosResponse<EventInviteLink[]>> {
+    return api.get(`/events/${id}/invite-links`);
+  },
+  createInviteLink(id: string, data: CreateInviteLinkRequest): Promise<AxiosResponse<EventInviteLink>> {
+    return api.post(`/events/${id}/invite-links`, data);
+  },
+  setInviteLinkActive(id: string, linkId: string, active: boolean): Promise<AxiosResponse<EventInviteLink>> {
+    return api.patch(`/events/${id}/invite-links/${linkId}`, { active });
   },
 
   /** Flat, CSV-ready rows for every registration - backs the "Export CSV" button. */

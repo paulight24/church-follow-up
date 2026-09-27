@@ -19,6 +19,7 @@ import { EventCountdown } from '../components/EventCountdown';
 import { EventDetailsDisclosure } from '../components/EventDetailsDisclosure';
 import { ShareEventCard } from '../components/ShareEventCard';
 import { formatEventDay, formatEventWhen } from '../lib/eventDate';
+import { captureInviteRef, clearInviteRef } from '../lib/inviteRef';
 import { useSeo } from '@/lib/seo';
 import { LanguageSwitcher, useTranslation } from '@/i18n';
 
@@ -115,6 +116,9 @@ export function PublicEventRegistrationPage() {
   });
 
   const { slug } = useParams<{ slug: string }>();
+  // Read once per mount: it must outlive the language switch and any reload
+  // that follows a validation error.
+  const inviteRef = useMemo(() => (slug ? captureInviteRef(slug) : null), [slug]);
   const [submittedName, setSubmittedName] = useState<string | null>(null);
   // True when the submitter was already on the list and we updated their
   // answers instead of adding them twice — worth saying plainly, otherwise a
@@ -160,10 +164,13 @@ export function PublicEventRegistrationPage() {
     // blank used to fail the whole registration. The API tolerates blanks now
     // too; this keeps the request honest about what was actually filled in.
     mutationFn: (answers: EventRegistrationAnswers) =>
-      publicEventsApi.register(slug!, stripBlankAnswers(answers)),
+      publicEventsApi.register(slug!, stripBlankAnswers(answers), inviteRef),
     onSuccess: (_res, answers) => {
       setSubmittedName(answers.firstName?.trim() || null);
       setWasAlreadyRegistered(Boolean(_res.data.alreadyRegistered));
+      // A shared phone at a welcome desk registers several people in a row;
+      // the second must not inherit the first one's link.
+      if (slug) clearInviteRef(slug);
     },
   });
 

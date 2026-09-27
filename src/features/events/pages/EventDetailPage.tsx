@@ -20,6 +20,7 @@ import { EventAnnounceModal } from '../components/EventAnnounceModal';
 import { EventRemindersCard } from '../components/EventRemindersCard';
 import { EventRegistrationsPanel } from '../components/EventRegistrationsPanel';
 import { RegistrationReviewPanel } from '../components/RegistrationReviewPanel';
+import { EventInviteLinksCard } from '../components/EventInviteLinksCard';
 
 function errorMessage(err: unknown, fallback: string): string {
   return (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback;
@@ -208,6 +209,10 @@ export function EventDetailPage() {
       <EventQrShare slug={event.slug} eventName={event.name} />
 
       {canUpdate && event.status === 'PUBLISHED' && <EventRemindersCard eventId={event.id} />}
+
+      {/* Only meaningful once the page is public — a personal link to a
+          draft event leads to "not found". */}
+      {canViewRegistrations && event.status === 'PUBLISHED' && <EventInviteLinksCard eventId={event.id} />}
 
       {/* An event whose submissions are requests gets the review panel
           instead of the plain list — the same rows, but arranged around the

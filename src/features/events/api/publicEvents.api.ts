@@ -57,8 +57,13 @@ export const publicEventsApi = {
 
   // Backend wraps the submitted answers in an { answers: {...} } envelope
   // (see publicRegisterSchema in events.validation.ts) rather than taking them flat.
-  register(slug: string, answers: EventRegistrationAnswers): Promise<AxiosResponse<RegisterResult>> {
-    return publicClient.post(`/public/events/${slug}/register`, { answers }).then((res) => {
+  register(
+    slug: string,
+    answers: EventRegistrationAnswers,
+    /** The per-person link this visitor arrived through, if any. */
+    ref?: string | null,
+  ): Promise<AxiosResponse<RegisterResult>> {
+    return publicClient.post(`/public/events/${slug}/register`, { answers, ...(ref ? { ref } : {}) }).then((res) => {
       res.data = (res.data as { success?: boolean; data?: RegisterResult })?.data ?? res.data;
       return res;
     });

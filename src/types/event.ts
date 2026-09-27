@@ -252,3 +252,28 @@ export type EventRegistrationAnswers = Partial<Record<EventFieldKey, string>> & 
 export interface PublicRegisterRequest {
   answers: EventRegistrationAnswers;
 }
+
+/**
+ * A per-person registration link for an event. Registering through one makes
+ * the registrant the owner's to follow up — see the assignment rule in
+ * events.invite-links.service.ts.
+ */
+export interface EventInviteLink {
+  id: string;
+  code: string;
+  url: string;
+  label: string;
+  active: boolean;
+  ownerUserId: string;
+  ownerName: string;
+  teamId: string;
+  teamName: string;
+  registrationCount: number;
+  createdAt: string;
+}
+
+export interface CreateInviteLinkRequest {
+  ownerUserId: string;
+  teamId: string;
+  label?: string | null;
+}
