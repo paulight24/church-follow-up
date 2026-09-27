@@ -104,9 +104,10 @@ export function EventInviteLinksCard({ eventId }: { eventId: string }) {
   const [teamId, setTeamId] = useState('');
   const [ownerUserId, setOwnerUserId] = useState('');
 
-  const { data: links, isLoading } = useQuery({
+  const { data: links, isLoading, isError } = useQuery({
     queryKey: ['event-invite-links', eventId],
     queryFn: () => eventsApi.getInviteLinks(eventId).then((res) => res.data),
+    retry: false,
   });
 
   const { data: teams } = useQuery({
@@ -208,6 +209,15 @@ export function EventInviteLinksCard({ eventId }: { eventId: string }) {
           <div className="flex justify-center py-8">
             <Spinner className="text-indigo-600" />
           </div>
+        ) : isError ? (
+          // Distinguished from "none yet" on purpose. Both used to render the
+          // same empty state, so a card that could not reach the server said
+          // there were no links — which is a different thing, and the more
+          // alarming of the two to be wrong about.
+          <p className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-6 text-center text-sm text-amber-800">
+            Could not load the links for this event. Refresh in a moment — if it keeps happening, the
+            server may still be updating.
+          </p>
         ) : !links || links.length === 0 ? (
           <p className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
             No personal links yet.
