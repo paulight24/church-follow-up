@@ -8,7 +8,7 @@
  */
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, Check, Copy, Download, Link2, Plus, QrCode as QrCodeIcon, Sparkles, Users } from 'lucide-react';
+import { Bell, Check, Copy, Download, Link2, Mail, Pencil, Plus, QrCode as QrCodeIcon, Sparkles, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -29,9 +29,15 @@ function LinkRow({ eventId, link, canManage }: { eventId: string; link: EventInv
   const [showQr, setShowQr] = useState(false);
 
   const toggle = useMutation({
-    mutationFn: (active: boolean) => eventsApi.setInviteLinkActive(eventId, link.id, active),
+    mutationFn: (active: boolean) => eventsApi.updateInviteLink(eventId, link.id, { active }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['event-invite-links', eventId] }),
     onError: () => toast({ title: 'Could not change that link', variant: 'error' }),
+  });
+
+  const rename = useMutation({
+    mutationFn: (label: string) => eventsApi.updateInviteLink(eventId, link.id, { label }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['event-invite-links', eventId] }),
+    onError: () => toast({ title: 'Could not rename that link', variant: 'error' }),
   });
 
   async function copy() {
@@ -82,14 +88,29 @@ function LinkRow({ eventId, link, canManage }: { eventId: string; link: EventInv
             <QrCodeIcon className="h-4 w-4" />
           </button>
           {canManage && (
-            <Button
-              variant="ghost"
-              size="sm"
-              isLoading={toggle.isPending}
-              onClick={() => toggle.mutate(!link.active)}
-            >
-              {link.active ? 'Retire' : 'Restore'}
-            </Button>
+            <>
+              <button
+                type="button"
+                aria-label="Rename this link"
+                className="rounded p-1.5 text-slate-400 hover:bg-slate-100"
+                onClick={() => {
+                  const next = window.prompt('What should this link be called?', link.label);
+                  // Cancel returns null; an empty string clears it and the
+                  // list falls back to the owner's own name.
+                  if (next !== null) rename.mutate(next);
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <Button
+                variant="ghost"
+                size="sm"
+                isLoading={toggle.isPending}
+                onClick={() => toggle.mutate(!link.active)}
+              >
+                {link.active ? 'Retire' : 'Restore'}
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -146,10 +167,19 @@ export function EventInviteLinksCard({ eventId }: { eventId: string }) {
   });
 
   const notify = useMutation({
-    mutationFn: () => eventsApi.notifyInviteLinkOwners(eventId),
-    onSuccess: (res) =>
-      toast({ title: `Sent to ${res.data.sent} of ${res.data.total}`, variant: 'success' }),
-    onError: () => toast({ title: 'Could not send those notifications', variant: 'error' }),
+    mutationFn: (channel: 'in_app' | 'email' | 'both') =>
+      eventsApi.notifyInviteLinkOwners(eventId, channel),
+    onSuccess: (res, channel) => {
+      const parts = [];
+      if (channel !== 'email') parts.push(`${res.data.sent} in-app`);
+      if (channel !== 'in_app') parts.push(`${res.data.emailed} emailed`);
+      toast({
+        title: parts.join(' · '),
+        description: res.data.noEmail > 0 ? `${res.data.noEmail} have no email address on file.` : undefined,
+        variant: 'success',
+      });
+    },
+    onError: () => toast({ title: 'Could not send those', variant: 'error' }),
   });
 
   const alreadyLinked = useMemo(
@@ -289,13 +319,22 @@ export function EventInviteLinksCard({ eventId }: { eventId: string }) {
               Export CSV
             </Button>
             <Button
+              variant="ghost"
+              size="sm"
+              isLoading={notify.isPending && notify.variables === 'in_app'}
+              leftIcon={<Bell className="h-3.5 w-3.5" />}
+              onClick={() => notify.mutate('in_app')}
+            >
+              Notify in-app
+            </Button>
+            <Button
               variant="outline"
               size="sm"
-              isLoading={notify.isPending}
-              leftIcon={<Bell className="h-3.5 w-3.5" />}
-              onClick={() => notify.mutate()}
+              isLoading={notify.isPending && notify.variables === 'email'}
+              leftIcon={<Mail className="h-3.5 w-3.5" />}
+              onClick={() => notify.mutate('email')}
             >
-              Send everyone their link
+              Email everyone their link
             </Button>
           </div>
         )}

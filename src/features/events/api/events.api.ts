@@ -125,8 +125,12 @@ export const eventsApi = {
   createInviteLink(id: string, data: CreateInviteLinkRequest): Promise<AxiosResponse<EventInviteLink>> {
     return api.post(`/events/${id}/invite-links`, data);
   },
-  setInviteLinkActive(id: string, linkId: string, active: boolean): Promise<AxiosResponse<EventInviteLink>> {
-    return api.patch(`/events/${id}/invite-links/${linkId}`, { active });
+  updateInviteLink(
+    id: string,
+    linkId: string,
+    data: { active?: boolean; label?: string | null },
+  ): Promise<AxiosResponse<EventInviteLink>> {
+    return api.patch(`/events/${id}/invite-links/${linkId}`, data);
   },
   getInviteLinkSummary(id: string): Promise<AxiosResponse<InviteLinkSummary>> {
     return api.get(`/events/${id}/invite-links/summary`);
@@ -134,8 +138,11 @@ export const eventsApi = {
   bulkCreateInviteLinks(id: string, teamId: string): Promise<AxiosResponse<{ created: number; alreadyHad: number; teamName: string }>> {
     return api.post(`/events/${id}/invite-links/bulk`, { teamId });
   },
-  notifyInviteLinkOwners(id: string): Promise<AxiosResponse<{ sent: number; total: number }>> {
-    return api.post(`/events/${id}/invite-links/notify`);
+  notifyInviteLinkOwners(
+    id: string,
+    channel: 'in_app' | 'email' | 'both' = 'in_app',
+  ): Promise<AxiosResponse<{ sent: number; emailed: number; noEmail: number; total: number }>> {
+    return api.post(`/events/${id}/invite-links/notify`, { channel });
   },
   getReferralConflicts(id: string): Promise<AxiosResponse<ReferralConflict[]>> {
     return api.get(`/events/${id}/referral-conflicts`);
