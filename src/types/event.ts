@@ -269,7 +269,29 @@ export interface EventInviteLink {
   teamId: string;
   teamName: string;
   registrationCount: number;
+  /** Of those, how many had never been to this church before. */
+  firstTimerCount: number;
   createdAt: string;
+}
+
+export interface InviteLinkSummary {
+  total: number;
+  viaLinks: number;
+  /** Came straight off the flier — the denominator a leaderboard hides. */
+  direct: number;
+  firstTimersViaLinks: number;
+}
+
+/** A registration that came via one person's link while the member belongs to another. */
+export interface ReferralConflict {
+  registrationId: string;
+  submittedAt: string;
+  memberId: string;
+  memberName: string;
+  cameVia: string;
+  cameViaUserId: string;
+  currentlyWith: string;
+  currentTeam: string;
 }
 
 export interface CreateInviteLinkRequest {

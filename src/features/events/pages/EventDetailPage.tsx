@@ -21,6 +21,7 @@ import { EventRemindersCard } from '../components/EventRemindersCard';
 import { EventRegistrationsPanel } from '../components/EventRegistrationsPanel';
 import { RegistrationReviewPanel } from '../components/RegistrationReviewPanel';
 import { EventInviteLinksCard } from '../components/EventInviteLinksCard';
+import { ReferralConflictsCard } from '../components/ReferralConflictsCard';
 
 function errorMessage(err: unknown, fallback: string): string {
   return (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback;
@@ -212,7 +213,12 @@ export function EventDetailPage() {
 
       {/* Only meaningful once the page is public — a personal link to a
           draft event leads to "not found". */}
-      {canViewRegistrations && event.status === 'PUBLISHED' && <EventInviteLinksCard eventId={event.id} />}
+      {canViewRegistrations && event.status === 'PUBLISHED' && (
+        <>
+          <EventInviteLinksCard eventId={event.id} />
+          <ReferralConflictsCard eventId={event.id} />
+        </>
+      )}
 
       {/* An event whose submissions are requests gets the review panel
           instead of the plain list — the same rows, but arranged around the

@@ -11,6 +11,8 @@ import type {
   ReviewRegistrationPayload,
   EventInviteLink,
   CreateInviteLinkRequest,
+  InviteLinkSummary,
+  ReferralConflict,
 } from '@/types/event';
 
 export interface AnnounceTestResult {
@@ -125,6 +127,21 @@ export const eventsApi = {
   },
   setInviteLinkActive(id: string, linkId: string, active: boolean): Promise<AxiosResponse<EventInviteLink>> {
     return api.patch(`/events/${id}/invite-links/${linkId}`, { active });
+  },
+  getInviteLinkSummary(id: string): Promise<AxiosResponse<InviteLinkSummary>> {
+    return api.get(`/events/${id}/invite-links/summary`);
+  },
+  bulkCreateInviteLinks(id: string, teamId: string): Promise<AxiosResponse<{ created: number; alreadyHad: number; teamName: string }>> {
+    return api.post(`/events/${id}/invite-links/bulk`, { teamId });
+  },
+  notifyInviteLinkOwners(id: string): Promise<AxiosResponse<{ sent: number; total: number }>> {
+    return api.post(`/events/${id}/invite-links/notify`);
+  },
+  getReferralConflicts(id: string): Promise<AxiosResponse<ReferralConflict[]>> {
+    return api.get(`/events/${id}/referral-conflicts`);
+  },
+  honourReferral(id: string, registrationId: string): Promise<AxiosResponse<null>> {
+    return api.post(`/events/${id}/registrations/${registrationId}/honour-referral`);
   },
 
   /** Flat, CSV-ready rows for every registration - backs the "Export CSV" button. */

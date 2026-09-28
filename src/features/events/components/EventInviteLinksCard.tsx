@@ -8,7 +8,7 @@
  */
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Copy, Link2, Plus, QrCode as QrCodeIcon, Users } from 'lucide-react';
+import { Bell, Check, Copy, Download, Link2, Plus, QrCode as QrCodeIcon, Sparkles, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -18,6 +18,7 @@ import { useToast } from '@/components/ui/Toast';
 import { usePermission } from '@/hooks/usePermission';
 import { QrCode } from '@/features/attendance/components/QrCode';
 import { teamsApi } from '@/features/teams/api/teams.api';
+import { downloadCsv } from '@/lib/downloadCsv';
 import { eventsApi } from '../api/events.api';
 import type { EventInviteLink } from '@/types/event';
 
@@ -53,6 +54,11 @@ function LinkRow({ eventId, link, canManage }: { eventId: string; link: EventInv
               <Users className="mr-1 inline h-3 w-3" />
               {link.registrationCount}
             </Badge>
+            {link.firstTimerCount > 0 && (
+              // The number that says a link reached past the people who were
+              // coming anyway.
+              <Badge variant="purple">{link.firstTimerCount} first-timers</Badge>
+            )}
             {!link.active && <Badge variant="gray">Retired</Badge>}
           </div>
           <p className="mt-0.5 truncate font-mono text-xs text-slate-500">{link.url}</p>
@@ -125,6 +131,27 @@ export function EventInviteLinksCard({ eventId }: { eventId: string }) {
     enabled: canManage && Boolean(teamId),
   });
 
+  const { data: summary } = useQuery({
+    queryKey: ['event-invite-links-summary', eventId],
+    queryFn: () => eventsApi.getInviteLinkSummary(eventId).then((res) => res.data),
+  });
+
+  const bulk = useMutation({
+    mutationFn: () => eventsApi.bulkCreateInviteLinks(eventId, teamId),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['event-invite-links', eventId] });
+      toast({ title: res.data.created === 0 ? 'Everyone already has one' : `Created ${res.data.created}`, variant: 'success' });
+    },
+    onError: () => toast({ title: 'Could not create those links', variant: 'error' }),
+  });
+
+  const notify = useMutation({
+    mutationFn: () => eventsApi.notifyInviteLinkOwners(eventId),
+    onSuccess: (res) =>
+      toast({ title: `Sent to ${res.data.sent} of ${res.data.total}`, variant: 'success' }),
+    onError: () => toast({ title: 'Could not send those notifications', variant: 'error' }),
+  });
+
   const alreadyLinked = useMemo(
     () => new Set((links ?? []).map((l) => l.ownerUserId)),
     [links]
@@ -156,6 +183,28 @@ export function EventInviteLinksCard({ eventId }: { eventId: string }) {
           follow up — unless that person is already assigned to someone else, in which case they stay
           where they are.
         </p>
+
+        {summary && summary.total > 0 && (
+          // The denominator matters more than the ranking: without "came
+          // straight off the flier" a church reads the leaderboard as the
+          // whole story.
+          <div className="grid grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white p-3 text-center">
+            <div>
+              <p className="text-lg font-semibold tabular-nums text-slate-900">{summary.viaLinks}</p>
+              <p className="text-xs text-slate-500">through a link</p>
+            </div>
+            <div>
+              <p className="text-lg font-semibold tabular-nums text-slate-900">{summary.direct}</p>
+              <p className="text-xs text-slate-500">straight off the flier</p>
+            </div>
+            <div>
+              <p className="text-lg font-semibold tabular-nums text-indigo-700">
+                {summary.firstTimersViaLinks}
+              </p>
+              <p className="text-xs text-slate-500">first-timers via links</p>
+            </div>
+          </div>
+        )}
 
         {canManage && (
           <div className="grid grid-cols-1 gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1fr_1fr_auto]">
@@ -202,6 +251,52 @@ export function EventInviteLinksCard({ eventId }: { eventId: string }) {
                 Create link
               </Button>
             </div>
+            <div className="sm:col-span-3">
+              <Button
+                variant="outline"
+                size="sm"
+                isLoading={bulk.isPending}
+                disabled={!teamId}
+                leftIcon={<Sparkles className="h-4 w-4" />}
+                onClick={() => bulk.mutate()}
+              >
+                Give everyone on this team a link
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {canManage && links && links.length > 0 && (
+          <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<Download className="h-3.5 w-3.5" />}
+              onClick={() =>
+                downloadCsv(
+                  'registration-links.csv',
+                  links.map((l) => ({
+                    Person: l.ownerName,
+                    Team: l.teamName,
+                    Link: l.url,
+                    Registrations: l.registrationCount,
+                    'First-timers': l.firstTimerCount,
+                    Active: l.active ? 'yes' : 'retired',
+                  }))
+                )
+              }
+            >
+              Export CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              isLoading={notify.isPending}
+              leftIcon={<Bell className="h-3.5 w-3.5" />}
+              onClick={() => notify.mutate()}
+            >
+              Send everyone their link
+            </Button>
           </div>
         )}
 
